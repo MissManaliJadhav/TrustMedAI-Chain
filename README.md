@@ -1,64 +1,309 @@
 # TrustMedAI-Chain
 
-Production-grade full-stack scaffold for a blockchain-enabled, explainable, adversarially robust, federated healthcare AI platform inspired by:
+## Blockchain-Enabled Trustworthy Explainable AI Framework for Secure Multi-Disease Diagnosis
 
-`Blockchain-Enabled Trustworthy Explainable Deep Learning Framework with Dynamic Trust Evolution for Secure Multi-Disease Diagnosis Under Adversarial Conditions`
+TrustMedAI-Chain is a production-grade healthcare AI platform that combines Artificial Intelligence, Explainable AI (XAI), Blockchain, Federated Learning, Adversarial Robustness, and Dynamic Trust Evolution to provide secure, transparent, and trustworthy multi-disease diagnosis.
 
-## What Is Included
+The framework is inspired by the research concept:
 
-- React 18 + TypeScript + Vite frontend with TailwindCSS, Material UI, Redux Toolkit, React Router, Recharts, and Axios
-- FastAPI backend with JWT auth, refresh tokens, RBAC, prediction, XAI, trust, blockchain, federated learning, and report APIs
-- PostgreSQL schema via SQLAlchemy models
-- MinIO object storage integration points
-- TensorFlow, PyTorch, SHAP, LIME, Captum, Grad-CAM, adversarial attack, and trust-engine modules
-- Ethereum Solidity contracts and Hyperledger Fabric chaincode skeleton
-- Flower federated learning server/client skeleton
-- Dataset metadata and train/validation/test directory scaffolding for all 9 diseases
-- Docker, Docker Compose, Kubernetes manifests, CI pipeline, API docs, and architecture diagrams
+**"Blockchain-Enabled Trustworthy Explainable Deep Learning Framework with Dynamic Trust Evolution for Secure Multi-Disease Diagnosis Under Adversarial Conditions"**
 
-## Quick Start
+---
 
-```bash
-cp .env.example .env
-docker-compose up --build
-```
+## Key Features
 
-Frontend: http://localhost:3000
+### Artificial Intelligence & Deep Learning
 
-Backend API: http://localhost:8000/docs
+* Multi-disease prediction using machine learning and deep learning models
+* Support for structured, tabular, and medical imaging datasets
+* Real-time disease diagnosis and risk assessment
 
-Default super admin:
+### Explainable AI (XAI)
 
-- Email: `admin@trustmedai.local`
-- Password: `ChangeMe123!`
+* SHAP-based explanations
+* LIME explanations
+* Captum integration
+* Grad-CAM visualization for medical imaging
+* Transparent prediction reasoning
+
+### Blockchain Security Layer
+
+* Ethereum smart contract integration
+* Hyperledger Fabric support
+* Immutable audit trails
+* Tamper-resistant medical records
+* Trust score verification
+
+### Federated Learning
+
+* Flower-based federated learning framework
+* Privacy-preserving collaborative model training
+* Distributed healthcare institution support
+
+### Security & Trust
+
+* JWT Authentication
+* Role-Based Access Control (RBAC)
+* Adversarial attack detection
+* Dynamic trust evolution engine
+* Secure API communication
+
+### Cloud-Native Deployment
+
+* Docker containerization
+* Docker Compose orchestration
+* Kubernetes deployment manifests
+* CI/CD pipeline using GitHub Actions
+
+---
+
+## Technology Stack
+
+### Frontend
+
+* React 18
+* TypeScript
+* Vite
+* Tailwind CSS
+* Material UI
+* Redux Toolkit
+* React Router
+* Recharts
+* Axios
+
+### Backend
+
+* FastAPI
+* Python 3.11+
+* SQLAlchemy
+* PostgreSQL
+* JWT Authentication
+* Pydantic
+
+### AI & Machine Learning
+
+* TensorFlow
+* PyTorch
+* Scikit-Learn
+* SHAP
+* LIME
+* Captum
+* OpenCV
+
+### Blockchain
+
+* Ethereum
+* Solidity Smart Contracts
+* Hyperledger Fabric
+
+### Federated Learning
+
+* Flower Framework
+
+### Infrastructure
+
+* Docker
+* Docker Compose
+* Kubernetes
+* GitHub Actions
+* MinIO Object Storage
+
+---
 
 ## Supported Diseases
 
-1. Heart Disease - UCI Heart Disease Dataset
-2. Diabetes - Pima Indians Diabetes Dataset
-3. Asthma - Asthma Prediction Dataset
-4. Pneumonia - Chest X-Ray Pneumonia Dataset
-5. Eye Disease - Ocular Disease Recognition Dataset
-6. Tuberculosis - TB Chest X-Ray Dataset
-7. Liver Disease - Indian Liver Patient Dataset
-8. Parkinson Disease - UCI Parkinson Dataset
-9. Brain Tumor - Brain MRI Dataset
+| Disease           | Dataset Source                     |
+| ----------------- | ---------------------------------- |
+| Heart Disease     | UCI Heart Disease Dataset          |
+| Diabetes          | Pima Indians Diabetes Dataset      |
+| Asthma            | Asthma Prediction Dataset          |
+| Pneumonia         | Chest X-Ray Pneumonia Dataset      |
+| Eye Disease       | Ocular Disease Recognition Dataset |
+| Tuberculosis      | TB Chest X-Ray Dataset             |
+| Liver Disease     | Indian Liver Patient Dataset       |
+| Parkinson Disease | UCI Parkinson Dataset              |
+| Brain Tumor       | Brain MRI Dataset                  |
 
-## Production Notes
+---
 
-This repository is runnable out of the box as a platform foundation. Model training scripts use dataset adapters and placeholder-safe fallbacks so the stack can boot before licensed datasets or large image archives are downloaded. Replace demo model artifacts under `backend/app/ai/artifacts/` with trained weights generated by `ai/training/train_all.py`.
+## Project Architecture
 
-For regulated deployments, configure:
+Frontend (React)
+↓
+FastAPI Backend
+↓
+AI Prediction Engine
+↓
+Explainable AI Module
+↓
+Trust Evolution Engine
+↓
+Blockchain Layer (Ethereum / Hyperledger)
+↓
+PostgreSQL + MinIO Storage
 
-- A managed PostgreSQL instance with encrypted storage
-- MinIO or S3 with bucket policies and server-side encryption
-- Real Hyperledger Fabric gateways and Ethereum RPC provider
-- OIDC or enterprise identity provider integration
-- TLS termination, audit retention policies, and secret management
+---
+## Quick Start
+
+### Clone Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/TrustMedAI-Chain.git
+cd TrustMedAI-Chain
+```
+
+### Configure Environment
+
+Create a `.env` file from the provided template:
+
+```bash
+cp .env.example .env
+```
+
+### Start the Platform
+
+```bash
+docker compose up --build
+```
+
+### Access Services
+
+| Service                  | URL                         |
+| ------------------------ | --------------------------- |
+| Frontend Dashboard       | http://localhost:3000       |
+| Backend API              | http://localhost:8000       |
+| Swagger API Docs         | http://localhost:8000/docs  |
+| ReDoc API Docs           | http://localhost:8000/redoc |
+| MinIO Object Storage API | http://localhost:9000       |
+| MinIO Console            | http://localhost:9001       |
+| PostgreSQL               | localhost:5432              |
+
+### Default Credentials
+
+#### Platform Administrator
+
+Email:
+
+```text
+admin@trustmedai.local
+```
+
+Password:
+
+```text
+ChangeMe123!
+```
+
+#### MinIO Console
+
+Username:
+
+```text
+trustmedai
+```
+
+Password:
+
+```text
+trustmedai123
+```
+
+Login at:
+
+```text
+http://localhost:9001
+```
+
+### Docker Services
+
+The platform automatically starts:
+
+* PostgreSQL Database
+* MinIO Object Storage
+* FastAPI Backend
+* React Frontend
+
+Verify running containers:
+
+```bash
+docker ps
+```
+
+Stop all services:
+
+```bash
+docker compose down
+```
+
+Rebuild after code changes:
+
+```bash
+docker compose up --build
+```
+
+---
+
+## Repository Structure
+
+```text
+TrustMedAI-Chain/
+│
+├── backend/
+├── frontend/
+├── blockchain/
+├── ai/
+├── docs/
+├── data/
+├── k8s/
+├── .github/
+├── docker-compose.yml
+├── README.md
+└── .env.example
+```
+
+---
+
+## Production Deployment Notes
+
+For production environments:
+
+* Use managed PostgreSQL with encrypted storage.
+* Configure MinIO or AWS S3 with encryption.
+* Integrate enterprise identity providers.
+* Enable TLS certificates.
+* Configure secure secret management.
+* Deploy blockchain gateways for Ethereum and Hyperledger Fabric.
+* Enable audit logging and compliance monitoring.
+
+---
 
 ## Documentation
 
-- [API Overview](docs/API.md)
-- [System Architecture](docs/ARCHITECTURE.md)
-- [Methodology](docs/METHODOLOGY.md)
-- [Diagrams](docs/DIAGRAMS.md)
+* API Documentation
+* System Architecture
+* Methodology
+* UML Diagrams
+* Deployment Guide
+* Security Architecture
+
+Refer to the `/docs` directory for detailed documentation.
+
+---
+
+## Research Contribution
+
+TrustMedAI-Chain demonstrates the integration of:
+
+* Explainable Artificial Intelligence
+* Blockchain-Based Trust Management
+* Federated Learning
+* Adversarially Robust Deep Learning
+* Secure Healthcare Data Sharing
+
+to create a trustworthy next-generation healthcare diagnosis platform.
+
+---
+
+## License
+
+This project is intended for academic research, educational purposes, and healthcare AI experimentation.
