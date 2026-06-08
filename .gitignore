@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# Node
+node_modules/
+npm-debug.log
+
+# Docker
+*.log
+
+# VS Code
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
+cmd_out.txt
+
+# Blockchain Secrets
+wallet/
+keystore/
+*.pem
+*.key
+*.crt
+
+# Build Files
+dist/
+build/
+coverage/
+
+# Python cache
+.pytest_cache/
+
+# Large datasets
+data/raw/
+data/train/
+data/test/
+data/validation/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment examples stay in GitHub
+!.env.example

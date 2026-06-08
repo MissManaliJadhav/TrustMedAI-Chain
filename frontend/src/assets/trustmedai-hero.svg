@@ -1,0 +1,59 @@
+<svg width="1200" height="820" viewBox="0 0 1200 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="820" fill="#F7FBFA"/>
+  <path d="M0 670C170 610 300 705 480 640C650 578 730 438 900 458C1040 474 1120 565 1200 532V820H0V670Z" fill="#D9F99D"/>
+  <path d="M0 138C185 88 334 131 488 90C651 47 817 -29 1200 42V0H0V138Z" fill="#DFF6F3"/>
+  <g opacity="0.55" stroke="#0F766E" stroke-width="2">
+    <path d="M164 174H1040"/>
+    <path d="M164 264H1040"/>
+    <path d="M164 354H1040"/>
+    <path d="M164 444H1040"/>
+    <path d="M164 534H1040"/>
+    <path d="M254 84V626"/>
+    <path d="M344 84V626"/>
+    <path d="M434 84V626"/>
+    <path d="M524 84V626"/>
+    <path d="M614 84V626"/>
+    <path d="M704 84V626"/>
+    <path d="M794 84V626"/>
+    <path d="M884 84V626"/>
+    <path d="M974 84V626"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="242" y="170" width="452" height="410" rx="8" fill="white"/>
+    <rect x="274" y="214" width="388" height="28" rx="4" fill="#0F766E"/>
+    <rect x="274" y="272" width="178" height="110" rx="8" fill="#E0F2FE"/>
+    <rect x="484" y="272" width="178" height="110" rx="8" fill="#FFEDD5"/>
+    <rect x="274" y="414" width="388" height="24" rx="4" fill="#CCFBF1"/>
+    <rect x="274" y="462" width="312" height="18" rx="4" fill="#E2E8F0"/>
+    <rect x="274" y="502" width="260" height="18" rx="4" fill="#E2E8F0"/>
+    <path d="M312 348C342 298 386 296 420 348" stroke="#0284C7" stroke-width="14" stroke-linecap="round"/>
+    <path d="M522 328L550 300L582 340L622 292" stroke="#F97316" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g filter="url(#shadow)">
+    <circle cx="816" cy="356" r="148" fill="#10212A"/>
+    <circle cx="816" cy="356" r="104" fill="#0F766E"/>
+    <circle cx="816" cy="356" r="58" fill="#F7FBFA"/>
+    <path d="M816 214V498M674 356H958M716 256L916 456M916 256L716 456" stroke="#D9F99D" stroke-width="5" opacity="0.9"/>
+    <circle cx="816" cy="214" r="20" fill="#F97316"/>
+    <circle cx="958" cy="356" r="20" fill="#F97316"/>
+    <circle cx="816" cy="498" r="20" fill="#F97316"/>
+    <circle cx="674" cy="356" r="20" fill="#F97316"/>
+    <circle cx="716" cy="256" r="15" fill="#E0F2FE"/>
+    <circle cx="916" cy="456" r="15" fill="#E0F2FE"/>
+    <circle cx="916" cy="256" r="15" fill="#E0F2FE"/>
+    <circle cx="716" cy="456" r="15" fill="#E0F2FE"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="770" y="548" width="280" height="112" rx="8" fill="white"/>
+    <path d="M804 620C838 574 872 628 908 592C936 564 960 574 1018 568" stroke="#0F766E" stroke-width="10" stroke-linecap="round"/>
+    <rect x="804" y="592" width="36" height="36" rx="4" fill="#CCFBF1"/>
+    <rect x="858" y="568" width="36" height="60" rx="4" fill="#BAE6FD"/>
+    <rect x="912" y="582" width="36" height="46" rx="4" fill="#FED7AA"/>
+    <rect x="966" y="552" width="36" height="76" rx="4" fill="#D9F99D"/>
+  </g>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+</svg>

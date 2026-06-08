@@ -1,0 +1,46 @@
+diseases:
+  heart:
+    name: Heart Disease
+    dataset: UCI Heart Disease Dataset
+    source: https://archive.ics.uci.edu/dataset/45/heart+disease
+    modality: tabular
+  diabetes:
+    name: Diabetes
+    dataset: Pima Indians Diabetes Dataset
+    source: https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database
+    modality: tabular
+  asthma:
+    name: Asthma
+    dataset: Asthma Prediction Dataset
+    source: https://www.kaggle.com/search?q=asthma+prediction+dataset
+    modality: tabular
+  pneumonia:
+    name: Pneumonia
+    dataset: Chest X-Ray Pneumonia Dataset
+    source: https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia
+    modality: image
+  eye:
+    name: Eye Disease
+    dataset: Ocular Disease Recognition Dataset
+    source: https://www.kaggle.com/datasets/andrewmvd/ocular-disease-recognition-odir5k
+    modality: image
+  tuberculosis:
+    name: Tuberculosis
+    dataset: TB Chest X-Ray Dataset
+    source: https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset
+    modality: image
+  liver:
+    name: Liver Disease
+    dataset: Indian Liver Patient Dataset
+    source: https://archive.ics.uci.edu/dataset/225/ilpd+indian+liver+patient+dataset
+    modality: tabular
+  parkinson:
+    name: Parkinson Disease
+    dataset: UCI Parkinson Dataset
+    source: https://archive.ics.uci.edu/dataset/174/parkinsons
+    modality: voice
+  brain_tumor:
+    name: Brain Tumor
+    dataset: Brain MRI Dataset
+    source: https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset
+    modality: image
