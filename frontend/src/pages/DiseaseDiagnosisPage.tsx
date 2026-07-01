@@ -118,6 +118,7 @@ export default function DiseaseDiagnosisPage() {
 
     api.get<DiseaseInputSpec>(`/datasets/diseases/${diseaseKey}/features`, {
       signal: controller.signal,
+      timeout: 60000,
     })
       .then((response) => setInputSpec(response.data))
       .catch((requestError) => {

@@ -113,6 +113,7 @@ export default function DashboardPage() {
     setSupportingPdf(null);
     api.get<DiseaseInputSpec>(`/datasets/diseases/${selectedDiseaseKey}/features`, {
       signal: controller.signal,
+      timeout: 60000,
     })
       .then((res) => setInputSpec(res.data))
       .catch((requestError) => {
