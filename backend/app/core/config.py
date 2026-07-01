@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     minio_secret_key: str = "trustmedai123"
     minio_secure: bool = False
     minio_bucket: str = "trustmedai-artifacts"
+    artifact_storage_backend: str = "auto"
+    local_artifact_dir: str = "./.artifacts"
 
     jwt_secret_key: str = "replace-with-a-long-random-secret"
     jwt_algorithm: str = "HS256"
@@ -29,6 +31,7 @@ class Settings(BaseSettings):
     ethereum_rpc_url: str = "http://ethereum:8545"
     ethereum_contract_address: str | None = None
     ethereum_contract_bytecode: str | None = None
+    ethereum_contract_artifact: str = "app/blockchain/TrustLedger.compiled.json"
     ethereum_private_key: str | None = None
     ethereum_sender_address: str | None = None
     ethereum_receipt_timeout_seconds: int = 120
@@ -41,7 +44,7 @@ class Settings(BaseSettings):
     fabric_chaincode_name: str = "trustledger"
     fabric_peer_names: str = ""
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
 
 
 @lru_cache

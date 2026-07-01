@@ -15,13 +15,14 @@ def issue_tokens(user: User) -> TokenPair:
         access_token=create_token(user.email, user.role, token_type="access"),
         refresh_token=create_token(user.email, user.role, days=7, token_type="refresh"),
         role=Role(user.role),
+        user_id=user.id,
     )
 
 
 @router.post("/signup", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def signup(payload: SignupRequest, db: Session = Depends(get_db)) -> User:
-    if payload.role == Role.SUPER_ADMIN:
-        raise HTTPException(status_code=403, detail="Super admin cannot be self-provisioned")
+    if payload.role != Role.PATIENT:
+        raise HTTPException(status_code=403, detail="Only patient accounts can be self-registered")
     exists = db.query(User).filter(User.email == payload.email).first()
     if exists:
         raise HTTPException(status_code=409, detail="Email already registered")

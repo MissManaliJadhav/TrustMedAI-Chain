@@ -11,6 +11,7 @@ HOSPITAL_NODES = [
 def federated_dashboard() -> dict:
     consensus = round(sum(node["trust"] for node in HOSPITAL_NODES) / len(HOSPITAL_NODES), 3)
     return {
+        "mode": "demonstration",
         "nodes": HOSPITAL_NODES,
         "model_weight_round": 12,
         "consensus_reliability": consensus,

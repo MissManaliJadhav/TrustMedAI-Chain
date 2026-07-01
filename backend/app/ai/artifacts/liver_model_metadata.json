@@ -1,0 +1,200 @@
+{
+  "artifact_version": 2,
+  "trained_at": "2026-06-30T14:23:33.476413+00:00",
+  "modality": "tabular",
+  "selected_model": "extra_trees",
+  "decision_threshold": 0.5794133638964736,
+  "selection_metric": "0.45 balanced_accuracy + 0.35 weighted_f1 + 0.20 roc_auc",
+  "class_labels": [
+    "normal",
+    "disease"
+  ],
+  "positive_class": "disease",
+  "input_schema": [
+    {
+      "name": "Age",
+      "label": "Age",
+      "input_type": "number",
+      "required": true,
+      "minimum": 4.0,
+      "maximum": 90.0,
+      "default": 45.0,
+      "choices": null
+    },
+    {
+      "name": "Gender",
+      "label": "Gender",
+      "input_type": "category",
+      "required": true,
+      "minimum": null,
+      "maximum": null,
+      "default": "Male",
+      "choices": [
+        "Female",
+        "Male"
+      ]
+    },
+    {
+      "name": "Total_Bilirubin",
+      "label": "Total Bilirubin",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.4,
+      "maximum": 75.0,
+      "default": 1.0,
+      "choices": null
+    },
+    {
+      "name": "Direct_Bilirubin",
+      "label": "Direct Bilirubin",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.1,
+      "maximum": 18.3,
+      "default": 0.3,
+      "choices": null
+    },
+    {
+      "name": "Alkaline_Phosphotase",
+      "label": "Alkaline Phosphotase",
+      "input_type": "number",
+      "required": true,
+      "minimum": 75.0,
+      "maximum": 2110.0,
+      "default": 208.0,
+      "choices": null
+    },
+    {
+      "name": "Alamine_Aminotransferase",
+      "label": "Alamine Aminotransferase",
+      "input_type": "number",
+      "required": true,
+      "minimum": 10.0,
+      "maximum": 2000.0,
+      "default": 35.0,
+      "choices": null
+    },
+    {
+      "name": "Aspartate_Aminotransferase",
+      "label": "Aspartate Aminotransferase",
+      "input_type": "number",
+      "required": true,
+      "minimum": 10.0,
+      "maximum": 4929.0,
+      "default": 42.0,
+      "choices": null
+    },
+    {
+      "name": "Total_Protiens",
+      "label": "Total Protiens",
+      "input_type": "number",
+      "required": true,
+      "minimum": 2.8,
+      "maximum": 9.6,
+      "default": 6.6,
+      "choices": null
+    },
+    {
+      "name": "Albumin",
+      "label": "Albumin",
+      "input_type": "number",
+      "required": true,
+      "minimum": 1.0,
+      "maximum": 5.5,
+      "default": 3.1,
+      "choices": null
+    },
+    {
+      "name": "Albumin_and_Globulin_Ratio",
+      "label": "Albumin and Globulin Ratio",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.3,
+      "maximum": 2.5,
+      "default": 0.94,
+      "choices": null
+    }
+  ],
+  "data_quality": {
+    "source_rows": 583,
+    "rows_after_exact_deduplication": 570,
+    "exact_duplicates_removed": 13,
+    "feature_count": 10,
+    "class_distribution": {
+      "0": 164,
+      "1": 406
+    },
+    "notes": [
+      "Exact duplicate rows are removed before splitting."
+    ]
+  },
+  "validation_comparison": {
+    "logistic_regression": {
+      "accuracy": 0.7176470588235294,
+      "balanced_accuracy": 0.7780054644808743,
+      "precision": 0.823816355810617,
+      "recall": 0.7176470588235294,
+      "f1_score": 0.7314878892733564,
+      "auc": 0.7903005464480874,
+      "sensitivity": 0.639344262295082,
+      "specificity": 0.9166666666666666,
+      "decision_threshold": 0.525,
+      "selection_score": 0.7641833295516856
+    },
+    "random_forest": {
+      "accuracy": 0.6705882352941176,
+      "balanced_accuracy": 0.7325819672131147,
+      "precision": 0.7913436946685029,
+      "recall": 0.6705882352941176,
+      "f1_score": 0.6861176470588235,
+      "auc": 0.760928961748634,
+      "sensitivity": 0.5901639344262295,
+      "specificity": 0.875,
+      "decision_threshold": 0.73,
+      "selection_score": 0.7219888540662167
+    },
+    "extra_trees": {
+      "accuracy": 0.7411764705882353,
+      "balanced_accuracy": 0.7817622950819672,
+      "precision": 0.8180392156862745,
+      "recall": 0.7411764705882353,
+      "f1_score": 0.7539955604883463,
+      "auc": 0.8046448087431693,
+      "sensitivity": 0.6885245901639344,
+      "specificity": 0.875,
+      "decision_threshold": 0.5794133638964736,
+      "selection_score": 0.7766204407064403
+    },
+    "neural_network": {
+      "accuracy": 0.6588235294117647,
+      "balanced_accuracy": 0.7496584699453552,
+      "precision": 0.8238754325259515,
+      "recall": 0.6588235294117647,
+      "f1_score": 0.6717523219814242,
+      "auc": 0.7281420765027322,
+      "sensitivity": 0.5409836065573771,
+      "specificity": 0.9583333333333334,
+      "decision_threshold": 0.6770089238589698,
+      "selection_score": 0.7180880394694549
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.6744186046511628,
+    "balanced_accuracy": 0.7350819672131148,
+    "precision": 0.7908118600844974,
+    "recall": 0.6744186046511628,
+    "f1_score": 0.6883462532299742,
+    "auc": 0.7245901639344262,
+    "sensitivity": 0.5901639344262295,
+    "specificity": 0.88,
+    "train_rows": 399.0,
+    "validation_rows": 85.0,
+    "test_rows": 86.0,
+    "num_classes": 2.0
+  },
+  "deployment_status": "ready_for_research",
+  "limitations": [
+    "Research decision-support only; not validated or approved as a medical device.",
+    "Performance on this held-out source dataset does not establish clinical generalization."
+  ]
+}

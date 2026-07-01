@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, blockchain, contact, datasets, federated, predictions, reports, trust
+from app.api.v1 import auth, blockchain, contact, datasets, federated, predictions, reports, trust, chatbot
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
@@ -11,3 +11,4 @@ api_router.include_router(blockchain.router, prefix="/blockchain", tags=["blockc
 api_router.include_router(federated.router, prefix="/federated", tags=["federated-learning"])
 api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
 api_router.include_router(contact.router, prefix="/contact", tags=["contact"])
+api_router.include_router(chatbot.router, prefix="", tags=["chatbot"])

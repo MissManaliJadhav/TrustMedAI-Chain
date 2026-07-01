@@ -22,8 +22,8 @@ ROLE_PERMISSIONS: dict[Role, set[str]] = {
         "research:view",
         "reports:download",
     },
-    Role.HOSPITAL_ADMIN: {"doctors:manage", "patients:manage", "reports:view", "reports:download", "datasets:upload"},
-    Role.DOCTOR: {"diagnosis:create", "scans:upload", "xai:view", "trust:view", "reports:view", "reports:download"},
+    Role.HOSPITAL_ADMIN: {"doctors:manage", "patients:manage", "reports:view", "reports:download", "datasets:upload", "audit:view"},
+    Role.DOCTOR: {"diagnosis:create", "scans:upload", "xai:view", "trust:view", "reports:view", "reports:download", "audit:view"},
     Role.PATIENT: {"reports:upload", "results:view", "reports:download"},
     Role.RESEARCHER: {"datasets:anonymized:view", "metrics:view", "experiments:run", "trust:view"},
 }

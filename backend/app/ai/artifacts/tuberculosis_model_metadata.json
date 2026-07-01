@@ -1,0 +1,8 @@
+{
+  "modality": "image",
+  "feature_count": 4096,
+  "class_labels": [
+    "normal",
+    "tuberculosis"
+  ]
+}

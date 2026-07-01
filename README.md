@@ -18,6 +18,19 @@ The framework is inspired by the research concept:
 * Support for structured, tabular, and medical imaging datasets
 * Real-time disease diagnosis and risk assessment
 
+### MedAI Healthcare Chatbot
+
+* Intelligent healthcare assistant with conversational interface
+* Systematic patient intake workflow
+* Emergency symptom detection and escalation
+* Comprehensive symptom analysis and risk assessment
+* Disease prediction with confidence scoring
+* Personalized health recommendations
+* Medical knowledge base with 15+ conditions
+* Session persistence and history
+* Export assessments as diagnosis records
+* Full medical disclaimers and safety protocols
+
 ### Explainable AI (XAI)
 
 * SHAP-based explanations
@@ -287,6 +300,10 @@ For production environments:
 * Security Architecture
 
 Refer to the `/docs` directory for detailed documentation.
+
+The measured leakage-safe model results, preprocessing decisions, and known
+dataset limitations are documented in
+[`docs/MODEL_EVALUATION.md`](docs/MODEL_EVALUATION.md).
 
 ---
 

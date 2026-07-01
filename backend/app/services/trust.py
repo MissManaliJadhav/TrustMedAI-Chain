@@ -19,7 +19,7 @@ class DTEIComponents:
         }
 
 
-def calculate_dtei(confidence: float, explanation_stability: float, robustness_score: float, blockchain_integrity: float = 0.97, compliance: float = 0.94) -> tuple[float, DTEIComponents]:
+def calculate_dtei(confidence: float, explanation_stability: float, robustness_score: float, blockchain_integrity: float = 0.0, compliance: float = 0.0) -> tuple[float, DTEIComponents]:
     components = DTEIComponents(
         fidelity=round(confidence, 3),
         interpretability=round(explanation_stability, 3),

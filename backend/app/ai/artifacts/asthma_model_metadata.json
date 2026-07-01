@@ -1,0 +1,259 @@
+{
+  "artifact_version": 2,
+  "trained_at": "2026-06-30T14:29:27.254075+00:00",
+  "modality": "tabular",
+  "selected_model": "neural_network",
+  "decision_threshold": 0.6549676211819381,
+  "selection_metric": "0.45 balanced_accuracy + 0.35 weighted_f1 + 0.20 roc_auc",
+  "class_labels": [
+    "controlled",
+    "risk"
+  ],
+  "positive_class": "risk",
+  "input_schema": [
+    {
+      "name": "Tiredness",
+      "label": "Tiredness",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Dry-Cough",
+      "label": "Dry Cough",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 1.0,
+      "choices": null
+    },
+    {
+      "name": "Difficulty-in-Breathing",
+      "label": "Difficulty in Breathing",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 1.0,
+      "choices": null
+    },
+    {
+      "name": "Sore-Throat",
+      "label": "Sore Throat",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "None_Sympton",
+      "label": "None Sympton",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Pains",
+      "label": "Pains",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Nasal-Congestion",
+      "label": "Nasal Congestion",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 1.0,
+      "choices": null
+    },
+    {
+      "name": "Runny-Nose",
+      "label": "Runny Nose",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "None_Experiencing",
+      "label": "None Experiencing",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Age_0-9",
+      "label": "Age 0 9",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Age_10-19",
+      "label": "Age 10 19",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Age_20-24",
+      "label": "Age 20 24",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Age_25-59",
+      "label": "Age 25 59",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Age_60+",
+      "label": "Age 60+",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Gender_Female",
+      "label": "Gender Female",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    },
+    {
+      "name": "Gender_Male",
+      "label": "Gender Male",
+      "input_type": "boolean",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "default": 0.0,
+      "choices": null
+    }
+  ],
+  "data_quality": {
+    "source_rows": 316800,
+    "rows_after_exact_deduplication": 5760,
+    "exact_duplicates_removed": 311040,
+    "feature_count": 16,
+    "class_distribution": {
+      "0": 1440,
+      "1": 4320
+    },
+    "notes": [
+      "The source is highly duplicated and appears combinatorial rather than a real patient cohort.",
+      "Severity-derived columns are removed because they directly leak the target.",
+      "Identical symptom profiles are kept in the same split to prevent near-duplicate leakage."
+    ]
+  },
+  "validation_comparison": {
+    "logistic_regression": {
+      "accuracy": 0.75,
+      "balanced_accuracy": 0.5,
+      "precision": 0.5625,
+      "recall": 0.75,
+      "f1_score": 0.6428571428571429,
+      "auc": 0.5,
+      "sensitivity": 1.0,
+      "specificity": 0.0,
+      "decision_threshold": 0.5,
+      "selection_score": 0.55
+    },
+    "random_forest": {
+      "accuracy": 0.7106481481481481,
+      "balanced_accuracy": 0.5,
+      "precision": 0.625,
+      "recall": 0.7106481481481481,
+      "f1_score": 0.6500819320354259,
+      "auc": 0.49999999999999994,
+      "sensitivity": 0.9212962962962963,
+      "specificity": 0.0787037037037037,
+      "decision_threshold": 0.5542175891728646,
+      "selection_score": 0.552528676212399
+    },
+    "extra_trees": {
+      "accuracy": 0.7106481481481481,
+      "balanced_accuracy": 0.5,
+      "precision": 0.625,
+      "recall": 0.7106481481481481,
+      "f1_score": 0.6500819320354259,
+      "auc": 0.49999999999999994,
+      "sensitivity": 0.9212962962962963,
+      "specificity": 0.0787037037037037,
+      "decision_threshold": 0.4999999999999898,
+      "selection_score": 0.552528676212399
+    },
+    "neural_network": {
+      "accuracy": 0.7129629629629629,
+      "balanced_accuracy": 0.5,
+      "precision": 0.625,
+      "recall": 0.7129629629629629,
+      "f1_score": 0.6501183898973955,
+      "auc": 0.49999999999999994,
+      "sensitivity": 0.9259259259259259,
+      "specificity": 0.07407407407407407,
+      "decision_threshold": 0.6549676211819381,
+      "selection_score": 0.5525414364640884
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.6967592592592593,
+    "balanced_accuracy": 0.5,
+    "precision": 0.625,
+    "recall": 0.6967592592592593,
+    "f1_score": 0.6489573806475215,
+    "auc": 0.49999999999999994,
+    "sensitivity": 0.8935185185185185,
+    "specificity": 0.10648148148148148,
+    "train_rows": 4032.0,
+    "validation_rows": 864.0,
+    "test_rows": 864.0,
+    "num_classes": 2.0
+  },
+  "deployment_status": "blocked_low_quality",
+  "limitations": [
+    "Research decision-support only; not validated or approved as a medical device.",
+    "Performance on this held-out source dataset does not establish clinical generalization."
+  ]
+}

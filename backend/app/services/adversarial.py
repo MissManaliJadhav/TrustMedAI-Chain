@@ -1,16 +1,18 @@
 def evaluate_attacks(confidence: float) -> dict[str, float]:
-    attack_accuracy = max(0.0, confidence - 0.18)
-    defense_accuracy = min(0.99, confidence + 0.07)
-    robustness = (defense_accuracy + (1 - abs(confidence - attack_accuracy))) / 2
+    """Return a conservative result when no real attack suite has been run.
+
+    Robustness cannot be inferred from one prediction's confidence.
+    """
     return {
-        "fgsm_accuracy": round(max(0.0, confidence - 0.12), 3),
-        "pgd_accuracy": round(max(0.0, confidence - 0.17), 3),
-        "deepfool_accuracy": round(max(0.0, confidence - 0.2), 3),
-        "cw_accuracy": round(max(0.0, confidence - 0.24), 3),
-        "attack_accuracy": round(attack_accuracy, 3),
-        "defense_accuracy": round(defense_accuracy, 3),
-        "robustness_score": round(robustness, 3),
-        "explanation_stability": round(min(0.99, robustness + 0.04), 3),
+        "evaluated": 0.0,
+        "fgsm_accuracy": 0.0,
+        "pgd_accuracy": 0.0,
+        "deepfool_accuracy": 0.0,
+        "cw_accuracy": 0.0,
+        "attack_accuracy": 0.0,
+        "defense_accuracy": 0.0,
+        "robustness_score": 0.0,
+        "explanation_stability": 0.0,
     }
 
 
@@ -23,6 +25,5 @@ def dice_similarity(original: list[float], adversarial: list[float]) -> float:
 
 
 def calculate_aecs(confidence: float) -> float:
-    original = [confidence, 0.62, 0.44, 0.31, 0.15]
-    adversarial = [max(0, confidence - 0.08), 0.59, 0.4, 0.29, 0.12]
-    return dice_similarity(original, adversarial)
+    # AECS requires real original/adversarial attribution maps.
+    return 0.0

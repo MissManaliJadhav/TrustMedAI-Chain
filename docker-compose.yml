@@ -27,6 +27,19 @@ services:
     volumes:
       - minio_data:/data
 
+  ethereum:
+    image: trufflesuite/ganache:v7.9.2
+    command:
+      - --server.host
+      - 0.0.0.0
+      - --server.port
+      - "8545"
+      - --wallet.deterministic
+      - --chain.chainId
+      - "1337"
+    ports:
+      - "8545:8545"
+
   backend:
     build:
       context: ./backend
@@ -38,6 +51,8 @@ services:
       postgres:
         condition: service_healthy
       minio:
+        condition: service_started
+      ethereum:
         condition: service_started
 
   frontend:

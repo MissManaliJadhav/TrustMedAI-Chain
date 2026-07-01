@@ -1,95 +1,267 @@
 {
+  "generated_at": "2026-06-30T14:43:54.221630+00:00",
   "datasets": {
     "asthma": {
-      "raw_folder": "C:\\Users\\dbatu\\OneDrive\\Desktop\\Trust_ai_chain\\data\\raw\\asthma",
-      "data_type": "csv",
-      "data_file": "data\\raw\\asthma\\asthma.csv",
-      "status": "completed",
-      "message": null,
+      "status": "blocked_low_quality",
+      "modality": "tabular",
+      "selected_model": "neural_network",
+      "trained_at": "2026-06-30T14:29:27.254075+00:00",
       "metrics": {
-        "accuracy": 0.7213594276094276,
-        "precision": 0.7199625847003766,
-        "recall": 0.7213594276094276,
-        "f1_score": 0.7206508552016524,
-        "num_classes": 2,
-        "train_rows": 221760,
-        "validation_rows": 47520,
-        "test_rows": 47520,
-        "auc": 0.8071481769622902
-      }
+        "accuracy": 0.6967592592592593,
+        "balanced_accuracy": 0.5,
+        "precision": 0.625,
+        "recall": 0.6967592592592593,
+        "f1_score": 0.6489573806475215,
+        "auc": 0.49999999999999994,
+        "sensitivity": 0.8935185185185185,
+        "specificity": 0.10648148148148148,
+        "train_rows": 4032.0,
+        "validation_rows": 864.0,
+        "test_rows": 864.0,
+        "num_classes": 2.0
+      },
+      "data_quality": {
+        "source_rows": 316800,
+        "rows_after_exact_deduplication": 5760,
+        "exact_duplicates_removed": 311040,
+        "feature_count": 16,
+        "class_distribution": {
+          "0": 1440,
+          "1": 4320
+        },
+        "notes": [
+          "The source is highly duplicated and appears combinatorial rather than a real patient cohort.",
+          "Severity-derived columns are removed because they directly leak the target.",
+          "Identical symptom profiles are kept in the same split to prevent near-duplicate leakage."
+        ]
+      },
+      "limitations": [
+        "Research decision-support only; not validated or approved as a medical device.",
+        "Performance on this held-out source dataset does not establish clinical generalization."
+      ]
+    },
+    "brain_tumor": {
+      "status": "existing_artifact",
+      "modality": "image",
+      "selected_model": "legacy_baseline",
+      "trained_at": null,
+      "metrics": {
+        "accuracy": 0.8833333333333333,
+        "precision": 0.9029761904761905,
+        "recall": 0.8833333333333333,
+        "f1_score": 0.8832954401919919,
+        "num_classes": 4,
+        "train_rows": 280,
+        "validation_rows": 60,
+        "test_rows": 60
+      },
+      "data_quality": null,
+      "limitations": []
     },
     "diabetes": {
-      "raw_folder": "C:\\Users\\dbatu\\OneDrive\\Desktop\\Trust_ai_chain\\data\\raw\\diabetes",
-      "data_type": "csv",
-      "data_file": "data\\raw\\diabetes\\diabetes.csv",
-      "status": "completed",
-      "message": null,
+      "status": "ready_for_research",
+      "modality": "tabular",
+      "selected_model": "random_forest",
+      "trained_at": "2026-06-30T14:19:53.658161+00:00",
       "metrics": {
-        "accuracy": 0.7413793103448276,
-        "precision": 0.7342449464922711,
-        "recall": 0.7413793103448276,
-        "f1_score": 0.7287903667214011,
-        "num_classes": 2,
-        "train_rows": 537,
-        "validation_rows": 115,
-        "test_rows": 116,
-        "auc": 0.8123577235772358
-      }
+        "accuracy": 0.7586206896551724,
+        "balanced_accuracy": 0.7746341463414634,
+        "precision": 0.7908525617965979,
+        "recall": 0.7586206896551724,
+        "f1_score": 0.7637973292765381,
+        "auc": 0.8364227642276423,
+        "sensitivity": 0.8292682926829268,
+        "specificity": 0.72,
+        "train_rows": 537.0,
+        "validation_rows": 115.0,
+        "test_rows": 116.0,
+        "num_classes": 2.0
+      },
+      "data_quality": {
+        "source_rows": 768,
+        "rows_after_exact_deduplication": 768,
+        "exact_duplicates_removed": 0,
+        "feature_count": 8,
+        "class_distribution": {
+          "0": 500,
+          "1": 268
+        },
+        "notes": [
+          "Physiologically impossible zero measurements are treated as missing and imputed from training data."
+        ]
+      },
+      "limitations": [
+        "Research decision-support only; not validated or approved as a medical device.",
+        "Performance on this held-out source dataset does not establish clinical generalization."
+      ]
+    },
+    "eye": {
+      "status": "existing_artifact",
+      "modality": "image",
+      "selected_model": "legacy_baseline",
+      "trained_at": null,
+      "metrics": {
+        "accuracy": 0.3333333333333333,
+        "precision": 0.3189705031810295,
+        "recall": 0.3333333333333333,
+        "f1_score": 0.3238554042306578,
+        "num_classes": 4,
+        "train_rows": 280,
+        "validation_rows": 60,
+        "test_rows": 60
+      },
+      "data_quality": null,
+      "limitations": []
     },
     "heart": {
-      "raw_folder": "C:\\Users\\dbatu\\OneDrive\\Desktop\\Trust_ai_chain\\data\\raw\\heart",
-      "data_type": "csv",
-      "data_file": "data\\raw\\heart\\heart_disease_uci.csv",
-      "status": "completed",
-      "message": null,
+      "status": "ready_for_research",
+      "modality": "tabular",
+      "selected_model": "extra_trees",
+      "trained_at": "2026-06-30T14:21:05.589165+00:00",
       "metrics": {
-        "accuracy": 0.8478260869565217,
-        "precision": 0.8476733530190408,
-        "recall": 0.8478260869565217,
-        "f1_score": 0.8477047941834919,
-        "num_classes": 2,
-        "train_rows": 644,
-        "validation_rows": 138,
-        "test_rows": 138,
-        "auc": 0.9119269949066214
-      }
+        "accuracy": 0.8188405797101449,
+        "balanced_accuracy": 0.8221561969439728,
+        "precision": 0.8239865574459146,
+        "recall": 0.8188405797101449,
+        "f1_score": 0.8193079033002583,
+        "auc": 0.9210526315789473,
+        "sensitivity": 0.7894736842105263,
+        "specificity": 0.8548387096774194,
+        "train_rows": 644.0,
+        "validation_rows": 138.0,
+        "test_rows": 138.0,
+        "num_classes": 2.0
+      },
+      "data_quality": {
+        "source_rows": 920,
+        "rows_after_exact_deduplication": 920,
+        "exact_duplicates_removed": 0,
+        "feature_count": 13,
+        "class_distribution": {
+          "0": 411,
+          "1": 509
+        },
+        "notes": [
+          "The UCI source combines cohorts with substantial missingness; imputation is fitted on training data only."
+        ]
+      },
+      "limitations": [
+        "Research decision-support only; not validated or approved as a medical device.",
+        "Performance on this held-out source dataset does not establish clinical generalization."
+      ]
     },
     "liver": {
-      "raw_folder": "C:\\Users\\dbatu\\OneDrive\\Desktop\\Trust_ai_chain\\data\\raw\\liver",
-      "data_type": "csv",
-      "data_file": "data\\raw\\liver\\indian_liver_patient.csv",
-      "status": "completed",
-      "message": null,
+      "status": "ready_for_research",
+      "modality": "tabular",
+      "selected_model": "extra_trees",
+      "trained_at": "2026-06-30T14:23:33.476413+00:00",
       "metrics": {
-        "accuracy": 0.6931818181818182,
-        "precision": 0.6612215909090909,
-        "recall": 0.6931818181818182,
-        "f1_score": 0.6697339246119735,
-        "num_classes": 2,
-        "train_rows": 408,
-        "validation_rows": 87,
-        "test_rows": 88,
-        "auc": 0.6980952380952381
-      }
+        "accuracy": 0.6744186046511628,
+        "balanced_accuracy": 0.7350819672131148,
+        "precision": 0.7908118600844974,
+        "recall": 0.6744186046511628,
+        "f1_score": 0.6883462532299742,
+        "auc": 0.7245901639344262,
+        "sensitivity": 0.5901639344262295,
+        "specificity": 0.88,
+        "train_rows": 399.0,
+        "validation_rows": 85.0,
+        "test_rows": 86.0,
+        "num_classes": 2.0
+      },
+      "data_quality": {
+        "source_rows": 583,
+        "rows_after_exact_deduplication": 570,
+        "exact_duplicates_removed": 13,
+        "feature_count": 10,
+        "class_distribution": {
+          "0": 164,
+          "1": 406
+        },
+        "notes": [
+          "Exact duplicate rows are removed before splitting."
+        ]
+      },
+      "limitations": [
+        "Research decision-support only; not validated or approved as a medical device.",
+        "Performance on this held-out source dataset does not establish clinical generalization."
+      ]
     },
     "parkinson": {
-      "raw_folder": "C:\\Users\\dbatu\\OneDrive\\Desktop\\Trust_ai_chain\\data\\raw\\parkinson",
-      "data_type": "csv",
-      "data_file": "data\\raw\\parkinson\\parkinsons.csv",
-      "status": "completed",
-      "message": null,
+      "status": "ready_for_research",
+      "modality": "tabular",
+      "selected_model": "logistic_regression",
+      "trained_at": "2026-06-30T14:24:25.383921+00:00",
       "metrics": {
-        "accuracy": 0.8666666666666667,
-        "precision": 0.8666666666666667,
-        "recall": 0.8666666666666667,
-        "f1_score": 0.8666666666666667,
+        "accuracy": 0.7741935483870968,
+        "balanced_accuracy": 0.86,
+        "precision": 0.8957816377171216,
+        "recall": 0.7741935483870968,
+        "f1_score": 0.797409878785486,
+        "auc": 0.8133333333333334,
+        "sensitivity": 0.72,
+        "specificity": 1.0,
+        "train_rows": 134.0,
+        "validation_rows": 30.0,
+        "test_rows": 31.0,
+        "num_classes": 2.0
+      },
+      "data_quality": {
+        "source_rows": 195,
+        "rows_after_exact_deduplication": 195,
+        "exact_duplicates_removed": 0,
+        "feature_count": 22,
+        "class_distribution": {
+          "0": 48,
+          "1": 147
+        },
+        "notes": [
+          "Repeated voice recordings from one person are kept in a single split to prevent patient leakage.",
+          "This dataset is small, so the held-out estimate has wide uncertainty."
+        ]
+      },
+      "limitations": [
+        "Research decision-support only; not validated or approved as a medical device.",
+        "Performance on this held-out source dataset does not establish clinical generalization."
+      ]
+    },
+    "pneumonia": {
+      "status": "existing_artifact",
+      "modality": "image",
+      "selected_model": "legacy_baseline",
+      "trained_at": null,
+      "metrics": {
+        "accuracy": 0.9666666666666667,
+        "precision": 0.96875,
+        "recall": 0.9666666666666667,
+        "f1_score": 0.9666295884315907,
         "num_classes": 2,
-        "train_rows": 136,
-        "validation_rows": 29,
+        "train_rows": 140,
+        "validation_rows": 30,
         "test_rows": 30,
-        "auc": 0.9147727272727273
-      }
+        "auc": 1.0
+      },
+      "data_quality": null,
+      "limitations": []
+    },
+    "tuberculosis": {
+      "status": "existing_artifact",
+      "modality": "image",
+      "selected_model": "legacy_baseline",
+      "trained_at": null,
+      "metrics": {
+        "accuracy": 0.9,
+        "precision": 0.9017857142857143,
+        "recall": 0.9,
+        "f1_score": 0.899888765294772,
+        "num_classes": 2,
+        "train_rows": 140,
+        "validation_rows": 30,
+        "test_rows": 30,
+        "auc": 0.96
+      },
+      "data_quality": null,
+      "limitations": []
     }
-  },
-  "timestamp": "C:\\Users\\dbatu\\OneDrive\\Desktop\\Trust_ai_chain"
+  }
 }

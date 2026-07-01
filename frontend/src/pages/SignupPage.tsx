@@ -1,10 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Alert, Button, MenuItem, TextField } from '@mui/material';
+import { Alert, Button, TextField } from '@mui/material';
 import Header from '../components/Header';
 import { api } from '../api/client';
-
-const roles = ['PATIENT', 'DOCTOR', 'HOSPITAL_ADMIN', 'RESEARCHER'];
 
 export default function SignupPage() {
   const [done, setDone] = useState(false);
@@ -19,7 +17,7 @@ export default function SignupPage() {
         full_name: data.get('full_name'),
         email: data.get('email'),
         password: data.get('password'),
-        role: data.get('role'),
+        role: 'PATIENT',
       });
       setDone(true);
     } catch {
@@ -38,9 +36,7 @@ export default function SignupPage() {
           <TextField name="full_name" label="Full name" required />
           <TextField name="email" label="Email" type="email" required />
           <TextField name="password" label="Password" type="password" required />
-          <TextField name="role" label="Role" select defaultValue="PATIENT">
-            {roles.map((role) => <MenuItem key={role} value={role}>{role}</MenuItem>)}
-          </TextField>
+          <Alert severity="info">Public registration creates a patient account. Staff roles are provisioned by an administrator.</Alert>
           <Button type="submit" variant="contained">Create Account</Button>
           <Link className="text-sm" to="/login">Already have an account?</Link>
         </form>

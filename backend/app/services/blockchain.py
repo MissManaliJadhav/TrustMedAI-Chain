@@ -1,11 +1,15 @@
 import asyncio
 import inspect
 import json
+import logging
 from datetime import datetime, timezone
 from hashlib import sha256
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from app.core.config import settings
 from app.db.models import DiagnosisRecord, User
@@ -83,6 +87,18 @@ def commit_hash(record_type: str, payload: dict[str, Any]) -> str:
 
 
 def build_diagnosis_anchor_payload(record: DiagnosisRecord, actor: User | None = None) -> dict[str, Any]:
+    input_artifacts = sorted(
+        (
+            {
+                "kind": artifact.kind,
+                "sha256": artifact.sha256,
+                "size_bytes": artifact.size_bytes,
+            }
+            for artifact in record.artifacts
+            if artifact.kind in {"input_image", "supporting_pdf"}
+        ),
+        key=lambda artifact: (artifact["kind"], artifact["sha256"]),
+    )
     return {
         "diagnosis_id": record.id,
         "patient_id": record.patient_id,
@@ -91,6 +107,9 @@ def build_diagnosis_anchor_payload(record: DiagnosisRecord, actor: User | None =
         "disease_key": record.disease_key,
         "prediction": record.prediction,
         "confidence": record.confidence,
+        "input_modality": record.input_modality,
+        "input_features": record.input_features,
+        "input_artifacts": input_artifacts,
         "trust_score": record.trust_score,
         "aecs": record.aecs,
         "metrics": record.metrics,
@@ -168,11 +187,21 @@ def _ethereum_contract(web3: Any) -> Any:
             address=Web3.to_checksum_address(_ethereum_contract_address),
             abi=TRUST_LEDGER_ABI,
         )
-    if not settings.ethereum_contract_bytecode:
-        raise RuntimeError("ETHEREUM_CONTRACT_ADDRESS or ETHEREUM_CONTRACT_BYTECODE must be configured")
+    bytecode = settings.ethereum_contract_bytecode
+    if not bytecode:
+        artifact_path = Path(settings.ethereum_contract_artifact)
+        if artifact_path.exists():
+            artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+            bytecode = artifact.get("bytecode")
+    if not bytecode:
+        raise RuntimeError(
+            "ETHEREUM_CONTRACT_ADDRESS, ETHEREUM_CONTRACT_BYTECODE, or a compiled contract artifact is required"
+        )
+    if settings.environment.lower() not in {"local", "development", "test"}:
+        raise RuntimeError("Automatic contract deployment is disabled outside local/test environments")
 
     sender = _sender(web3)
-    contract_factory = web3.eth.contract(abi=TRUST_LEDGER_ABI, bytecode=settings.ethereum_contract_bytecode)
+    contract_factory = web3.eth.contract(abi=TRUST_LEDGER_ABI, bytecode=bytecode)
     receipt = _send_ethereum_transaction(web3, contract_factory.constructor(), sender)
     if receipt.status != 1 or not receipt.contractAddress:
         raise RuntimeError("TrustLedger deployment transaction failed")
@@ -303,6 +332,7 @@ def anchor_diagnosis(record: DiagnosisRecord, actor: User | None = None) -> dict
         record.ethereum_anchor_verified = result["ethereum"]["verified"]
     except Exception as exc:
         result["ethereum"] = {"status": "unavailable", "error": str(exc)}
+        logger.warning("Ethereum anchoring unavailable for record %s: %s", record.id, exc)
 
     try:
         result["fabric"] = anchor_diagnosis_on_fabric(record, actor)
@@ -310,7 +340,55 @@ def anchor_diagnosis(record: DiagnosisRecord, actor: User | None = None) -> dict
         record.fabric_anchor_verified = result["fabric"]["verified"]
     except Exception as exc:
         result["fabric"] = {"status": "unavailable", "error": str(exc)}
+        logger.warning("Fabric anchoring unavailable for record %s: %s", record.id, exc)
+
+    logger.info("Blockchain anchor result for record %s: %s", record.id, result)
     return result
+
+
+def verify_diagnosis(record: DiagnosisRecord, actor: User | None = None) -> dict[str, Any]:
+    hashes = anchor_hashes(record, actor)
+    local_match = hashes["record_hash"] == record.blockchain_hash
+    ethereum: dict[str, Any] = {"configured": False, "verified": False}
+    fabric: dict[str, Any] = {"configured": bool(settings.fabric_connection_profile), "verified": False}
+
+    try:
+        web3 = _web3()
+        contract = _ethereum_contract(web3)
+        anchor = contract.functions.anchors(_bytes32_from_text(record.id)).call()
+        ethereum = {
+            "configured": True,
+            "verified": bool(anchor[4])
+            and anchor[0] == _bytes32_from_hex(hashes["record_hash"])
+            and anchor[1] == _bytes32_from_hex(hashes["trust_hash"])
+            and anchor[2] == _bytes32_from_hex(hashes["audit_hash"]),
+            "submitter": anchor[3],
+            "timestamp": int(anchor[4]),
+            "contract_address": contract.address,
+        }
+    except Exception as exc:
+        ethereum = {"configured": bool(settings.ethereum_rpc_url), "verified": False, "error": str(exc)}
+
+    try:
+        ledger_payload = read_diagnosis_from_fabric(record.id)
+        if ledger_payload:
+            fabric = {
+                "configured": True,
+                "verified": ledger_payload.get("recordHash") == hashes["record_hash"],
+                "anchor": ledger_payload,
+            }
+    except Exception as exc:
+        fabric = {"configured": True, "verified": False, "error": str(exc)}
+
+    return {
+        "diagnosis_id": record.id,
+        "local_hash_match": local_match,
+        "expected_record_hash": hashes["record_hash"],
+        "stored_record_hash": record.blockchain_hash,
+        "ethereum": ethereum,
+        "fabric": fabric,
+        "verified": local_match and (ethereum.get("verified", False) or fabric.get("verified", False)),
+    }
 
 
 def explorer_snapshot(db: Session) -> dict[str, Any]:
@@ -320,11 +398,21 @@ def explorer_snapshot(db: Session) -> dict[str, Any]:
         .limit(100)
         .all()
     )
-    events = [
-        {
+    events = []
+    local_verified_count = 0
+    chain_verified_count = 0
+    for record in records:
+        actor = db.query(User).filter(User.id == record.doctor_id).first() if record.doctor_id else None
+        local_verified = hash_payload(build_diagnosis_anchor_payload(record, actor)) == record.blockchain_hash
+        chain_verified = bool(record.ethereum_anchor_verified or record.fabric_anchor_verified)
+        local_verified_count += int(local_verified)
+        chain_verified_count += int(chain_verified)
+        events.append({
             "diagnosis_id": record.id,
             "record_hash": record.blockchain_hash,
-            "created_at": record.created_at.isoformat() if record.created_at else None,
+            "hash": record.blockchain_hash or record.ethereum_tx_hash or record.fabric_tx_id,
+            "timestamp": record.created_at.isoformat() if record.created_at else None,
+            "local_hash_verified": local_verified,
             "ethereum": {
                 "tx_hash": record.ethereum_tx_hash,
                 "block_number": record.ethereum_block_number,
@@ -335,13 +423,16 @@ def explorer_snapshot(db: Session) -> dict[str, Any]:
                 "tx_id": record.fabric_tx_id,
                 "verified": record.fabric_anchor_verified,
             },
-        }
-        for record in records
-    ]
+        })
+    total = len(records)
+    configured = bool(_ethereum_contract_address or settings.ethereum_contract_bytecode) or bool(
+        Path(settings.ethereum_contract_artifact).exists()
+    )
     return {
-        "mode": "real-blockchain",
+        "mode": "blockchain" if configured else "local-hash-only",
         "events": events,
-        "reliability": 0.986,
+        "reliability": round(local_verified_count / total, 3) if total else 1.0,
+        "chain_anchor_rate": round(chain_verified_count / total, 3) if total else 0.0,
         "fabric": {
             "channel": settings.fabric_channel_name,
             "chaincode": settings.fabric_chaincode_name,
@@ -350,6 +441,6 @@ def explorer_snapshot(db: Session) -> dict[str, Any]:
         "ethereum": {
             "rpc_url": settings.ethereum_rpc_url,
             "contract": _ethereum_contract_address,
-            "configured": bool(_ethereum_contract_address or settings.ethereum_contract_bytecode),
+            "configured": configured,
         },
     }

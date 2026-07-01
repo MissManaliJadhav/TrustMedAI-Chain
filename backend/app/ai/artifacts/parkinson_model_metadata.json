@@ -1,0 +1,318 @@
+{
+  "artifact_version": 2,
+  "trained_at": "2026-06-30T14:24:25.383921+00:00",
+  "modality": "tabular",
+  "selected_model": "logistic_regression",
+  "decision_threshold": 0.9597103105871075,
+  "selection_metric": "0.45 balanced_accuracy + 0.35 weighted_f1 + 0.20 roc_auc",
+  "class_labels": [
+    "healthy",
+    "parkinson"
+  ],
+  "positive_class": "parkinson",
+  "input_schema": [
+    {
+      "name": "MDVP:Fo(Hz)",
+      "label": "MDVP Fo(Hz)",
+      "input_type": "number",
+      "required": true,
+      "minimum": 88.333,
+      "maximum": 260.105,
+      "default": 160.39350000000002,
+      "choices": null
+    },
+    {
+      "name": "MDVP:Fhi(Hz)",
+      "label": "MDVP Fhi(Hz)",
+      "input_type": "number",
+      "required": true,
+      "minimum": 102.145,
+      "maximum": 586.567,
+      "default": 200.483,
+      "choices": null
+    },
+    {
+      "name": "MDVP:Flo(Hz)",
+      "label": "MDVP Flo(Hz)",
+      "input_type": "number",
+      "required": true,
+      "minimum": 65.476,
+      "maximum": 239.17,
+      "default": 94.11949999999999,
+      "choices": null
+    },
+    {
+      "name": "MDVP:Jitter(%)",
+      "label": "MDVP Jitter(%)",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.00178,
+      "maximum": 0.03316,
+      "default": 0.00493,
+      "choices": null
+    },
+    {
+      "name": "MDVP:Jitter(Abs)",
+      "label": "MDVP Jitter(Abs)",
+      "input_type": "number",
+      "required": true,
+      "minimum": 7e-06,
+      "maximum": 0.00026,
+      "default": 3e-05,
+      "choices": null
+    },
+    {
+      "name": "MDVP:RAP",
+      "label": "MDVP RAP",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.00092,
+      "maximum": 0.02144,
+      "default": 0.0024549999999999997,
+      "choices": null
+    },
+    {
+      "name": "MDVP:PPQ",
+      "label": "MDVP PPQ",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.00106,
+      "maximum": 0.01628,
+      "default": 0.00264,
+      "choices": null
+    },
+    {
+      "name": "Jitter:DDP",
+      "label": "Jitter DDP",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.00276,
+      "maximum": 0.06433,
+      "default": 0.007365,
+      "choices": null
+    },
+    {
+      "name": "MDVP:Shimmer",
+      "label": "MDVP Shimmer",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.00954,
+      "maximum": 0.09419,
+      "default": 0.0216,
+      "choices": null
+    },
+    {
+      "name": "MDVP:Shimmer(dB)",
+      "label": "MDVP Shimmer(dB)",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.085,
+      "maximum": 0.93,
+      "default": 0.2095,
+      "choices": null
+    },
+    {
+      "name": "Shimmer:APQ3",
+      "label": "Shimmer APQ3",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.00468,
+      "maximum": 0.05551,
+      "default": 0.011890000000000001,
+      "choices": null
+    },
+    {
+      "name": "Shimmer:APQ5",
+      "label": "Shimmer APQ5",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.0057,
+      "maximum": 0.05005,
+      "default": 0.013315,
+      "choices": null
+    },
+    {
+      "name": "MDVP:APQ",
+      "label": "MDVP APQ",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.00719,
+      "maximum": 0.06196,
+      "default": 0.017425000000000003,
+      "choices": null
+    },
+    {
+      "name": "Shimmer:DDA",
+      "label": "Shimmer DDA",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.01403,
+      "maximum": 0.16654,
+      "default": 0.035665,
+      "choices": null
+    },
+    {
+      "name": "NHR",
+      "label": "NHR",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.00065,
+      "maximum": 0.31482,
+      "default": 0.013325,
+      "choices": null
+    },
+    {
+      "name": "HNR",
+      "label": "HNR",
+      "input_type": "number",
+      "required": true,
+      "minimum": 8.867,
+      "maximum": 33.047,
+      "default": 21.837,
+      "choices": null
+    },
+    {
+      "name": "RPDE",
+      "label": "RPDE",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.25657,
+      "maximum": 0.685151,
+      "default": 0.4944125,
+      "choices": null
+    },
+    {
+      "name": "DFA",
+      "label": "DFA",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.574282,
+      "maximum": 0.798463,
+      "default": 0.7148030000000001,
+      "choices": null
+    },
+    {
+      "name": "spread1",
+      "label": "spread1",
+      "input_type": "number",
+      "required": true,
+      "minimum": -7.964984,
+      "maximum": -2.929379,
+      "default": -5.8042645,
+      "choices": null
+    },
+    {
+      "name": "spread2",
+      "label": "spread2",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.006274,
+      "maximum": 0.434326,
+      "default": 0.212174,
+      "choices": null
+    },
+    {
+      "name": "D2",
+      "label": "D2",
+      "input_type": "number",
+      "required": true,
+      "minimum": 1.423287,
+      "maximum": 3.671155,
+      "default": 2.4180455,
+      "choices": null
+    },
+    {
+      "name": "PPE",
+      "label": "PPE",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.044539,
+      "maximum": 0.444774,
+      "default": 0.18735000000000002,
+      "choices": null
+    }
+  ],
+  "data_quality": {
+    "source_rows": 195,
+    "rows_after_exact_deduplication": 195,
+    "exact_duplicates_removed": 0,
+    "feature_count": 22,
+    "class_distribution": {
+      "0": 48,
+      "1": 147
+    },
+    "notes": [
+      "Repeated voice recordings from one person are kept in a single split to prevent patient leakage.",
+      "This dataset is small, so the held-out estimate has wide uncertainty."
+    ]
+  },
+  "validation_comparison": {
+    "logistic_regression": {
+      "accuracy": 0.5333333333333333,
+      "balanced_accuracy": 0.6458333333333334,
+      "precision": 0.788888888888889,
+      "recall": 0.5333333333333333,
+      "f1_score": 0.5722222222222223,
+      "auc": 0.548611111111111,
+      "sensitivity": 0.4583333333333333,
+      "specificity": 0.8333333333333334,
+      "decision_threshold": 0.9597103105871075,
+      "selection_score": 0.600625
+    },
+    "random_forest": {
+      "accuracy": 0.4666666666666667,
+      "balanced_accuracy": 0.6666666666666666,
+      "precision": 0.8545454545454546,
+      "recall": 0.4666666666666667,
+      "f1_score": 0.4857142857142857,
+      "auc": 0.5625,
+      "sensitivity": 0.3333333333333333,
+      "specificity": 1.0,
+      "decision_threshold": 0.9394576245852688,
+      "selection_score": 0.5825
+    },
+    "extra_trees": {
+      "accuracy": 0.3333333333333333,
+      "balanced_accuracy": 0.5833333333333334,
+      "precision": 0.8461538461538461,
+      "recall": 0.3333333333333333,
+      "f1_score": 0.3035714285714286,
+      "auc": 0.45833333333333337,
+      "sensitivity": 0.16666666666666666,
+      "specificity": 1.0,
+      "decision_threshold": 0.9541885874886283,
+      "selection_score": 0.4604166666666667
+    },
+    "neural_network": {
+      "accuracy": 0.4,
+      "balanced_accuracy": 0.625,
+      "precision": 0.85,
+      "recall": 0.4,
+      "f1_score": 0.4000000000000001,
+      "auc": 0.4444444444444445,
+      "sensitivity": 0.25,
+      "specificity": 1.0,
+      "decision_threshold": 0.655,
+      "selection_score": 0.5101388888888889
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.7741935483870968,
+    "balanced_accuracy": 0.86,
+    "precision": 0.8957816377171216,
+    "recall": 0.7741935483870968,
+    "f1_score": 0.797409878785486,
+    "auc": 0.8133333333333334,
+    "sensitivity": 0.72,
+    "specificity": 1.0,
+    "train_rows": 134.0,
+    "validation_rows": 30.0,
+    "test_rows": 31.0,
+    "num_classes": 2.0
+  },
+  "deployment_status": "ready_for_research",
+  "limitations": [
+    "Research decision-support only; not validated or approved as a medical device.",
+    "Performance on this held-out source dataset does not establish clinical generalization."
+  ]
+}

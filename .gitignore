@@ -20,7 +20,7 @@ npm-debug.log
 .DS_Store
 Thumbs.db
 cmd_out.txt
-
+.db
 # Blockchain Secrets
 wallet/
 keystore/
@@ -32,7 +32,7 @@ keystore/
 dist/
 build/
 coverage/
-
+.artifacts-browser
 # Python cache
 .pytest_cache/
 

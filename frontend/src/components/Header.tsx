@@ -26,6 +26,11 @@ export default function Header() {
           <Button component={Link} to="/dashboard" color="primary">
             Dashboard
           </Button>
+          {token && (
+            <Button component={Link} to="/diagnosis" color="primary">
+              Disease Diagnosis
+            </Button>
+          )}
           {token ? (
             <Button startIcon={<LogoutIcon />} variant="outlined" onClick={handleLogout}>
               Logout

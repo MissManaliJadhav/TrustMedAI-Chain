@@ -1,0 +1,177 @@
+{
+  "artifact_version": 2,
+  "trained_at": "2026-06-30T14:19:53.658161+00:00",
+  "modality": "tabular",
+  "selected_model": "random_forest",
+  "decision_threshold": 0.28192760498187236,
+  "selection_metric": "0.45 balanced_accuracy + 0.35 weighted_f1 + 0.20 roc_auc",
+  "class_labels": [
+    "negative",
+    "positive"
+  ],
+  "positive_class": "positive",
+  "input_schema": [
+    {
+      "name": "Pregnancies",
+      "label": "Pregnancies",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.0,
+      "maximum": 17.0,
+      "default": 3.0,
+      "choices": null
+    },
+    {
+      "name": "Glucose",
+      "label": "Glucose",
+      "input_type": "number",
+      "required": true,
+      "minimum": 57.0,
+      "maximum": 198.0,
+      "default": 117.0,
+      "choices": null
+    },
+    {
+      "name": "BloodPressure",
+      "label": "BloodPressure",
+      "input_type": "number",
+      "required": true,
+      "minimum": 24.0,
+      "maximum": 122.0,
+      "default": 72.0,
+      "choices": null
+    },
+    {
+      "name": "SkinThickness",
+      "label": "SkinThickness",
+      "input_type": "number",
+      "required": true,
+      "minimum": 7.0,
+      "maximum": 60.0,
+      "default": 29.0,
+      "choices": null
+    },
+    {
+      "name": "Insulin",
+      "label": "Insulin",
+      "input_type": "number",
+      "required": true,
+      "minimum": 16.0,
+      "maximum": 744.0,
+      "default": 126.0,
+      "choices": null
+    },
+    {
+      "name": "BMI",
+      "label": "BMI",
+      "input_type": "number",
+      "required": true,
+      "minimum": 18.2,
+      "maximum": 67.1,
+      "default": 32.4,
+      "choices": null
+    },
+    {
+      "name": "DiabetesPedigreeFunction",
+      "label": "DiabetesPedigreeFunction",
+      "input_type": "number",
+      "required": true,
+      "minimum": 0.084,
+      "maximum": 2.329,
+      "default": 0.385,
+      "choices": null
+    },
+    {
+      "name": "Age",
+      "label": "Age",
+      "input_type": "number",
+      "required": true,
+      "minimum": 21.0,
+      "maximum": 81.0,
+      "default": 30.0,
+      "choices": null
+    }
+  ],
+  "data_quality": {
+    "source_rows": 768,
+    "rows_after_exact_deduplication": 768,
+    "exact_duplicates_removed": 0,
+    "feature_count": 8,
+    "class_distribution": {
+      "0": 500,
+      "1": 268
+    },
+    "notes": [
+      "Physiologically impossible zero measurements are treated as missing and imputed from training data."
+    ]
+  },
+  "validation_comparison": {
+    "logistic_regression": {
+      "accuracy": 0.7565217391304347,
+      "balanced_accuracy": 0.7725,
+      "precision": 0.7898946701512631,
+      "recall": 0.7565217391304347,
+      "f1_score": 0.7621211296729608,
+      "auc": 0.8136666666666666,
+      "sensitivity": 0.825,
+      "specificity": 0.72,
+      "decision_threshold": 0.4314491977023114,
+      "selection_score": 0.7771007287188696
+    },
+    "random_forest": {
+      "accuracy": 0.7478260869565218,
+      "balanced_accuracy": 0.8008333333333333,
+      "precision": 0.8410528877352369,
+      "recall": 0.7478260869565218,
+      "f1_score": 0.7519647971774314,
+      "auc": 0.8333333333333333,
+      "sensitivity": 0.975,
+      "specificity": 0.6266666666666667,
+      "decision_threshold": 0.28192760498187236,
+      "selection_score": 0.7902293456787676
+    },
+    "extra_trees": {
+      "accuracy": 0.7478260869565218,
+      "balanced_accuracy": 0.7775000000000001,
+      "precision": 0.800281608590378,
+      "recall": 0.7478260869565218,
+      "f1_score": 0.7537371725888156,
+      "auc": 0.8263333333333334,
+      "sensitivity": 0.875,
+      "specificity": 0.68,
+      "decision_threshold": 0.4183838273128006,
+      "selection_score": 0.7789496770727522
+    },
+    "neural_network": {
+      "accuracy": 0.6869565217391305,
+      "balanced_accuracy": 0.7541666666666667,
+      "precision": 0.8195809807686796,
+      "recall": 0.6869565217391305,
+      "f1_score": 0.6877613824666614,
+      "auc": 0.7813333333333333,
+      "sensitivity": 0.975,
+      "specificity": 0.5333333333333333,
+      "decision_threshold": 0.19639420336522198,
+      "selection_score": 0.7363581505299981
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.7586206896551724,
+    "balanced_accuracy": 0.7746341463414634,
+    "precision": 0.7908525617965979,
+    "recall": 0.7586206896551724,
+    "f1_score": 0.7637973292765381,
+    "auc": 0.8364227642276423,
+    "sensitivity": 0.8292682926829268,
+    "specificity": 0.72,
+    "train_rows": 537.0,
+    "validation_rows": 115.0,
+    "test_rows": 116.0,
+    "num_classes": 2.0
+  },
+  "deployment_status": "ready_for_research",
+  "limitations": [
+    "Research decision-support only; not validated or approved as a medical device.",
+    "Performance on this held-out source dataset does not establish clinical generalization."
+  ]
+}

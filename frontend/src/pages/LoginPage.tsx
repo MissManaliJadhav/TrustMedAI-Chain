@@ -20,7 +20,14 @@ export default function LoginPage() {
         email: data.get('email'),
         password: data.get('password'),
       });
-      dispatch(setCredentials({ accessToken: res.data.access_token, refreshToken: res.data.refresh_token, role: res.data.role }));
+      dispatch(
+        setCredentials({
+          accessToken: res.data.access_token,
+          refreshToken: res.data.refresh_token,
+          role: res.data.role,
+          userId: res.data.user_id,
+        }),
+      );
       navigate('/dashboard');
     } catch {
       setError('Invalid credentials.');
@@ -34,8 +41,8 @@ export default function LoginPage() {
         <form onSubmit={submit} className="grid gap-4 rounded border border-slate-200 bg-white p-6 shadow-panel">
           <h1 className="text-2xl font-black">Login</h1>
           {error && <Alert severity="error">{error}</Alert>}
-          <TextField name="email" label="Email" type="email" defaultValue="admin@trustmedai.local" required />
-          <TextField name="password" label="Password" type="password" defaultValue="ChangeMe123!" required />
+          <TextField name="email" label="Email" type="email" autoComplete="email" required />
+          <TextField name="password" label="Password" type="password" autoComplete="current-password" required />
           <Button type="submit" variant="contained">Login</Button>
           <div className="flex justify-between text-sm">
             <Link to="/forgot-password">Forgot password</Link>
