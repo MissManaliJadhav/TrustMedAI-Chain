@@ -1,8 +1,374 @@
 {
+  "artifact_version": 3,
+  "trained_at": "2026-07-18T15:35:47.863237+00:00",
   "modality": "image",
-  "feature_count": 4096,
+  "source": "kaggle_or_local_real_dataset",
+  "kaggle_slug": "paultimothymooney/chest-xray-pneumonia",
+  "selected_model": "extra_trees",
+  "architectures_requested": [
+    "custom_cnn",
+    "densenet121",
+    "efficientnet_b0"
+  ],
+  "architectures_evaluated": [
+    "sgd_logistic",
+    "extra_trees"
+  ],
+  "feature_extractor": "opencv_hog_histogram_v1",
   "class_labels": [
     "normal",
     "pneumonia"
+  ],
+  "image_size": [
+    64,
+    64
+  ],
+  "data_processing": {
+    "resize": [
+      64,
+      64
+    ],
+    "normalization": "0_1_grayscale",
+    "noise_removal": "gaussian_blur",
+    "contrast_adjustment": "histogram_equalization",
+    "features": [
+      "32x32 intensity thumbnail",
+      "HSV color histogram",
+      "HOG",
+      "intensity statistics"
+    ],
+    "augmentation": "not applied for deterministic classical feature training"
+  },
+  "data_quality": {
+    "source_rows": 1400,
+    "feature_count": 1732,
+    "class_distribution": {
+      "normal": 700,
+      "pneumonia": 700
+    },
+    "dataset_fingerprint": "e1ad59f53b3dddd6bcc1c4513fcf4e2b2138806adbbb40540ff8f60265f43efe"
+  },
+  "validation_comparison": {
+    "sgd_logistic": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.8904761904761904,
+        "balanced_accuracy": 0.8904761904761904,
+        "precision": 0.8922193877551021,
+        "recall": 0.8904761904761904,
+        "f1_score": 0.8903543619895122,
+        "confusion_matrix": [
+          [
+            90,
+            15
+          ],
+          [
+            8,
+            97
+          ]
+        ],
+        "sensitivity": 0.9238095238095239,
+        "specificity": 0.8571428571428571,
+        "roc_auc": 0.9395011337868481,
+        "average_precision": 0.9029358939654673
+      }
+    },
+    "extra_trees": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.9285714285714286,
+        "balanced_accuracy": 0.9285714285714286,
+        "precision": 0.92861030478955,
+        "recall": 0.9285714285714286,
+        "f1_score": 0.9285698088392027,
+        "confusion_matrix": [
+          [
+            97,
+            8
+          ],
+          [
+            7,
+            98
+          ]
+        ],
+        "sensitivity": 0.9333333333333333,
+        "specificity": 0.9238095238095239,
+        "roc_auc": 0.9810430839002268,
+        "average_precision": 0.9810506400250294
+      }
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.9142857142857143,
+    "balanced_accuracy": 0.9142857142857143,
+    "precision": 0.9142857142857143,
+    "recall": 0.9142857142857143,
+    "f1_score": 0.9142857142857143,
+    "confusion_matrix": [
+      [
+        96,
+        9
+      ],
+      [
+        9,
+        96
+      ]
+    ],
+    "sensitivity": 0.9142857142857143,
+    "specificity": 0.9142857142857143,
+    "roc_auc": 0.9765532879818595,
+    "average_precision": 0.9797975126418242,
+    "train_rows": 980.0,
+    "validation_rows": 210.0,
+    "test_rows": 210.0,
+    "num_classes": 2.0
+  },
+  "feature_importance": [
+    {
+      "feature_index": 502,
+      "importance": 0.01135785
+    },
+    {
+      "feature_index": 1724,
+      "importance": 0.01098607
+    },
+    {
+      "feature_index": 684,
+      "importance": 0.00849368
+    },
+    {
+      "feature_index": 404,
+      "importance": 0.0082648
+    },
+    {
+      "feature_index": 683,
+      "importance": 0.00816371
+    },
+    {
+      "feature_index": 567,
+      "importance": 0.00786945
+    },
+    {
+      "feature_index": 716,
+      "importance": 0.0077872
+    },
+    {
+      "feature_index": 470,
+      "importance": 0.00753328
+    },
+    {
+      "feature_index": 405,
+      "importance": 0.00743352
+    },
+    {
+      "feature_index": 682,
+      "importance": 0.00739806
+    },
+    {
+      "feature_index": 664,
+      "importance": 0.00734661
+    },
+    {
+      "feature_index": 715,
+      "importance": 0.00697098
+    },
+    {
+      "feature_index": 1189,
+      "importance": 0.00687828
+    },
+    {
+      "feature_index": 651,
+      "importance": 0.00667796
+    },
+    {
+      "feature_index": 372,
+      "importance": 0.00651793
+    },
+    {
+      "feature_index": 373,
+      "importance": 0.00602068
+    },
+    {
+      "feature_index": 755,
+      "importance": 0.0059967
+    },
+    {
+      "feature_index": 665,
+      "importance": 0.00593597
+    },
+    {
+      "feature_index": 599,
+      "importance": 0.0058035
+    },
+    {
+      "feature_index": 761,
+      "importance": 0.00562101
+    },
+    {
+      "feature_index": 438,
+      "importance": 0.00561266
+    },
+    {
+      "feature_index": 1162,
+      "importance": 0.00560173
+    },
+    {
+      "feature_index": 535,
+      "importance": 0.00557561
+    },
+    {
+      "feature_index": 691,
+      "importance": 0.00553951
+    },
+    {
+      "feature_index": 600,
+      "importance": 0.00546901
+    }
+  ],
+  "explainability": {
+    "feature_importance": [
+      {
+        "feature_index": 502,
+        "importance": 0.01135785
+      },
+      {
+        "feature_index": 1724,
+        "importance": 0.01098607
+      },
+      {
+        "feature_index": 684,
+        "importance": 0.00849368
+      },
+      {
+        "feature_index": 404,
+        "importance": 0.0082648
+      },
+      {
+        "feature_index": 683,
+        "importance": 0.00816371
+      },
+      {
+        "feature_index": 567,
+        "importance": 0.00786945
+      },
+      {
+        "feature_index": 716,
+        "importance": 0.0077872
+      },
+      {
+        "feature_index": 470,
+        "importance": 0.00753328
+      },
+      {
+        "feature_index": 405,
+        "importance": 0.00743352
+      },
+      {
+        "feature_index": 682,
+        "importance": 0.00739806
+      },
+      {
+        "feature_index": 664,
+        "importance": 0.00734661
+      },
+      {
+        "feature_index": 715,
+        "importance": 0.00697098
+      },
+      {
+        "feature_index": 1189,
+        "importance": 0.00687828
+      },
+      {
+        "feature_index": 651,
+        "importance": 0.00667796
+      },
+      {
+        "feature_index": 372,
+        "importance": 0.00651793
+      },
+      {
+        "feature_index": 373,
+        "importance": 0.00602068
+      },
+      {
+        "feature_index": 755,
+        "importance": 0.0059967
+      },
+      {
+        "feature_index": 665,
+        "importance": 0.00593597
+      },
+      {
+        "feature_index": 599,
+        "importance": 0.0058035
+      },
+      {
+        "feature_index": 761,
+        "importance": 0.00562101
+      },
+      {
+        "feature_index": 438,
+        "importance": 0.00561266
+      },
+      {
+        "feature_index": 1162,
+        "importance": 0.00560173
+      },
+      {
+        "feature_index": 535,
+        "importance": 0.00557561
+      },
+      {
+        "feature_index": 691,
+        "importance": 0.00553951
+      },
+      {
+        "feature_index": 600,
+        "importance": 0.00546901
+      }
+    ],
+    "grad_cam": {
+      "available": false,
+      "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+    },
+    "integrated_gradients": {
+      "available": false,
+      "reason": "Integrated Gradients requires a differentiable deep-learning model."
+    }
+  },
+  "adversarial_robustness": {
+    "before_attack_accuracy": 0.9142857142857143,
+    "gaussian_noise_accuracy": 0.89375,
+    "brightness_shift_accuracy": 0.91875,
+    "fgsm_accuracy": null,
+    "pgd_accuracy": null,
+    "after_attack_accuracy": 0.90625,
+    "robustness_score": 0.9912,
+    "explanation_stability": 0.7,
+    "note": "FGSM/PGD require a differentiable deep-learning model; Gaussian and brightness attacks were evaluated for this OpenCV/sklearn image artifact."
+  },
+  "aecs": 0.7,
+  "dtei": 87.5,
+  "blockchain_audit": {
+    "disease_key": "pneumonia",
+    "model_artifact": "backend\\app\\ai\\artifacts\\pneumonia_model.pkl",
+    "model_sha256": "16026007eddb8118bc3502d343dc204bffc2e2b942c0c96e14e9d3bafc353a1a",
+    "dataset_fingerprint": "e1ad59f53b3dddd6bcc1c4513fcf4e2b2138806adbbb40540ff8f60265f43efe",
+    "metrics_sha256": "c390be42c3fed91809cd29b6223dbf2323dfe86126dab9a1750f9b8bd826df76",
+    "timestamp": "2026-07-18T15:35:47.779232+00:00",
+    "audit_type": "training_artifact_integrity",
+    "block_hash": "b689fb094ed972c076bd6162034efb9c697892e31dc8dc1194c7dd331fb80ab9",
+    "audit_file": "backend\\app\\ai\\artifacts\\reports\\pneumonia\\blockchain_audit.json"
+  },
+  "report_artifacts": {
+    "curves_json": "backend\\app\\ai\\artifacts\\reports\\pneumonia\\curves.json",
+    "explanations_json": "backend\\app\\ai\\artifacts\\reports\\pneumonia\\image_explanations.json"
+  },
+  "deployment_status": "ready_for_research",
+  "limitations": [
+    "Research decision-support only; not validated or approved as a medical device.",
+    "This run used OpenCV/sklearn features because TensorFlow/PyTorch was unavailable in the active Python environment.",
+    "CNN/ResNet/EfficientNet/ViT training remains implemented and will run automatically when TensorFlow is installed."
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "disease_key": "asthma",
+  "model_artifact": "backend\\app\\ai\\artifacts\\asthma_model.pkl",
+  "model_sha256": "484bde5dff4e03181f7d7d68bafad68a296b149772e8050844888ce9cf7e1190",
+  "dataset_fingerprint": "cd1cba7f1921796154080535ef62dc627c0df497a94cb24304b3ddc7e4765d4e",
+  "metrics_sha256": "338c688d7694ed63e7b6d1fb59b7a786d41552a24197536cdd26624c628895d6",
+  "timestamp": "2026-07-18T14:41:20.114882+00:00",
+  "audit_type": "training_artifact_integrity",
+  "block_hash": "6da84925f58e1c1b56f2f4ce11a521117eafa7ed6fbc6444c99f08c6edb83303"
+}

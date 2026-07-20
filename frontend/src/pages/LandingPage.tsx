@@ -1,55 +1,91 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, TextField } from '@mui/material';
+import { Alert, Button, TextField } from '@mui/material';
 import BiotechIcon from '@mui/icons-material/Biotech';
 import HubIcon from '@mui/icons-material/Hub';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
-import DownloadIcon from '@mui/icons-material/Download';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import Header from '../components/Header';
 import HeroIllustration from '../components/HeroIllustration';
 import { api } from '../api/client';
 import type { Disease } from '../types';
 
 const fallbackDiseases: Disease[] = [
-  { key: 'heart', name: 'Heart Disease', dataset: 'UCI Heart Disease Dataset', modality: 'tabular', task_type: 'binary', labels: [] },
-  { key: 'diabetes', name: 'Diabetes', dataset: 'Pima Indians Diabetes Dataset', modality: 'tabular', task_type: 'binary', labels: [] },
-  { key: 'asthma', name: 'Asthma', dataset: 'Asthma Prediction Dataset', modality: 'tabular', task_type: 'binary', labels: [] },
-  { key: 'pneumonia', name: 'Pneumonia', dataset: 'Chest X-Ray Pneumonia Dataset', modality: 'image', task_type: 'binary', labels: [] },
-  { key: 'eye', name: 'Eye Disease', dataset: 'Ocular Disease Recognition Dataset', modality: 'image', task_type: 'multiclass', labels: [] },
-  { key: 'tuberculosis', name: 'Tuberculosis', dataset: 'TB Chest X-Ray Dataset', modality: 'image', task_type: 'binary', labels: [] },
-  { key: 'liver', name: 'Liver Disease', dataset: 'Indian Liver Patient Dataset', modality: 'tabular', task_type: 'binary', labels: [] },
-  { key: 'parkinson', name: 'Parkinson Disease', dataset: 'UCI Parkinson Dataset', modality: 'voice', task_type: 'binary', labels: [] },
-  { key: 'brain_tumor', name: 'Brain Tumor', dataset: 'Brain MRI Dataset', modality: 'image', task_type: 'multiclass', labels: [] },
+  { key: 'brain_tumor', name: 'Brain Tumor Detection', dataset: 'Brain MRI images | CNN, ResNet, ViT-ready pipeline', modality: 'image', task_type: 'Tumor classification and MRI feature extraction', labels: ['no_tumor', 'glioma', 'meningioma', 'pituitary'] },
+  { key: 'pneumonia', name: 'Pneumonia Detection', dataset: 'Chest X-ray images | CNN, DenseNet, EfficientNet-ready pipeline', modality: 'image', task_type: 'Normal / Pneumonia classification', labels: ['normal', 'pneumonia'] },
+  { key: 'tuberculosis', name: 'Tuberculosis Detection', dataset: 'Chest X-ray images | CNN, ResNet, transfer learning-ready pipeline', modality: 'image', task_type: 'TB / Normal classification', labels: ['normal', 'tuberculosis'] },
+  { key: 'diabetes', name: 'Diabetes Prediction', dataset: 'Clinical tabular data | RF, XGBoost, LR, neural network', modality: 'tabular', task_type: 'Diabetes risk prediction', labels: ['negative', 'positive'] },
+  { key: 'heart', name: 'Heart Disease Prediction', dataset: 'Clinical cardiovascular data | XGBoost, RF, ANN', modality: 'tabular', task_type: 'Cardiovascular risk prediction', labels: ['low_risk', 'high_risk'] },
+  { key: 'liver', name: 'Liver Disease Prediction', dataset: 'Liver patient clinical records | RF, XGBoost, gradient boosting', modality: 'tabular', task_type: 'Liver disease prediction', labels: ['normal', 'disease'] },
+  { key: 'parkinson', name: 'Parkinson Disease Prediction', dataset: 'Voice and clinical features | SVM, RF, neural network', modality: 'tabular', task_type: 'Parkinson prediction', labels: ['healthy', 'parkinson'] },
+  { key: 'asthma', name: 'Asthma Prediction', dataset: 'Clinical symptoms and history | ML classifier, neural network', modality: 'tabular', task_type: 'Asthma risk prediction', labels: ['controlled', 'risk'] },
+  { key: 'eye', name: 'Eye Disease Detection', dataset: 'Retinal images | CNN, EfficientNet, ViT-ready pipeline', modality: 'image', task_type: 'Retinal disease classification', labels: ['normal', 'cataract', 'glaucoma', 'retina'] },
 ];
 
-const trustSeries = [
-  { round: 'R1', dtei: 0.72, aecs: 0.78 },
-  { round: 'R2', dtei: 0.79, aecs: 0.82 },
-  { round: 'R3', dtei: 0.84, aecs: 0.87 },
-  { round: 'R4', dtei: 0.88, aecs: 0.91 },
-  { round: 'R5', dtei: 0.92, aecs: 0.94 },
+const modelPerformance = [
+  { disease: 'Brain Tumor', accuracy: 88.6, trust: 83.1 },
+  { disease: 'Pneumonia', accuracy: 91.4, trust: 87.5 },
+  { disease: 'Tuberculosis', accuracy: 97.1, trust: 83.9 },
+  { disease: 'Heart', accuracy: 84.1, trust: 90.9 },
+  { disease: 'Parkinson', accuracy: 86.7, trust: 89.6 },
+  { disease: 'Diabetes', accuracy: 73.3, trust: 86.9 },
 ];
+
+const trustEvolutionRows = [
+  { stage: 'Input', dtei: 62, fidelity: 68, robustness: 52 },
+  { stage: 'Prediction', dtei: 74, fidelity: 82, robustness: 63 },
+  { stage: 'XAI', dtei: 81, fidelity: 84, robustness: 72 },
+  { stage: 'Robustness', dtei: 86, fidelity: 86, robustness: 84 },
+  { stage: 'Blockchain', dtei: 91, fidelity: 88, robustness: 87 },
+  { stage: 'Doctor Review', dtei: 94, fidelity: 91, robustness: 89 },
+];
+
+const fallbackTrustWeights = { alpha: 0.3, beta: 0.2, gamma: 0.2, delta: 0.15, lambda: 0.15 };
 
 export default function LandingPage() {
-  const [diseases, setDiseases] = useState<Disease[]>(fallbackDiseases);
+  const [diseases, setDiseases] = useState<Disease[]>([]);
+  const [trustWeights, setTrustWeights] = useState<Record<string, number>>({});
   const [sent, setSent] = useState(false);
+  const [contactError, setContactError] = useState('');
 
   useEffect(() => {
-    api.get<Disease[]>('/datasets/diseases').then((res) => setDiseases(res.data)).catch(() => setDiseases(fallbackDiseases));
+    api.get<Disease[]>('/datasets/diseases').then((res) => setDiseases(res.data)).catch(() => setDiseases([]));
+    api.get<Record<string, number>>('/trust/weights').then((res) => setTrustWeights(res.data)).catch(() => setTrustWeights({}));
   }, []);
 
   const handleContact = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setContactError('');
     const data = new FormData(event.currentTarget);
-    await api.post('/contact', {
-      name: data.get('name'),
-      email: data.get('email'),
-      message: data.get('message'),
-    });
-    setSent(true);
-    event.currentTarget.reset();
+    try {
+      await api.post('/contact', {
+        name: data.get('name'),
+        email: data.get('email'),
+        message: data.get('message'),
+      });
+      setSent(true);
+      event.currentTarget.reset();
+    } catch {
+      setContactError('Message could not be sent. Please try again.');
+    }
   };
+
+  const displayDiseases = diseases.length ? diseases : fallbackDiseases;
+  const clinicalDiseases = displayDiseases.filter((disease) => disease.modality !== 'image').length;
+  const imageDiseases = displayDiseases.filter((disease) => disease.modality === 'image').length;
+  const effectiveTrustWeights = Object.keys(trustWeights).length ? trustWeights : fallbackTrustWeights;
+  const trustWeightRows = Object.entries(effectiveTrustWeights).map(([name, value]) => ({
+    name: name === 'lambda' ? 'compliance' : name,
+    value: Number((value * 100).toFixed(0)),
+  }));
+  const diseaseCoverageRows = useMemo(() => {
+    const grouped = displayDiseases.reduce<Record<string, number>>((acc, disease) => {
+      const key = disease.modality === 'image' ? 'Image AI' : 'Clinical AI';
+      acc[key] = (acc[key] ?? 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(grouped).map(([name, value]) => ({ name, value }));
+  }, [displayDiseases]);
 
   return (
     <div className="min-h-screen bg-[#f7fbfa] text-trust-ink">
@@ -77,11 +113,14 @@ export default function LandingPage() {
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-12">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             {[
-              ['9', 'Disease models'],
-              ['0.94', 'AECS target'],
-              ['4', 'Federated nodes'],
+              [String(displayDiseases.length), 'Disease models'],
+              [String(clinicalDiseases), 'Clinical workflows'],
+              [String(imageDiseases), 'Image workflows'],
+              ['94%', 'Peak DTEI after review'],
+              ['7', 'Audit events tracked'],
+              ['9', 'Report sections'],
             ].map(([value, label]) => (
               <div key={label} className="rounded border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="text-4xl font-black text-trust-teal">{value}</div>
@@ -95,15 +134,48 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4">
             <h2 className="text-3xl font-black">Disease Coverage</h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {diseases.map((disease) => (
+              {displayDiseases.map((disease) => (
                 <article key={disease.key} className="rounded border border-slate-200 p-5 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-lg font-bold">{disease.name}</h3>
                     <span className="rounded bg-teal-50 px-2 py-1 text-xs font-bold text-trust-teal">{disease.modality}</span>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-slate-600">{disease.dataset}</p>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{disease.task_type}</p>
                 </article>
               ))}
+            </div>
+            <div className="mt-8 grid gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+              <div className="rounded border border-slate-200 p-5 shadow-sm">
+                <h3 className="font-bold">Coverage Mix</h3>
+                <div className="mt-4 h-60">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={diseaseCoverageRows}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#0f766e" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="rounded border border-slate-200 p-5 shadow-sm">
+                <h3 className="font-bold">Validated Model Snapshot</h3>
+                <div className="mt-4 h-60">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={modelPerformance}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="disease" />
+                      <YAxis domain={[0, 100]} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="accuracy" fill="#0f766e" name="Accuracy %" />
+                      <Bar dataKey="trust" fill="#2563eb" name="DTEI %" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -127,20 +199,36 @@ export default function LandingPage() {
           </div>
           <div className="rounded border border-slate-200 bg-white p-5 shadow-panel">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-bold">Dynamic Trust Evolution</h3>
+              <h3 className="font-bold">Dynamic Trust Evolution Graph</h3>
               <HubIcon className="trust-pulse text-trust-coral" />
             </div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trustSeries}>
+                <LineChart data={trustEvolutionRows}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="round" />
-                  <YAxis domain={[0.6, 1]} />
+                  <XAxis dataKey="stage" />
+                  <YAxis domain={[0, 100]} />
                   <Tooltip />
-                  <Area dataKey="dtei" stroke="#0f766e" fill="#ccfbf1" />
-                  <Area dataKey="aecs" stroke="#f97316" fill="#ffedd5" />
-                </AreaChart>
+                  <Legend />
+                  <Line type="monotone" dataKey="dtei" stroke="#0f766e" strokeWidth={3} name="DTEI %" />
+                  <Line type="monotone" dataKey="fidelity" stroke="#2563eb" strokeWidth={2} name="Fidelity %" />
+                  <Line type="monotone" dataKey="robustness" stroke="#e11d48" strokeWidth={2} name="Robustness %" />
+                </LineChart>
               </ResponsiveContainer>
+            </div>
+            <div className="mt-6 border-t border-slate-200 pt-5">
+              <h3 className="font-bold">DTEI Formula Weights</h3>
+              <div className="mt-4 h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={trustWeightRows}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis domain={[0, 40]} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#0f766e" name="Weight %" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </section>
@@ -148,14 +236,14 @@ export default function LandingPage() {
         <section className="bg-trust-ink py-12 text-white">
           <div className="mx-auto grid max-w-7xl gap-6 px-4 md:grid-cols-3">
             {[
-              ['Clinical AI Lead', 'The trust score and explanation stability views make model review faster.'],
-              ['Hospital Admin', 'Federated trust synchronization gives leadership a clean institutional picture.'],
-              ['Researcher', 'The adversarial and XAI dashboards are exactly the experiment surface we need.'],
-            ].map(([name, quote]) => (
-              <blockquote key={name} className="rounded border border-white/15 p-5">
-                <p className="leading-7 text-white/82">{quote}</p>
-                <footer className="mt-4 font-bold">{name}</footer>
-              </blockquote>
+              ['Disease records', `${displayDiseases.length} model workflows loaded with API-backed fallback coverage.`],
+              ['Trust weights', `${trustWeightRows.length} active trust formula weights loaded from backend config.`],
+              ['Contact pipeline', 'Messages are persisted in PostgreSQL with a tracked status.'],
+            ].map(([name, detail]) => (
+              <div key={name} className="rounded border border-white/15 p-5">
+                <p className="text-sm font-bold uppercase tracking-wide text-white/60">{name}</p>
+                <p className="mt-3 leading-7 text-white/82">{detail}</p>
+              </div>
             ))}
           </div>
         </section>
@@ -164,15 +252,13 @@ export default function LandingPage() {
           <div>
             <h2 className="text-3xl font-black">Contact</h2>
             <p className="mt-3 leading-7 text-slate-600">Coordinate hospital onboarding, research evaluation, or clinical pilot readiness.</p>
-            <Button className="mt-5" variant="outlined" startIcon={<DownloadIcon />}>
-              Download Research Brief
-            </Button>
           </div>
           <form onSubmit={handleContact} className="grid gap-4 rounded border border-slate-200 bg-white p-5 shadow-sm">
             <TextField name="name" label="Name" required />
             <TextField name="email" label="Email" type="email" required />
             <TextField name="message" label="Message" multiline minRows={4} required />
             <Button type="submit" variant="contained">Send</Button>
+            {contactError && <Alert severity="error">{contactError}</Alert>}
             {sent && <p className="text-sm font-semibold text-trust-teal">Message received.</p>}
           </form>
         </section>

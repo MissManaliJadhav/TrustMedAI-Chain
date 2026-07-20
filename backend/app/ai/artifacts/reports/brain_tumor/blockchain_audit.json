@@ -1,0 +1,10 @@
+{
+  "disease_key": "brain_tumor",
+  "model_artifact": "backend\\app\\ai\\artifacts\\brain_tumor_model.pkl",
+  "model_sha256": "30343f91acb66f96e79a3bb3055cb1e057dbad982e808dd7f9dfffab5a3a6b49",
+  "dataset_fingerprint": "109fbf64cc7bd7374c19b952f6f31d465a642538c6e243e8942552adcb4feff7",
+  "metrics_sha256": "4cc29619a1521230778d45a75647542a04d23a3c1c1f22048d5f2bfd1082f872",
+  "timestamp": "2026-07-18T15:39:46.071887+00:00",
+  "audit_type": "training_artifact_integrity",
+  "block_hash": "5032203992f18e0dfc218429401c720b2432d3fae88cc918ac92c89fe91751fa"
+}

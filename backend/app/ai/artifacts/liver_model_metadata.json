@@ -1,15 +1,19 @@
 {
-  "artifact_version": 2,
-  "trained_at": "2026-06-30T14:23:33.476413+00:00",
+  "artifact_version": 3,
+  "trained_at": "2026-07-18T14:51:11.414918+00:00",
   "modality": "tabular",
-  "selected_model": "extra_trees",
-  "decision_threshold": 0.5794133638964736,
-  "selection_metric": "0.45 balanced_accuracy + 0.35 weighted_f1 + 0.20 roc_auc",
+  "source": "kaggle_or_local_real_dataset",
+  "kaggle_slug": "uciml/indian-liver-patient-records",
+  "selected_model": "random_forest",
+  "architectures_evaluated": [
+    "random_forest",
+    "gradient_boosting",
+    "xgboost"
+  ],
   "class_labels": [
     "normal",
     "disease"
   ],
-  "positive_class": "disease",
   "input_schema": [
     {
       "name": "Age",
@@ -26,8 +30,6 @@
       "label": "Gender",
       "input_type": "category",
       "required": true,
-      "minimum": null,
-      "maximum": null,
       "default": "Male",
       "choices": [
         "Female",
@@ -40,7 +42,7 @@
       "input_type": "number",
       "required": true,
       "minimum": 0.4,
-      "maximum": 75.0,
+      "maximum": 4.425,
       "default": 1.0,
       "choices": null
     },
@@ -50,7 +52,7 @@
       "input_type": "number",
       "required": true,
       "minimum": 0.1,
-      "maximum": 18.3,
+      "maximum": 2.7,
       "default": 0.3,
       "choices": null
     },
@@ -60,7 +62,7 @@
       "input_type": "number",
       "required": true,
       "minimum": 75.0,
-      "maximum": 2110.0,
+      "maximum": 482.5,
       "default": 208.0,
       "choices": null
     },
@@ -70,7 +72,7 @@
       "input_type": "number",
       "required": true,
       "minimum": 10.0,
-      "maximum": 2000.0,
+      "maximum": 115.5,
       "default": 35.0,
       "choices": null
     },
@@ -80,7 +82,7 @@
       "input_type": "number",
       "required": true,
       "minimum": 10.0,
-      "maximum": 4929.0,
+      "maximum": 177.5,
       "default": 42.0,
       "choices": null
     },
@@ -89,8 +91,8 @@
       "label": "Total Protiens",
       "input_type": "number",
       "required": true,
-      "minimum": 2.8,
-      "maximum": 9.6,
+      "minimum": 3.9500000000000006,
+      "maximum": 9.15,
       "default": 6.6,
       "choices": null
     },
@@ -106,16 +108,17 @@
     },
     {
       "name": "Albumin_and_Globulin_Ratio",
-      "label": "Albumin and Globulin Ratio",
+      "label": "Albumin And Globulin Ratio",
       "input_type": "number",
       "required": true,
       "minimum": 0.3,
-      "maximum": 2.5,
+      "maximum": 1.7000000000000002,
       "default": 0.94,
       "choices": null
     }
   ],
   "data_quality": {
+    "source_file": "data\\raw\\liver\\indian_liver_patient.csv",
     "source_rows": 583,
     "rows_after_exact_deduplication": 570,
     "exact_duplicates_removed": 13,
@@ -124,77 +127,284 @@
       "0": 164,
       "1": 406
     },
-    "notes": [
-      "Exact duplicate rows are removed before splitting."
-    ]
+    "dataset_fingerprint": "b0deaf3f8b1923a7a8bca4c5c6bd93f0db74f571c40675b7043fe88f3f7cd4fc"
   },
   "validation_comparison": {
-    "logistic_regression": {
-      "accuracy": 0.7176470588235294,
-      "balanced_accuracy": 0.7780054644808743,
-      "precision": 0.823816355810617,
-      "recall": 0.7176470588235294,
-      "f1_score": 0.7314878892733564,
-      "auc": 0.7903005464480874,
-      "sensitivity": 0.639344262295082,
-      "specificity": 0.9166666666666666,
-      "decision_threshold": 0.525,
-      "selection_score": 0.7641833295516856
-    },
     "random_forest": {
-      "accuracy": 0.6705882352941176,
-      "balanced_accuracy": 0.7325819672131147,
-      "precision": 0.7913436946685029,
-      "recall": 0.6705882352941176,
-      "f1_score": 0.6861176470588235,
-      "auc": 0.760928961748634,
-      "sensitivity": 0.5901639344262295,
-      "specificity": 0.875,
-      "decision_threshold": 0.73,
-      "selection_score": 0.7219888540662167
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.7294117647058823,
+        "balanced_accuracy": 0.6724726775956285,
+        "precision": 0.7329019607843137,
+        "recall": 0.7294117647058823,
+        "f1_score": 0.7310547359439643,
+        "confusion_matrix": [
+          [
+            13,
+            11
+          ],
+          [
+            12,
+            49
+          ]
+        ],
+        "sensitivity": 0.8032786885245902,
+        "specificity": 0.5416666666666666,
+        "roc_auc": 0.7711748633879781,
+        "average_precision": 0.9027821006763863
+      },
+      "best_params": {
+        "classifier__min_samples_leaf": 4,
+        "classifier__n_estimators": 250
+      },
+      "cross_validation_score": 0.626846507977527
     },
-    "extra_trees": {
-      "accuracy": 0.7411764705882353,
-      "balanced_accuracy": 0.7817622950819672,
-      "precision": 0.8180392156862745,
-      "recall": 0.7411764705882353,
-      "f1_score": 0.7539955604883463,
-      "auc": 0.8046448087431693,
-      "sensitivity": 0.6885245901639344,
-      "specificity": 0.875,
-      "decision_threshold": 0.5794133638964736,
-      "selection_score": 0.7766204407064403
+    "gradient_boosting": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.7176470588235294,
+        "balanced_accuracy": 0.5758196721311475,
+        "precision": 0.6818694601128122,
+        "recall": 0.7176470588235294,
+        "f1_score": 0.6832309043020194,
+        "confusion_matrix": [
+          [
+            6,
+            18
+          ],
+          [
+            6,
+            55
+          ]
+        ],
+        "sensitivity": 0.9016393442622951,
+        "specificity": 0.25,
+        "roc_auc": 0.7288251366120219,
+        "average_precision": 0.8890063407242592
+      },
+      "best_params": {
+        "classifier__learning_rate": 0.08,
+        "classifier__n_estimators": 120
+      },
+      "cross_validation_score": 0.5694422909428508
     },
-    "neural_network": {
-      "accuracy": 0.6588235294117647,
-      "balanced_accuracy": 0.7496584699453552,
-      "precision": 0.8238754325259515,
-      "recall": 0.6588235294117647,
-      "f1_score": 0.6717523219814242,
-      "auc": 0.7281420765027322,
-      "sensitivity": 0.5409836065573771,
-      "specificity": 0.9583333333333334,
-      "decision_threshold": 0.6770089238589698,
-      "selection_score": 0.7180880394694549
+    "xgboost": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.7176470588235294,
+        "balanced_accuracy": 0.5884562841530054,
+        "precision": 0.6869925434962717,
+        "recall": 0.7176470588235294,
+        "f1_score": 0.6911905432029272,
+        "confusion_matrix": [
+          [
+            7,
+            17
+          ],
+          [
+            7,
+            54
+          ]
+        ],
+        "sensitivity": 0.8852459016393442,
+        "specificity": 0.2916666666666667,
+        "roc_auc": 0.6769125683060108,
+        "average_precision": 0.8462685877417584
+      },
+      "best_params": {
+        "mode": "direct_fit_due_sklearn_tag_compatibility"
+      },
+      "cross_validation_score": null
     }
   },
   "test_metrics": {
-    "accuracy": 0.6744186046511628,
-    "balanced_accuracy": 0.7350819672131148,
-    "precision": 0.7908118600844974,
-    "recall": 0.6744186046511628,
-    "f1_score": 0.6883462532299742,
-    "auc": 0.7245901639344262,
-    "sensitivity": 0.5901639344262295,
-    "specificity": 0.88,
+    "accuracy": 0.6627906976744186,
+    "balanced_accuracy": 0.5970491803278688,
+    "precision": 0.6667859272510436,
+    "recall": 0.6627906976744186,
+    "f1_score": 0.6647032443575162,
+    "confusion_matrix": [
+      [
+        11,
+        14
+      ],
+      [
+        15,
+        46
+      ]
+    ],
+    "sensitivity": 0.7540983606557377,
+    "specificity": 0.44,
+    "roc_auc": 0.7278688524590163,
+    "average_precision": 0.8888936639995271,
     "train_rows": 399.0,
     "validation_rows": 85.0,
     "test_rows": 86.0,
     "num_classes": 2.0
   },
-  "deployment_status": "ready_for_research",
+  "feature_importance": [
+    {
+      "feature": "Aspartate_Aminotransferase",
+      "importance": 0.057254
+    },
+    {
+      "feature": "Total_Bilirubin",
+      "importance": 0.051434
+    },
+    {
+      "feature": "Alkaline_Phosphotase",
+      "importance": 0.051352
+    },
+    {
+      "feature": "Albumin",
+      "importance": -0.030943
+    },
+    {
+      "feature": "Direct_Bilirubin",
+      "importance": 0.027787
+    },
+    {
+      "feature": "Alamine_Aminotransferase",
+      "importance": 0.027705
+    },
+    {
+      "feature": "Albumin_and_Globulin_Ratio",
+      "importance": -0.019221
+    },
+    {
+      "feature": "Total_Protiens",
+      "importance": -0.007254
+    },
+    {
+      "feature": "Age",
+      "importance": 0.006926
+    },
+    {
+      "feature": "Gender",
+      "importance": 0.005123
+    }
+  ],
+  "explainability": {
+    "feature_importance": [
+      {
+        "feature": "Aspartate_Aminotransferase",
+        "importance": 0.057254
+      },
+      {
+        "feature": "Total_Bilirubin",
+        "importance": 0.051434
+      },
+      {
+        "feature": "Alkaline_Phosphotase",
+        "importance": 0.051352
+      },
+      {
+        "feature": "Albumin",
+        "importance": -0.030943
+      },
+      {
+        "feature": "Direct_Bilirubin",
+        "importance": 0.027787
+      },
+      {
+        "feature": "Alamine_Aminotransferase",
+        "importance": 0.027705
+      },
+      {
+        "feature": "Albumin_and_Globulin_Ratio",
+        "importance": -0.019221
+      },
+      {
+        "feature": "Total_Protiens",
+        "importance": -0.007254
+      },
+      {
+        "feature": "Age",
+        "importance": 0.006926
+      },
+      {
+        "feature": "Gender",
+        "importance": 0.005123
+      }
+    ],
+    "shap": {
+      "available": true,
+      "mean_abs_value": 0.031451560919656195
+    },
+    "lime": {
+      "available": true,
+      "rules": [
+        [
+          "2 > 0.44",
+          0.11828787795010724
+        ],
+        [
+          "1 > 0.38",
+          0.10885790877833747
+        ],
+        [
+          "5 > 0.41",
+          0.07754046040929082
+        ],
+        [
+          "4 > 0.37",
+          0.0718538913348358
+        ],
+        [
+          "-0.39 < 3 <= 0.42",
+          0.06756678487619518
+        ],
+        [
+          "8 > 0.53",
+          -0.046813890722838494
+        ],
+        [
+          "7 > 0.83",
+          -0.04517901020722084
+        ],
+        [
+          "6 > 0.66",
+          0.029839706880796617
+        ],
+        [
+          "9 <= -0.09",
+          0.010683577059702019
+        ],
+        [
+          "10 <= 0.00",
+          0.008565760767627157
+        ]
+      ]
+    }
+  },
+  "adversarial_robustness": {
+    "gaussian_noise_accuracy": 0.627906976744186,
+    "data_poisoning_accuracy": 0.6627906976744186,
+    "before_attack_accuracy": 0.6627906976744186,
+    "after_attack_accuracy": 0.6453488372093024,
+    "robustness_score": 0.9737,
+    "poisoned_label_fraction": 0.1
+  },
+  "aecs": 1.0,
+  "dtei": 83.64,
+  "blockchain_audit": {
+    "disease_key": "liver",
+    "model_artifact": "backend\\app\\ai\\artifacts\\liver_model.pkl",
+    "model_sha256": "72291dcf507cb69ca043a772064627ec85e73d921289abb03759ee52680ef017",
+    "dataset_fingerprint": "b0deaf3f8b1923a7a8bca4c5c6bd93f0db74f571c40675b7043fe88f3f7cd4fc",
+    "metrics_sha256": "e36b6359057f30b20b0eea7c667665350759516af11c628bb4172ba6e6162316",
+    "timestamp": "2026-07-18T14:51:11.334174+00:00",
+    "audit_type": "training_artifact_integrity",
+    "block_hash": "e21f7cd01507b808d5cd22e0bd0e571892f028b5cb2cf44ec85cd28cec86c98a",
+    "audit_file": "backend\\app\\ai\\artifacts\\reports\\liver\\blockchain_audit.json"
+  },
+  "report_artifacts": {
+    "curves_json": "backend\\app\\ai\\artifacts\\reports\\liver\\curves.json",
+    "explanations_json": "backend\\app\\ai\\artifacts\\reports\\liver\\explanations.json"
+  },
+  "deployment_status": "blocked_low_quality",
   "limitations": [
     "Research decision-support only; not validated or approved as a medical device.",
-    "Performance on this held-out source dataset does not establish clinical generalization."
+    "Real accuracy is calculated only from the held-out test split, not synthetic or demo rows."
   ]
 }

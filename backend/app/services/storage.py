@@ -3,8 +3,13 @@ from dataclasses import dataclass
 from datetime import timedelta
 from io import BytesIO
 from pathlib import Path, PurePosixPath
+from urllib.parse import urlparse
+
+import urllib3
+from urllib3.exceptions import ConnectTimeoutError, NewConnectionError, MaxRetryError
 
 from minio import Minio
+from minio.error import MinioException
 
 from app.core.config import settings
 
@@ -18,18 +23,50 @@ class StoredObject:
 
 
 def minio_client() -> Minio:
+    """Create MinIO client with timeout configuration."""
+    try:
+        endpoint_parsed = urlparse(f"http://{settings.minio_endpoint}")
+        endpoint = endpoint_parsed.netloc or settings.minio_endpoint
+    except Exception:
+        endpoint = settings.minio_endpoint
+    
+    timeout = urllib3.Timeout(
+        connect=settings.minio_timeout_seconds,
+        read=settings.minio_timeout_seconds,
+    )
+    http_client = urllib3.PoolManager(
+        timeout=timeout,
+        retries=urllib3.Retry(
+            total=settings.minio_retry_total,
+            connect=settings.minio_retry_total,
+            read=settings.minio_retry_total,
+            redirect=0,
+            status=0,
+        ),
+    )
+
     return Minio(
-        settings.minio_endpoint,
+        endpoint,
         access_key=settings.minio_access_key,
         secret_key=settings.minio_secret_key,
         secure=settings.minio_secure,
+        http_client=http_client,
     )
 
 
 def ensure_bucket(client: Minio | None = None) -> Minio:
+    """Ensure MinIO bucket exists. Raises exception if connection fails."""
     client = client or minio_client()
-    if not client.bucket_exists(settings.minio_bucket):
-        client.make_bucket(settings.minio_bucket)
+    try:
+        if not client.bucket_exists(settings.minio_bucket):
+            client.make_bucket(settings.minio_bucket)
+    except (ConnectTimeoutError, NewConnectionError, MaxRetryError, MinioException) as e:
+        logger.warning(
+            "Failed to connect to MinIO at %s after timeout: %s. Falling back to local storage.",
+            settings.minio_endpoint,
+            str(e),
+        )
+        raise
     return client
 
 
@@ -76,10 +113,23 @@ def store_object(object_name: str, content: bytes, content_type: str) -> StoredO
     if backend in {"auto", "minio"}:
         try:
             return _store_minio(object_name, content, content_type)
-        except Exception:
+        except (ConnectTimeoutError, NewConnectionError, MaxRetryError, MinioException) as e:
             if backend == "minio":
                 raise
-            logger.warning("MinIO unavailable; storing %s in local artifact storage", object_name)
+            logger.debug(
+                "MinIO at %s unavailable (%s); falling back to local storage for %s",
+                settings.minio_endpoint,
+                type(e).__name__,
+                object_name,
+            )
+        except Exception as e:
+            if backend == "minio":
+                raise
+            logger.warning(
+                "Error accessing MinIO at %s: %s; falling back to local storage",
+                settings.minio_endpoint,
+                str(e),
+            )
     return _store_local(object_name, content)
 
 
@@ -96,19 +146,44 @@ def read_object(object_name: str) -> bytes:
             raise ValueError("Artifact path escapes the configured storage directory")
         return target.read_bytes()
 
+    # Try to read from MinIO
     object_name = object_name.removeprefix("minio:")
-    client = ensure_bucket()
-    response = client.get_object(settings.minio_bucket, object_name)
     try:
-        return response.read()
-    finally:
-        response.close()
-        response.release_conn()
+        client = ensure_bucket()
+        response = client.get_object(settings.minio_bucket, object_name)
+        try:
+            return response.read()
+        finally:
+            response.close()
+            response.release_conn()
+    except (ConnectTimeoutError, NewConnectionError, MaxRetryError, MinioException) as e:
+        logger.warning(
+            "Failed to read %s from MinIO at %s (%s). Object may be stored locally or unavailable.",
+            object_name,
+            settings.minio_endpoint,
+            type(e).__name__,
+        )
+        raise
+    except Exception as e:
+        logger.error("Error reading %s from MinIO: %s", object_name, str(e))
+        raise
 
 
 def presigned_download_url(object_name: str, expires: timedelta = timedelta(hours=1)) -> str | None:
     if object_name.startswith("local:"):
         return None
     object_name = object_name.removeprefix("minio:")
-    client = ensure_bucket()
-    return client.presigned_get_object(settings.minio_bucket, object_name, expires=expires)
+    try:
+        client = ensure_bucket()
+        return client.presigned_get_object(settings.minio_bucket, object_name, expires=expires)
+    except (ConnectTimeoutError, NewConnectionError, MaxRetryError, MinioException) as e:
+        logger.warning(
+            "Failed to generate presigned URL for %s from MinIO at %s (%s)",
+            object_name,
+            settings.minio_endpoint,
+            type(e).__name__,
+        )
+        return None
+    except Exception as e:
+        logger.error("Error generating presigned URL for %s: %s", object_name, str(e))
+        return None

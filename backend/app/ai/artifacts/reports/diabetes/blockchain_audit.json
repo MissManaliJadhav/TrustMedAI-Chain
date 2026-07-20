@@ -1,0 +1,10 @@
+{
+  "disease_key": "diabetes",
+  "model_artifact": "backend\\app\\ai\\artifacts\\diabetes_model.pkl",
+  "model_sha256": "e823efd153fc246864a59cb09ef5c894c97fc0e96eff36b51f3eace81760992a",
+  "dataset_fingerprint": "698c203a14aa31941d2251175330c9199f3ccdb31597abbba2a3e35416257a72",
+  "metrics_sha256": "0e8093c29857ec6ac9585c0fb6c96de6233ab057522d6b03ebe154dc2ffabfb1",
+  "timestamp": "2026-07-18T14:12:22.680225+00:00",
+  "audit_type": "training_artifact_integrity",
+  "block_hash": "2204d56aa71c7297db0998076531a9da0bfde96223f8e1db148f8804e8e14364"
+}

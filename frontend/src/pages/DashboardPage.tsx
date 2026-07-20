@@ -85,8 +85,8 @@ export default function DashboardPage() {
   const [submitting, setSubmitting] = useState(false);
   const [verification, setVerification] = useState<Record<string, any> | null>(null);
 
-  const canDiagnose = role === 'DOCTOR' || role === 'SUPER_ADMIN';
-  const canViewBlockchain = role === 'SUPER_ADMIN' || role === 'HOSPITAL_ADMIN' || role === 'DOCTOR';
+  const canDiagnose = role === 'DOCTOR' || role === 'PATIENT';
+  const canViewBlockchain = role === 'DOCTOR';
 
   useEffect(() => {
     api.get<Disease[]>('/datasets/diseases').then((res) => {
@@ -154,7 +154,7 @@ export default function DashboardPage() {
         if (patientId) upload.append('patient_id', String(patientId));
         upload.append('image', imageFile);
         if (supportingPdf) upload.append('supporting_pdf', supportingPdf);
-        response = await api.post('/predictions/image', upload);
+        response = await api.post('/predictions/image', upload, { timeout: 120000 });
       } else {
         const features = Object.fromEntries(
           inputSpec.features.map((feature) => [
@@ -172,7 +172,7 @@ export default function DashboardPage() {
         upload.append('features_json', JSON.stringify(features));
         if (patientId) upload.append('patient_id', String(patientId));
         if (supportingPdf) upload.append('supporting_pdf', supportingPdf);
-        response = await api.post('/predictions/tabular', upload);
+        response = await api.post('/predictions/tabular', upload, { timeout: 120000 });
       }
       setResult(response.data);
       setVerification(null);
@@ -225,13 +225,15 @@ export default function DashboardPage() {
             <p className="mt-1 text-slate-600">Active role: {role ?? 'UNKNOWN'}</p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="contained"
-              startIcon={<MedicalServicesIcon />}
-              onClick={() => navigate('/diagnosis')}
-            >
-              Disease Pages
-            </Button>
+            {canDiagnose && (
+              <Button
+                variant="contained"
+                startIcon={<MedicalServicesIcon />}
+                onClick={() => navigate('/diagnosis')}
+              >
+                Disease Pages
+              </Button>
+            )}
             <Button variant="outlined" startIcon={<ShieldIcon />}>Trust</Button>
             <Button variant="outlined" startIcon={<AccountTreeIcon />}>Federated</Button>
             <Button
@@ -259,7 +261,7 @@ export default function DashboardPage() {
               <h2 className="text-xl font-black">Diagnosis</h2>
             </div>
             {!canDiagnose && (
-              <Alert severity="info">Only doctors and super admins can run model diagnosis. Patients may view their own results below.</Alert>
+              <Alert severity="info">Only doctors and patients can run model diagnosis. Administrators manage the system and cannot run predictions.</Alert>
             )}
             <div className="border-t border-slate-200 pt-3">
               <h3 className="font-bold">Patient information</h3>
@@ -267,7 +269,7 @@ export default function DashboardPage() {
             </div>
             <TextField name="patient_name" label="Patient full name" required disabled={!canDiagnose} />
             <TextField name="patient_email" label="Patient email" type="email" required disabled={!canDiagnose} />
-            {(role === 'DOCTOR' || role === 'SUPER_ADMIN') && (
+            {role === 'DOCTOR' && (
               <TextField name="patient_id" label="Patient user ID (optional)" helperText="Use this when the patient already has an account." />
             )}
             <div className="border-t border-slate-200 pt-3">

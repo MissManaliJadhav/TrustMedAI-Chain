@@ -292,6 +292,11 @@ For production environments:
 
 ## Documentation
 
+For one complete and current guide covering installation, Docker and native
+startup, application pages, disease workflows, chatbot, reports, blockchain,
+testing, and troubleshooting, see
+[`docs/COMPLETE_RUNBOOK.md`](docs/COMPLETE_RUNBOOK.md).
+
 * API Documentation
 * System Architecture
 * Methodology

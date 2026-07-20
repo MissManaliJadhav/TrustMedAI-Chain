@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
@@ -7,6 +7,7 @@ from app.db.models import DiagnosisArtifact, DiagnosisRecord, User
 from app.db.session import get_db
 from app.schemas import DiagnosisArtifactResponse
 from app.services.access import can_access_diagnosis
+from app.services.audit import record_audit_event
 from app.services.reports import build_pdf_report
 from app.services.storage import read_object
 
@@ -36,6 +37,7 @@ def list_artifacts(
 def download_artifact(
     diagnosis_id: str,
     artifact_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("reports:download")),
 ) -> Response:
@@ -51,6 +53,16 @@ def download_artifact(
     if not artifact:
         raise HTTPException(status_code=404, detail="Artifact not found")
     content = read_object(artifact.object_path)
+    record_audit_event(
+        db,
+        actor=user,
+        action="report.downloaded",
+        resource_type="diagnosis",
+        resource_id=record.id,
+        metadata={"artifact_id": artifact.id, "kind": artifact.kind},
+        request=request,
+    )
+    db.commit()
     return Response(
         content=content,
         media_type=artifact.content_type,
@@ -61,11 +73,36 @@ def download_artifact(
 @router.get("/{diagnosis_id}.pdf")
 def report(
     diagnosis_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("reports:download")),
 ) -> Response:
     record = _authorized_record(db, user, diagnosis_id)
-    pdf = read_object(record.report_object_path) if record.report_object_path else build_pdf_report(record)
+    patient_user = None
+    if record.patient_id:
+        patient_user = db.query(User).filter(User.id == record.patient_id).first()
+    if patient_user is None and record.patient_email:
+        patient_user = db.query(User).filter(User.email == record.patient_email.lower()).first()
+    pdf = build_pdf_report(record, patient_user)
+    record_audit_event(
+        db,
+        actor=user,
+        action="report.generated",
+        resource_type="diagnosis",
+        resource_id=record.id,
+        metadata={"format": "pdf"},
+        request=request,
+    )
+    record_audit_event(
+        db,
+        actor=user,
+        action="report.downloaded",
+        resource_type="diagnosis",
+        resource_id=record.id,
+        metadata={"format": "pdf"},
+        request=request,
+    )
+    db.commit()
     return Response(
         content=pdf,
         media_type="application/pdf",

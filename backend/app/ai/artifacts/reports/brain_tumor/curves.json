@@ -1,0 +1,9 @@
+{
+  "class_labels": [
+    "no_tumor",
+    "glioma",
+    "meningioma",
+    "pituitary"
+  ],
+  "note": "ROC/PR plotting for multiclass is stored in metrics via weighted ROC-AUC."
+}

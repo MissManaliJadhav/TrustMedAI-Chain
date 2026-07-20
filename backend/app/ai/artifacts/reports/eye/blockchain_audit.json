@@ -1,0 +1,10 @@
+{
+  "disease_key": "eye",
+  "model_artifact": "backend\\app\\ai\\artifacts\\eye_model.pkl",
+  "model_sha256": "910bac116243a20e11edc77e09b78887039efd7c0a7c53403afad6b949be4e6d",
+  "dataset_fingerprint": "0bf1f4b4d82e8a9d07dba6dc3aff0552c76ee9a018a6d620d3956690af8a8a4d",
+  "metrics_sha256": "fd1f36786558e518b1da9f7cb315a1e0f62d4943e6ea726ef3f2944ef3980154",
+  "timestamp": "2026-07-18T15:25:37.559733+00:00",
+  "audit_type": "training_artifact_integrity",
+  "block_hash": "0d89284fbde521dcdc185a062bc6a68022795d8ab119175d8a82c7adcf8fddeb"
+}

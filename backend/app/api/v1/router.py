@@ -1,11 +1,14 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, blockchain, contact, datasets, federated, predictions, reports, trust, chatbot
+from app.api.v1 import admin, auth, blockchain, contact, datasets, doctors, federated, patients, predictions, reports, trust, chatbot
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
+api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(datasets.router, prefix="/datasets", tags=["datasets"])
 api_router.include_router(predictions.router, prefix="/predictions", tags=["prediction"])
+api_router.include_router(patients.router, prefix="/patients", tags=["patients"])
+api_router.include_router(doctors.router, prefix="/doctors", tags=["doctors"])
 api_router.include_router(trust.router, prefix="/trust", tags=["trust"])
 api_router.include_router(blockchain.router, prefix="/blockchain", tags=["blockchain"])
 api_router.include_router(federated.router, prefix="/federated", tags=["federated-learning"])

@@ -1,0 +1,1600 @@
+{
+  "generated_at": "2026-07-18T15:40:58.251441+00:00",
+  "datasets": {
+    "brain_tumor": {
+      "status": "ready_for_research",
+      "modality": "image",
+      "selected_model": "extra_trees",
+      "trained_at": "2026-07-18T15:39:46.162575+00:00",
+      "metrics": {
+        "accuracy": 0.8857142857142857,
+        "balanced_accuracy": 0.8857142857142857,
+        "precision": 0.8877416387627951,
+        "recall": 0.8857142857142857,
+        "f1_score": 0.8845484713237768,
+        "confusion_matrix": [
+          [
+            101,
+            2,
+            1,
+            1
+          ],
+          [
+            0,
+            90,
+            9,
+            6
+          ],
+          [
+            7,
+            3,
+            81,
+            14
+          ],
+          [
+            0,
+            3,
+            2,
+            100
+          ]
+        ],
+        "roc_auc": 0.9818027210884355,
+        "train_rows": 1960.0,
+        "validation_rows": 420.0,
+        "test_rows": 420.0,
+        "num_classes": 4.0
+      },
+      "dtei": 83.12,
+      "aecs": 0.7,
+      "adversarial_robustness": {
+        "before_attack_accuracy": 0.8857142857142857,
+        "gaussian_noise_accuracy": 0.53125,
+        "brightness_shift_accuracy": 0.9125,
+        "fgsm_accuracy": null,
+        "pgd_accuracy": null,
+        "after_attack_accuracy": 0.721875,
+        "robustness_score": 0.815,
+        "explanation_stability": 0.7,
+        "note": "FGSM/PGD require a differentiable deep-learning model; Gaussian and brightness attacks were evaluated for this OpenCV/sklearn image artifact."
+      },
+      "blockchain_audit": {
+        "disease_key": "brain_tumor",
+        "model_artifact": "backend\\app\\ai\\artifacts\\brain_tumor_model.pkl",
+        "model_sha256": "30343f91acb66f96e79a3bb3055cb1e057dbad982e808dd7f9dfffab5a3a6b49",
+        "dataset_fingerprint": "109fbf64cc7bd7374c19b952f6f31d465a642538c6e243e8942552adcb4feff7",
+        "metrics_sha256": "4cc29619a1521230778d45a75647542a04d23a3c1c1f22048d5f2bfd1082f872",
+        "timestamp": "2026-07-18T15:39:46.071887+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "5032203992f18e0dfc218429401c720b2432d3fae88cc918ac92c89fe91751fa",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\brain_tumor\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature_index": 476,
+            "importance": 0.00600098
+          },
+          {
+            "feature_index": 579,
+            "importance": 0.00569115
+          },
+          {
+            "feature_index": 1189,
+            "importance": 0.00526988
+          },
+          {
+            "feature_index": 540,
+            "importance": 0.00487358
+          },
+          {
+            "feature_index": 1026,
+            "importance": 0.00443151
+          },
+          {
+            "feature_index": 355,
+            "importance": 0.0039811
+          },
+          {
+            "feature_index": 419,
+            "importance": 0.00391193
+          },
+          {
+            "feature_index": 515,
+            "importance": 0.00386633
+          },
+          {
+            "feature_index": 668,
+            "importance": 0.00384054
+          },
+          {
+            "feature_index": 572,
+            "importance": 0.0037855
+          },
+          {
+            "feature_index": 412,
+            "importance": 0.00377579
+          },
+          {
+            "feature_index": 547,
+            "importance": 0.00376307
+          },
+          {
+            "feature_index": 444,
+            "importance": 0.00368534
+          },
+          {
+            "feature_index": 643,
+            "importance": 0.00358721
+          },
+          {
+            "feature_index": 1198,
+            "importance": 0.00349322
+          },
+          {
+            "feature_index": 451,
+            "importance": 0.00348197
+          },
+          {
+            "feature_index": 965,
+            "importance": 0.00345479
+          },
+          {
+            "feature_index": 380,
+            "importance": 0.00344987
+          },
+          {
+            "feature_index": 732,
+            "importance": 0.00341413
+          },
+          {
+            "feature_index": 636,
+            "importance": 0.0033848
+          },
+          {
+            "feature_index": 739,
+            "importance": 0.0033287
+          },
+          {
+            "feature_index": 675,
+            "importance": 0.00325677
+          },
+          {
+            "feature_index": 1363,
+            "importance": 0.00317363
+          },
+          {
+            "feature_index": 700,
+            "importance": 0.00306313
+          },
+          {
+            "feature_index": 1390,
+            "importance": 0.00287611
+          }
+        ],
+        "grad_cam": {
+          "available": false,
+          "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+        },
+        "integrated_gradients": {
+          "available": false,
+          "reason": "Integrated Gradients requires a differentiable deep-learning model."
+        }
+      },
+      "data_quality": {
+        "source_rows": 2800,
+        "feature_count": 1732,
+        "class_distribution": {
+          "no_tumor": 700,
+          "glioma": 700,
+          "meningioma": 700,
+          "pituitary": 700
+        },
+        "dataset_fingerprint": "109fbf64cc7bd7374c19b952f6f31d465a642538c6e243e8942552adcb4feff7"
+      }
+    },
+    "pneumonia": {
+      "status": "ready_for_research",
+      "modality": "image",
+      "selected_model": "extra_trees",
+      "trained_at": "2026-07-18T15:35:47.863237+00:00",
+      "metrics": {
+        "accuracy": 0.9142857142857143,
+        "balanced_accuracy": 0.9142857142857143,
+        "precision": 0.9142857142857143,
+        "recall": 0.9142857142857143,
+        "f1_score": 0.9142857142857143,
+        "confusion_matrix": [
+          [
+            96,
+            9
+          ],
+          [
+            9,
+            96
+          ]
+        ],
+        "sensitivity": 0.9142857142857143,
+        "specificity": 0.9142857142857143,
+        "roc_auc": 0.9765532879818595,
+        "average_precision": 0.9797975126418242,
+        "train_rows": 980.0,
+        "validation_rows": 210.0,
+        "test_rows": 210.0,
+        "num_classes": 2.0
+      },
+      "dtei": 87.5,
+      "aecs": 0.7,
+      "adversarial_robustness": {
+        "before_attack_accuracy": 0.9142857142857143,
+        "gaussian_noise_accuracy": 0.89375,
+        "brightness_shift_accuracy": 0.91875,
+        "fgsm_accuracy": null,
+        "pgd_accuracy": null,
+        "after_attack_accuracy": 0.90625,
+        "robustness_score": 0.9912,
+        "explanation_stability": 0.7,
+        "note": "FGSM/PGD require a differentiable deep-learning model; Gaussian and brightness attacks were evaluated for this OpenCV/sklearn image artifact."
+      },
+      "blockchain_audit": {
+        "disease_key": "pneumonia",
+        "model_artifact": "backend\\app\\ai\\artifacts\\pneumonia_model.pkl",
+        "model_sha256": "16026007eddb8118bc3502d343dc204bffc2e2b942c0c96e14e9d3bafc353a1a",
+        "dataset_fingerprint": "e1ad59f53b3dddd6bcc1c4513fcf4e2b2138806adbbb40540ff8f60265f43efe",
+        "metrics_sha256": "c390be42c3fed91809cd29b6223dbf2323dfe86126dab9a1750f9b8bd826df76",
+        "timestamp": "2026-07-18T15:35:47.779232+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "b689fb094ed972c076bd6162034efb9c697892e31dc8dc1194c7dd331fb80ab9",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\pneumonia\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature_index": 502,
+            "importance": 0.01135785
+          },
+          {
+            "feature_index": 1724,
+            "importance": 0.01098607
+          },
+          {
+            "feature_index": 684,
+            "importance": 0.00849368
+          },
+          {
+            "feature_index": 404,
+            "importance": 0.0082648
+          },
+          {
+            "feature_index": 683,
+            "importance": 0.00816371
+          },
+          {
+            "feature_index": 567,
+            "importance": 0.00786945
+          },
+          {
+            "feature_index": 716,
+            "importance": 0.0077872
+          },
+          {
+            "feature_index": 470,
+            "importance": 0.00753328
+          },
+          {
+            "feature_index": 405,
+            "importance": 0.00743352
+          },
+          {
+            "feature_index": 682,
+            "importance": 0.00739806
+          },
+          {
+            "feature_index": 664,
+            "importance": 0.00734661
+          },
+          {
+            "feature_index": 715,
+            "importance": 0.00697098
+          },
+          {
+            "feature_index": 1189,
+            "importance": 0.00687828
+          },
+          {
+            "feature_index": 651,
+            "importance": 0.00667796
+          },
+          {
+            "feature_index": 372,
+            "importance": 0.00651793
+          },
+          {
+            "feature_index": 373,
+            "importance": 0.00602068
+          },
+          {
+            "feature_index": 755,
+            "importance": 0.0059967
+          },
+          {
+            "feature_index": 665,
+            "importance": 0.00593597
+          },
+          {
+            "feature_index": 599,
+            "importance": 0.0058035
+          },
+          {
+            "feature_index": 761,
+            "importance": 0.00562101
+          },
+          {
+            "feature_index": 438,
+            "importance": 0.00561266
+          },
+          {
+            "feature_index": 1162,
+            "importance": 0.00560173
+          },
+          {
+            "feature_index": 535,
+            "importance": 0.00557561
+          },
+          {
+            "feature_index": 691,
+            "importance": 0.00553951
+          },
+          {
+            "feature_index": 600,
+            "importance": 0.00546901
+          }
+        ],
+        "grad_cam": {
+          "available": false,
+          "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+        },
+        "integrated_gradients": {
+          "available": false,
+          "reason": "Integrated Gradients requires a differentiable deep-learning model."
+        }
+      },
+      "data_quality": {
+        "source_rows": 1400,
+        "feature_count": 1732,
+        "class_distribution": {
+          "normal": 700,
+          "pneumonia": 700
+        },
+        "dataset_fingerprint": "e1ad59f53b3dddd6bcc1c4513fcf4e2b2138806adbbb40540ff8f60265f43efe"
+      }
+    },
+    "tuberculosis": {
+      "status": "ready_for_research",
+      "modality": "image",
+      "selected_model": "sgd_logistic",
+      "trained_at": "2026-07-18T15:28:57.249935+00:00",
+      "metrics": {
+        "accuracy": 0.9714285714285714,
+        "balanced_accuracy": 0.9714285714285714,
+        "precision": 0.9721137251339812,
+        "recall": 0.9714285714285714,
+        "f1_score": 0.9714182016150985,
+        "confusion_matrix": [
+          [
+            100,
+            5
+          ],
+          [
+            1,
+            104
+          ]
+        ],
+        "sensitivity": 0.9904761904761905,
+        "specificity": 0.9523809523809523,
+        "roc_auc": 0.9824036281179138,
+        "average_precision": 0.9689528109147936,
+        "train_rows": 980.0,
+        "validation_rows": 210.0,
+        "test_rows": 210.0,
+        "num_classes": 2.0
+      },
+      "dtei": 83.87,
+      "aecs": 0.7,
+      "adversarial_robustness": {
+        "before_attack_accuracy": 0.9714285714285714,
+        "gaussian_noise_accuracy": 0.46875,
+        "brightness_shift_accuracy": 0.9375,
+        "fgsm_accuracy": null,
+        "pgd_accuracy": null,
+        "after_attack_accuracy": 0.703125,
+        "robustness_score": 0.7238,
+        "explanation_stability": 0.7,
+        "note": "FGSM/PGD require a differentiable deep-learning model; Gaussian and brightness attacks were evaluated for this OpenCV/sklearn image artifact."
+      },
+      "blockchain_audit": {
+        "disease_key": "tuberculosis",
+        "model_artifact": "backend\\app\\ai\\artifacts\\tuberculosis_model.pkl",
+        "model_sha256": "30dc849e70955b41a6d7590c6eba45c230253d53522bbe0523a7c4af74fbde27",
+        "dataset_fingerprint": "1f4e76dcab2c9f34eae1c2e3129228b6b28a4e89097d26e50e536baec5b66428",
+        "metrics_sha256": "8222d9c219803018f18bed17773bd5b98c6eb6fa0ed754a154406b2b9ca83f00",
+        "timestamp": "2026-07-18T15:28:57.158279+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "f10c4f6a6c1064aaa303c5021e41d4c2f96dc0151499ab474a0308d84c80ab16",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\tuberculosis\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature_index": 1027,
+            "importance": 10.86261368
+          },
+          {
+            "feature_index": 1025,
+            "importance": 7.15821505
+          },
+          {
+            "feature_index": 1024,
+            "importance": 6.60545349
+          },
+          {
+            "feature_index": 1271,
+            "importance": 5.89814663
+          },
+          {
+            "feature_index": 1674,
+            "importance": 5.30593061
+          },
+          {
+            "feature_index": 1094,
+            "importance": 5.17982244
+          },
+          {
+            "feature_index": 1265,
+            "importance": 4.82752371
+          },
+          {
+            "feature_index": 1095,
+            "importance": 4.76804256
+          },
+          {
+            "feature_index": 1613,
+            "importance": 4.74206352
+          },
+          {
+            "feature_index": 1174,
+            "importance": 4.71180725
+          },
+          {
+            "feature_index": 1647,
+            "importance": 4.60099649
+          },
+          {
+            "feature_index": 1238,
+            "importance": 4.37935066
+          },
+          {
+            "feature_index": 1228,
+            "importance": 4.36192226
+          },
+          {
+            "feature_index": 1710,
+            "importance": 4.36180305
+          },
+          {
+            "feature_index": 1160,
+            "importance": 4.35858727
+          },
+          {
+            "feature_index": 1688,
+            "importance": 4.32374239
+          },
+          {
+            "feature_index": 1201,
+            "importance": 4.25118876
+          },
+          {
+            "feature_index": 1690,
+            "importance": 4.17132711
+          },
+          {
+            "feature_index": 1729,
+            "importance": 4.1572032
+          },
+          {
+            "feature_index": 1300,
+            "importance": 4.12149954
+          },
+          {
+            "feature_index": 1641,
+            "importance": 4.04296398
+          },
+          {
+            "feature_index": 1640,
+            "importance": 3.74087429
+          },
+          {
+            "feature_index": 1169,
+            "importance": 3.73338509
+          },
+          {
+            "feature_index": 1097,
+            "importance": 3.71725368
+          },
+          {
+            "feature_index": 1093,
+            "importance": 3.68996358
+          }
+        ],
+        "grad_cam": {
+          "available": false,
+          "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+        },
+        "integrated_gradients": {
+          "available": false,
+          "reason": "Integrated Gradients requires a differentiable deep-learning model."
+        }
+      },
+      "data_quality": {
+        "source_rows": 1400,
+        "feature_count": 1732,
+        "class_distribution": {
+          "normal": 700,
+          "tuberculosis": 700
+        },
+        "dataset_fingerprint": "1f4e76dcab2c9f34eae1c2e3129228b6b28a4e89097d26e50e536baec5b66428"
+      }
+    },
+    "diabetes": {
+      "status": "ready_for_research",
+      "modality": "tabular",
+      "selected_model": "xgboost",
+      "trained_at": "2026-07-18T14:12:22.691231+00:00",
+      "metrics": {
+        "accuracy": 0.7327586206896551,
+        "balanced_accuracy": 0.6882926829268292,
+        "precision": 0.7254427843467076,
+        "recall": 0.7327586206896551,
+        "f1_score": 0.7262449666886303,
+        "confusion_matrix": [
+          [
+            63,
+            12
+          ],
+          [
+            19,
+            22
+          ]
+        ],
+        "sensitivity": 0.5365853658536586,
+        "specificity": 0.84,
+        "roc_auc": 0.7804878048780488,
+        "average_precision": 0.6815062621764065,
+        "train_rows": 537.0,
+        "validation_rows": 115.0,
+        "test_rows": 116.0,
+        "num_classes": 2.0
+      },
+      "dtei": 86.9,
+      "aecs": 1.0,
+      "adversarial_robustness": {
+        "gaussian_noise_accuracy": 0.7672413793103449,
+        "data_poisoning_accuracy": 0.7155172413793104,
+        "before_attack_accuracy": 0.7327586206896551,
+        "after_attack_accuracy": 0.7413793103448276,
+        "robustness_score": 1.0,
+        "poisoned_label_fraction": 0.1
+      },
+      "blockchain_audit": {
+        "disease_key": "diabetes",
+        "model_artifact": "backend\\app\\ai\\artifacts\\diabetes_model.pkl",
+        "model_sha256": "e823efd153fc246864a59cb09ef5c894c97fc0e96eff36b51f3eace81760992a",
+        "dataset_fingerprint": "698c203a14aa31941d2251175330c9199f3ccdb31597abbba2a3e35416257a72",
+        "metrics_sha256": "0e8093c29857ec6ac9585c0fb6c96de6233ab057522d6b03ebe154dc2ffabfb1",
+        "timestamp": "2026-07-18T14:12:22.680225+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "2204d56aa71c7297db0998076531a9da0bfde96223f8e1db148f8804e8e14364",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\diabetes\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature": "Glucose",
+            "importance": 0.087337
+          },
+          {
+            "feature": "BMI",
+            "importance": 0.04252
+          },
+          {
+            "feature": "Pregnancies",
+            "importance": 0.034533
+          },
+          {
+            "feature": "Insulin",
+            "importance": 0.017297
+          },
+          {
+            "feature": "DiabetesPedigreeFunction",
+            "importance": 0.009533
+          },
+          {
+            "feature": "SkinThickness",
+            "importance": -0.005691
+          },
+          {
+            "feature": "Age",
+            "importance": 0.004533
+          },
+          {
+            "feature": "BloodPressure",
+            "importance": -0.003069
+          }
+        ],
+        "shap": {
+          "available": true,
+          "mean_abs_value": 0.46586740802394044
+        },
+        "lime": {
+          "available": true,
+          "rules": [
+            [
+              "5 <= -0.72",
+              -0.1821113332316037
+            ],
+            [
+              "-0.75 < 1 <= -0.15",
+              -0.1429543139984597
+            ],
+            [
+              "6 <= -0.76",
+              -0.09804793843951465
+            ],
+            [
+              "7 <= -0.82",
+              -0.0906848625572756
+            ],
+            [
+              "8 <= -0.07",
+              -0.06086307767896658
+            ],
+            [
+              "-0.20 < 4 <= -0.14",
+              0.0512865849539346
+            ],
+            [
+              "9 <= -0.21",
+              -0.03112810391283838
+            ],
+            [
+              "-0.70 < 2 <= -0.02",
+              0.024781018606410396
+            ],
+            [
+              "12 <= -0.12",
+              -0.021488029677578655
+            ],
+            [
+              "0 <= -0.87",
+              -0.015844855243983047
+            ]
+          ]
+        }
+      },
+      "data_quality": {
+        "source_file": "data\\raw\\diabetes\\diabetes.csv",
+        "source_rows": 768,
+        "rows_after_exact_deduplication": 768,
+        "exact_duplicates_removed": 0,
+        "feature_count": 8,
+        "class_distribution": {
+          "0": 500,
+          "1": 268
+        },
+        "dataset_fingerprint": "698c203a14aa31941d2251175330c9199f3ccdb31597abbba2a3e35416257a72"
+      }
+    },
+    "heart": {
+      "status": "ready_for_research",
+      "modality": "tabular",
+      "selected_model": "neural_network",
+      "trained_at": "2026-07-18T14:46:59.405053+00:00",
+      "metrics": {
+        "accuracy": 0.8405797101449275,
+        "balanced_accuracy": 0.8374363327674024,
+        "precision": 0.8403939056112969,
+        "recall": 0.8405797101449275,
+        "f1_score": 0.8403081831449615,
+        "confusion_matrix": [
+          [
+            50,
+            12
+          ],
+          [
+            10,
+            66
+          ]
+        ],
+        "sensitivity": 0.868421052631579,
+        "specificity": 0.8064516129032258,
+        "roc_auc": 0.919779286926995,
+        "average_precision": 0.9346121775502212,
+        "train_rows": 644.0,
+        "validation_rows": 138.0,
+        "test_rows": 138.0,
+        "num_classes": 2.0
+      },
+      "dtei": 90.94,
+      "aecs": 1.0,
+      "adversarial_robustness": {
+        "gaussian_noise_accuracy": 0.8405797101449275,
+        "data_poisoning_accuracy": 0.8043478260869565,
+        "before_attack_accuracy": 0.8405797101449275,
+        "after_attack_accuracy": 0.822463768115942,
+        "robustness_score": 0.9784,
+        "poisoned_label_fraction": 0.1
+      },
+      "blockchain_audit": {
+        "disease_key": "heart",
+        "model_artifact": "backend\\app\\ai\\artifacts\\heart_model.pkl",
+        "model_sha256": "c819cda1ca8c1f227e175fa80e805646db4bd5ee07623187faea0d0e8f50c872",
+        "dataset_fingerprint": "574f2fa2b43012fa25fca4fcdb36bd7c6bccdd0af4242f6c0e4c8633c5a072ae",
+        "metrics_sha256": "22c8db304c5bcf0c13dcc9b094c42eff01a0f43bc4efb4db9cfe957fa3be3b8c",
+        "timestamp": "2026-07-18T14:46:59.085975+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "fbd38e8b976b7dd8841c8692646aa4cc60a19dc18d018283da9ab56a430ef5ef",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\heart\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature": "chol",
+            "importance": 0.05356
+          },
+          {
+            "feature": "cp",
+            "importance": 0.032789
+          },
+          {
+            "feature": "oldpeak",
+            "importance": 0.024247
+          },
+          {
+            "feature": "ca",
+            "importance": 0.018968
+          },
+          {
+            "feature": "thal",
+            "importance": 0.017668
+          },
+          {
+            "feature": "age",
+            "importance": -0.016235
+          },
+          {
+            "feature": "slope",
+            "importance": 0.011964
+          },
+          {
+            "feature": "sex",
+            "importance": 0.011407
+          },
+          {
+            "feature": "restecg",
+            "importance": -0.009152
+          },
+          {
+            "feature": "trestbps",
+            "importance": 0.008913
+          },
+          {
+            "feature": "exang",
+            "importance": 0.006393
+          },
+          {
+            "feature": "thalch",
+            "importance": -0.005942
+          },
+          {
+            "feature": "fbs",
+            "importance": 0.000822
+          }
+        ],
+        "shap": {
+          "available": true,
+          "mean_abs_value": 0.020466092589182184
+        },
+        "lime": {
+          "available": true,
+          "rules": [
+            [
+              "14 > 0.00",
+              -0.2539574827229316
+            ],
+            [
+              "5 <= -0.36",
+              -0.24787616736693643
+            ],
+            [
+              "4 <= -0.85",
+              -0.1662203753358812
+            ],
+            [
+              "8 <= -0.27",
+              -0.15314882876022687
+            ],
+            [
+              "26 <= 0.00",
+              0.13627020295547165
+            ],
+            [
+              "23 <= 0.00",
+              -0.10381063984111467
+            ],
+            [
+              "13 <= 0.00",
+              -0.09871345103466986
+            ],
+            [
+              "15 <= 0.00",
+              0.09589663329158757
+            ],
+            [
+              "11 <= 0.00",
+              0.09079527277169168
+            ],
+            [
+              "7 <= -0.19",
+              0.08072881107581843
+            ]
+          ]
+        }
+      },
+      "data_quality": {
+        "source_file": "data\\raw\\heart\\heart_disease_uci.csv",
+        "source_rows": 920,
+        "rows_after_exact_deduplication": 920,
+        "exact_duplicates_removed": 0,
+        "feature_count": 13,
+        "class_distribution": {
+          "0": 411,
+          "1": 509
+        },
+        "dataset_fingerprint": "574f2fa2b43012fa25fca4fcdb36bd7c6bccdd0af4242f6c0e4c8633c5a072ae"
+      }
+    },
+    "liver": {
+      "status": "blocked_low_quality",
+      "modality": "tabular",
+      "selected_model": "random_forest",
+      "trained_at": "2026-07-18T14:51:11.414918+00:00",
+      "metrics": {
+        "accuracy": 0.6627906976744186,
+        "balanced_accuracy": 0.5970491803278688,
+        "precision": 0.6667859272510436,
+        "recall": 0.6627906976744186,
+        "f1_score": 0.6647032443575162,
+        "confusion_matrix": [
+          [
+            11,
+            14
+          ],
+          [
+            15,
+            46
+          ]
+        ],
+        "sensitivity": 0.7540983606557377,
+        "specificity": 0.44,
+        "roc_auc": 0.7278688524590163,
+        "average_precision": 0.8888936639995271,
+        "train_rows": 399.0,
+        "validation_rows": 85.0,
+        "test_rows": 86.0,
+        "num_classes": 2.0
+      },
+      "dtei": 83.64,
+      "aecs": 1.0,
+      "adversarial_robustness": {
+        "gaussian_noise_accuracy": 0.627906976744186,
+        "data_poisoning_accuracy": 0.6627906976744186,
+        "before_attack_accuracy": 0.6627906976744186,
+        "after_attack_accuracy": 0.6453488372093024,
+        "robustness_score": 0.9737,
+        "poisoned_label_fraction": 0.1
+      },
+      "blockchain_audit": {
+        "disease_key": "liver",
+        "model_artifact": "backend\\app\\ai\\artifacts\\liver_model.pkl",
+        "model_sha256": "72291dcf507cb69ca043a772064627ec85e73d921289abb03759ee52680ef017",
+        "dataset_fingerprint": "b0deaf3f8b1923a7a8bca4c5c6bd93f0db74f571c40675b7043fe88f3f7cd4fc",
+        "metrics_sha256": "e36b6359057f30b20b0eea7c667665350759516af11c628bb4172ba6e6162316",
+        "timestamp": "2026-07-18T14:51:11.334174+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "e21f7cd01507b808d5cd22e0bd0e571892f028b5cb2cf44ec85cd28cec86c98a",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\liver\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature": "Aspartate_Aminotransferase",
+            "importance": 0.057254
+          },
+          {
+            "feature": "Total_Bilirubin",
+            "importance": 0.051434
+          },
+          {
+            "feature": "Alkaline_Phosphotase",
+            "importance": 0.051352
+          },
+          {
+            "feature": "Albumin",
+            "importance": -0.030943
+          },
+          {
+            "feature": "Direct_Bilirubin",
+            "importance": 0.027787
+          },
+          {
+            "feature": "Alamine_Aminotransferase",
+            "importance": 0.027705
+          },
+          {
+            "feature": "Albumin_and_Globulin_Ratio",
+            "importance": -0.019221
+          },
+          {
+            "feature": "Total_Protiens",
+            "importance": -0.007254
+          },
+          {
+            "feature": "Age",
+            "importance": 0.006926
+          },
+          {
+            "feature": "Gender",
+            "importance": 0.005123
+          }
+        ],
+        "shap": {
+          "available": true,
+          "mean_abs_value": 0.031451560919656195
+        },
+        "lime": {
+          "available": true,
+          "rules": [
+            [
+              "2 > 0.44",
+              0.11828787795010724
+            ],
+            [
+              "1 > 0.38",
+              0.10885790877833747
+            ],
+            [
+              "5 > 0.41",
+              0.07754046040929082
+            ],
+            [
+              "4 > 0.37",
+              0.0718538913348358
+            ],
+            [
+              "-0.39 < 3 <= 0.42",
+              0.06756678487619518
+            ],
+            [
+              "8 > 0.53",
+              -0.046813890722838494
+            ],
+            [
+              "7 > 0.83",
+              -0.04517901020722084
+            ],
+            [
+              "6 > 0.66",
+              0.029839706880796617
+            ],
+            [
+              "9 <= -0.09",
+              0.010683577059702019
+            ],
+            [
+              "10 <= 0.00",
+              0.008565760767627157
+            ]
+          ]
+        }
+      },
+      "data_quality": {
+        "source_file": "data\\raw\\liver\\indian_liver_patient.csv",
+        "source_rows": 583,
+        "rows_after_exact_deduplication": 570,
+        "exact_duplicates_removed": 13,
+        "feature_count": 10,
+        "class_distribution": {
+          "0": 164,
+          "1": 406
+        },
+        "dataset_fingerprint": "b0deaf3f8b1923a7a8bca4c5c6bd93f0db74f571c40675b7043fe88f3f7cd4fc"
+      }
+    },
+    "parkinson": {
+      "status": "ready_for_research",
+      "modality": "tabular",
+      "selected_model": "random_forest",
+      "trained_at": "2026-07-18T14:56:07.389655+00:00",
+      "metrics": {
+        "accuracy": 0.8666666666666667,
+        "balanced_accuracy": 0.8295454545454546,
+        "precision": 0.8666666666666667,
+        "recall": 0.8666666666666667,
+        "f1_score": 0.8666666666666667,
+        "confusion_matrix": [
+          [
+            6,
+            2
+          ],
+          [
+            2,
+            20
+          ]
+        ],
+        "sensitivity": 0.9090909090909091,
+        "specificity": 0.75,
+        "roc_auc": 0.9147727272727273,
+        "average_precision": 0.9703687305960031,
+        "train_rows": 136.0,
+        "validation_rows": 29.0,
+        "test_rows": 30.0,
+        "num_classes": 2.0
+      },
+      "dtei": 89.6,
+      "aecs": 1.0,
+      "adversarial_robustness": {
+        "gaussian_noise_accuracy": 0.8666666666666667,
+        "data_poisoning_accuracy": 0.7333333333333333,
+        "before_attack_accuracy": 0.8666666666666667,
+        "after_attack_accuracy": 0.8,
+        "robustness_score": 0.9231,
+        "poisoned_label_fraction": 0.1
+      },
+      "blockchain_audit": {
+        "disease_key": "parkinson",
+        "model_artifact": "backend\\app\\ai\\artifacts\\parkinson_model.pkl",
+        "model_sha256": "721b69f2421d97e49bc1f9d7d0572c99c241a27a3e70d45c687dc7a6ce9cf53a",
+        "dataset_fingerprint": "32e6040916d2f5b80b49589d925a92bd25420687c76be19d72e37205e104abe6",
+        "metrics_sha256": "562014326dbeff213c66d24ca0dcbd7ba9573b8d22069803f9e677319b0c9324",
+        "timestamp": "2026-07-18T14:56:07.227272+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "3567394221e975f34ba35ab939a83c6e4c37f18bd6df3ca547129d9eab2bea7c",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\parkinson\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature": "spread1",
+            "importance": 0.079545
+          },
+          {
+            "feature": "PPE",
+            "importance": 0.075284
+          },
+          {
+            "feature": "MDVP:Fhi(Hz)",
+            "importance": 0.069602
+          },
+          {
+            "feature": "D2",
+            "importance": 0.056108
+          },
+          {
+            "feature": "spread2",
+            "importance": 0.029119
+          },
+          {
+            "feature": "MDVP:APQ",
+            "importance": 0.024858
+          },
+          {
+            "feature": "MDVP:RAP",
+            "importance": 0.022017
+          },
+          {
+            "feature": "Jitter:DDP",
+            "importance": 0.022017
+          },
+          {
+            "feature": "MDVP:Fo(Hz)",
+            "importance": 0.016335
+          },
+          {
+            "feature": "HNR",
+            "importance": 0.015625
+          },
+          {
+            "feature": "RPDE",
+            "importance": 0.015625
+          },
+          {
+            "feature": "DFA",
+            "importance": 0.015625
+          },
+          {
+            "feature": "MDVP:PPQ",
+            "importance": -0.014205
+          },
+          {
+            "feature": "NHR",
+            "importance": 0.011364
+          },
+          {
+            "feature": "MDVP:Flo(Hz)",
+            "importance": 0.007812
+          },
+          {
+            "feature": "MDVP:Shimmer",
+            "importance": -0.005682
+          },
+          {
+            "feature": "Shimmer:APQ5",
+            "importance": -0.005682
+          },
+          {
+            "feature": "MDVP:Jitter(%)",
+            "importance": 0.0
+          },
+          {
+            "feature": "MDVP:Jitter(Abs)",
+            "importance": 0.0
+          },
+          {
+            "feature": "MDVP:Shimmer(dB)",
+            "importance": 0.0
+          },
+          {
+            "feature": "Shimmer:APQ3",
+            "importance": 0.0
+          },
+          {
+            "feature": "Shimmer:DDA",
+            "importance": 0.0
+          }
+        ],
+        "shap": {
+          "available": true,
+          "mean_abs_value": 0.021379805859998963
+        },
+        "lime": {
+          "available": true,
+          "rules": [
+            [
+              "21 <= -0.78",
+              -0.1248656950781095
+            ],
+            [
+              "18 <= -0.71",
+              -0.122941843375982
+            ],
+            [
+              "1 > 0.55",
+              -0.058554342001498026
+            ],
+            [
+              "12 <= -0.76",
+              -0.04965077873297044
+            ],
+            [
+              "19 <= -0.67",
+              -0.0441911790997792
+            ],
+            [
+              "17 <= -0.77",
+              -0.02624393221488061
+            ],
+            [
+              "0 > 0.66",
+              -0.025373543239430488
+            ],
+            [
+              "16 <= -0.77",
+              -0.017169391699861997
+            ],
+            [
+              "-0.30 < 5 <= 0.45",
+              0.016013255393600115
+            ],
+            [
+              "-0.77 < 11 <= -0.39",
+              -0.015402630963383117
+            ]
+          ]
+        }
+      },
+      "data_quality": {
+        "source_file": "data\\raw\\parkinson\\parkinsons.csv",
+        "source_rows": 195,
+        "rows_after_exact_deduplication": 195,
+        "exact_duplicates_removed": 0,
+        "feature_count": 22,
+        "class_distribution": {
+          "0": 48,
+          "1": 147
+        },
+        "dataset_fingerprint": "32e6040916d2f5b80b49589d925a92bd25420687c76be19d72e37205e104abe6"
+      }
+    },
+    "asthma": {
+      "status": "blocked_low_quality",
+      "modality": "tabular",
+      "selected_model": "gradient_boosting",
+      "trained_at": "2026-07-18T14:41:20.298366+00:00",
+      "metrics": {
+        "accuracy": 0.75,
+        "balanced_accuracy": 0.5,
+        "precision": 0.5625,
+        "recall": 0.75,
+        "f1_score": 0.6428571428571429,
+        "confusion_matrix": [
+          [
+            648,
+            0
+          ],
+          [
+            216,
+            0
+          ]
+        ],
+        "sensitivity": 0.0,
+        "specificity": 1.0,
+        "roc_auc": 0.35716020804755366,
+        "average_precision": 0.18707075236553855,
+        "train_rows": 4032.0,
+        "validation_rows": 864.0,
+        "test_rows": 864.0,
+        "num_classes": 2.0
+      },
+      "dtei": 81.25,
+      "aecs": 1.0,
+      "adversarial_robustness": {
+        "gaussian_noise_accuracy": 0.75,
+        "data_poisoning_accuracy": 0.75,
+        "before_attack_accuracy": 0.75,
+        "after_attack_accuracy": 0.75,
+        "robustness_score": 1.0,
+        "poisoned_label_fraction": 0.1
+      },
+      "blockchain_audit": {
+        "disease_key": "asthma",
+        "model_artifact": "backend\\app\\ai\\artifacts\\asthma_model.pkl",
+        "model_sha256": "484bde5dff4e03181f7d7d68bafad68a296b149772e8050844888ce9cf7e1190",
+        "dataset_fingerprint": "cd1cba7f1921796154080535ef62dc627c0df497a94cb24304b3ddc7e4765d4e",
+        "metrics_sha256": "338c688d7694ed63e7b6d1fb59b7a786d41552a24197536cdd26624c628895d6",
+        "timestamp": "2026-07-18T14:41:20.114882+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "6da84925f58e1c1b56f2f4ce11a521117eafa7ed6fbc6444c99f08c6edb83303",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\asthma\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature": "Tiredness",
+            "importance": 0.0
+          },
+          {
+            "feature": "Dry-Cough",
+            "importance": 0.0
+          },
+          {
+            "feature": "Difficulty-in-Breathing",
+            "importance": 0.0
+          },
+          {
+            "feature": "Sore-Throat",
+            "importance": 0.0
+          },
+          {
+            "feature": "None_Sympton",
+            "importance": 0.0
+          },
+          {
+            "feature": "Pains",
+            "importance": 0.0
+          },
+          {
+            "feature": "Nasal-Congestion",
+            "importance": 0.0
+          },
+          {
+            "feature": "Runny-Nose",
+            "importance": 0.0
+          },
+          {
+            "feature": "None_Experiencing",
+            "importance": 0.0
+          },
+          {
+            "feature": "Age_0-9",
+            "importance": 0.0
+          },
+          {
+            "feature": "Age_10-19",
+            "importance": 0.0
+          },
+          {
+            "feature": "Age_20-24",
+            "importance": 0.0
+          },
+          {
+            "feature": "Age_25-59",
+            "importance": 0.0
+          },
+          {
+            "feature": "Age_60+",
+            "importance": 0.0
+          },
+          {
+            "feature": "Gender_Female",
+            "importance": 0.0
+          },
+          {
+            "feature": "Gender_Male",
+            "importance": 0.0
+          }
+        ],
+        "shap": {
+          "available": true,
+          "mean_abs_value": 0.015346497665937901
+        },
+        "lime": {
+          "available": true,
+          "rules": [
+            [
+              "12 <= -0.49",
+              -0.029019902007184215
+            ],
+            [
+              "3 <= -0.70",
+              -0.008315313483615689
+            ],
+            [
+              "5 <= -0.77",
+              -0.007605572010297523
+            ],
+            [
+              "4 <= -0.30",
+              0.00688486151895365
+            ],
+            [
+              "14 <= -0.72",
+              -0.006224522236794258
+            ],
+            [
+              "10 <= -0.50",
+              0.005977970418681388
+            ],
+            [
+              "0 <= -0.71",
+              0.0051067771488791155
+            ],
+            [
+              "8 <= -0.38",
+              -0.004394884886384161
+            ],
+            [
+              "13 <= -0.50",
+              -0.0029966388676344467
+            ],
+            [
+              "0.00 < 1 <= 1.00",
+              -0.0027715729462749776
+            ]
+          ]
+        }
+      },
+      "data_quality": {
+        "source_file": "data\\raw\\asthma\\asthma.csv",
+        "source_rows": 316800,
+        "rows_after_exact_deduplication": 5760,
+        "exact_duplicates_removed": 311040,
+        "feature_count": 16,
+        "class_distribution": {
+          "0": 4320,
+          "1": 1440
+        },
+        "dataset_fingerprint": "cd1cba7f1921796154080535ef62dc627c0df497a94cb24304b3ddc7e4765d4e"
+      }
+    },
+    "eye": {
+      "status": "blocked_low_quality",
+      "modality": "image",
+      "selected_model": "logistic_regression",
+      "trained_at": "2026-07-18T15:25:37.729734+00:00",
+      "metrics": {
+        "accuracy": 0.4945054945054945,
+        "balanced_accuracy": 0.4357638888888889,
+        "precision": 0.4739403453689168,
+        "recall": 0.4945054945054945,
+        "f1_score": 0.4829509671614935,
+        "confusion_matrix": [
+          [
+            28,
+            2,
+            6,
+            9
+          ],
+          [
+            1,
+            12,
+            2,
+            0
+          ],
+          [
+            12,
+            0,
+            3,
+            1
+          ],
+          [
+            9,
+            1,
+            3,
+            2
+          ]
+        ],
+        "roc_auc": 0.6229778459526744,
+        "train_rows": 420.0,
+        "validation_rows": 90.0,
+        "test_rows": 91.0,
+        "num_classes": 4.0
+      },
+      "dtei": 69.99,
+      "aecs": 0.7,
+      "adversarial_robustness": {
+        "before_attack_accuracy": 0.4945054945054945,
+        "gaussian_noise_accuracy": 0.4945054945054945,
+        "brightness_shift_accuracy": 0.32967032967032966,
+        "fgsm_accuracy": null,
+        "pgd_accuracy": null,
+        "after_attack_accuracy": 0.41208791208791207,
+        "robustness_score": 0.8333,
+        "explanation_stability": 0.7,
+        "note": "FGSM/PGD require a differentiable deep-learning model; Gaussian and brightness attacks were evaluated for this OpenCV/sklearn image artifact."
+      },
+      "blockchain_audit": {
+        "disease_key": "eye",
+        "model_artifact": "backend\\app\\ai\\artifacts\\eye_model.pkl",
+        "model_sha256": "910bac116243a20e11edc77e09b78887039efd7c0a7c53403afad6b949be4e6d",
+        "dataset_fingerprint": "0bf1f4b4d82e8a9d07dba6dc3aff0552c76ee9a018a6d620d3956690af8a8a4d",
+        "metrics_sha256": "fd1f36786558e518b1da9f7cb315a1e0f62d4943e6ea726ef3f2944ef3980154",
+        "timestamp": "2026-07-18T15:25:37.559733+00:00",
+        "audit_type": "training_artifact_integrity",
+        "block_hash": "0d89284fbde521dcdc185a062bc6a68022795d8ab119175d8a82c7adcf8fddeb",
+        "audit_file": "backend\\app\\ai\\artifacts\\reports\\eye\\blockchain_audit.json"
+      },
+      "explainability": {
+        "feature_importance": [
+          {
+            "feature_index": 575,
+            "importance": 0.0752154
+          },
+          {
+            "feature_index": 316,
+            "importance": 0.07283511
+          },
+          {
+            "feature_index": 29,
+            "importance": 0.07225549
+          },
+          {
+            "feature_index": 1002,
+            "importance": 0.07211715
+          },
+          {
+            "feature_index": 1303,
+            "importance": 0.07145183
+          },
+          {
+            "feature_index": 1043,
+            "importance": 0.07092771
+          },
+          {
+            "feature_index": 1359,
+            "importance": 0.06873727
+          },
+          {
+            "feature_index": 314,
+            "importance": 0.06797554
+          },
+          {
+            "feature_index": 925,
+            "importance": 0.0675115
+          },
+          {
+            "feature_index": 1047,
+            "importance": 0.06715077
+          },
+          {
+            "feature_index": 287,
+            "importance": 0.06567247
+          },
+          {
+            "feature_index": 1163,
+            "importance": 0.06519274
+          },
+          {
+            "feature_index": 479,
+            "importance": 0.06492021
+          },
+          {
+            "feature_index": 703,
+            "importance": 0.06485148
+          },
+          {
+            "feature_index": 1167,
+            "importance": 0.06426932
+          },
+          {
+            "feature_index": 21,
+            "importance": 0.06298276
+          },
+          {
+            "feature_index": 1276,
+            "importance": 0.0627649
+          },
+          {
+            "feature_index": 1060,
+            "importance": 0.06260344
+          },
+          {
+            "feature_index": 2745,
+            "importance": 0.06256021
+          },
+          {
+            "feature_index": 118,
+            "importance": 0.06254271
+          },
+          {
+            "feature_index": 2759,
+            "importance": 0.06237369
+          },
+          {
+            "feature_index": 2610,
+            "importance": 0.06217482
+          },
+          {
+            "feature_index": 222,
+            "importance": 0.06171417
+          },
+          {
+            "feature_index": 318,
+            "importance": 0.06036145
+          },
+          {
+            "feature_index": 378,
+            "importance": 0.06011161
+          }
+        ],
+        "grad_cam": {
+          "available": false,
+          "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+        },
+        "integrated_gradients": {
+          "available": false,
+          "reason": "Integrated Gradients requires a differentiable deep-learning model."
+        }
+      },
+      "data_quality": {
+        "source_rows": 601,
+        "feature_count": 2920,
+        "class_distribution": {
+          "normal": 300,
+          "cataract": 100,
+          "glaucoma": 101,
+          "retina": 100
+        },
+        "dataset_fingerprint": "0bf1f4b4d82e8a9d07dba6dc3aff0552c76ee9a018a6d620d3956690af8a8a4d"
+      }
+    }
+  }
+}

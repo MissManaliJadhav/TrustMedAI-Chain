@@ -1,0 +1,9 @@
+{
+  "class_labels": [
+    "normal",
+    "cataract",
+    "glaucoma",
+    "retina"
+  ],
+  "note": "ROC/PR plotting for multiclass is stored in metrics via weighted ROC-AUC."
+}

@@ -1,6 +1,11 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -12,13 +17,15 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite:///./trustmedai.local.db"
 
-    minio_endpoint: str = "minio:9000"
+    minio_endpoint: str = "localhost:9000"  # Use localhost for local dev, override with MINIO_ENDPOINT env var for docker
     minio_access_key: str = "trustmedai"
     minio_secret_key: str = "trustmedai123"
     minio_secure: bool = False
     minio_bucket: str = "trustmedai-artifacts"
-    artifact_storage_backend: str = "auto"
+    artifact_storage_backend: str = "auto"  # auto, minio, or local
     local_artifact_dir: str = "./.artifacts"
+    minio_timeout_seconds: float = 1.5  # Short local timeout so auto storage can fall back quickly.
+    minio_retry_total: int = 0
 
     jwt_secret_key: str = "replace-with-a-long-random-secret"
     jwt_algorithm: str = "HS256"
@@ -44,7 +51,11 @@ class Settings(BaseSettings):
     fabric_chaincode_name: str = "trustledger"
     fabric_peer_names: str = ""
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=(PROJECT_ROOT / ".env", BACKEND_ROOT / ".env", ".env"),
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 @lru_cache

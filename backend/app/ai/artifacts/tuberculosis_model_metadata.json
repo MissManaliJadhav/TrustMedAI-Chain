@@ -1,8 +1,374 @@
 {
+  "artifact_version": 3,
+  "trained_at": "2026-07-18T15:28:57.249935+00:00",
   "modality": "image",
-  "feature_count": 4096,
+  "source": "kaggle_or_local_real_dataset",
+  "kaggle_slug": "tawsifurrahman/tuberculosis-tb-chest-xray-dataset",
+  "selected_model": "sgd_logistic",
+  "architectures_requested": [
+    "custom_cnn",
+    "resnet50",
+    "transfer_learning"
+  ],
+  "architectures_evaluated": [
+    "sgd_logistic",
+    "extra_trees"
+  ],
+  "feature_extractor": "opencv_hog_histogram_v1",
   "class_labels": [
     "normal",
     "tuberculosis"
+  ],
+  "image_size": [
+    64,
+    64
+  ],
+  "data_processing": {
+    "resize": [
+      64,
+      64
+    ],
+    "normalization": "0_1_grayscale",
+    "noise_removal": "gaussian_blur",
+    "contrast_adjustment": "histogram_equalization",
+    "features": [
+      "32x32 intensity thumbnail",
+      "HSV color histogram",
+      "HOG",
+      "intensity statistics"
+    ],
+    "augmentation": "not applied for deterministic classical feature training"
+  },
+  "data_quality": {
+    "source_rows": 1400,
+    "feature_count": 1732,
+    "class_distribution": {
+      "normal": 700,
+      "tuberculosis": 700
+    },
+    "dataset_fingerprint": "1f4e76dcab2c9f34eae1c2e3129228b6b28a4e89097d26e50e536baec5b66428"
+  },
+  "validation_comparison": {
+    "sgd_logistic": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.9571428571428572,
+        "balanced_accuracy": 0.9571428571428571,
+        "precision": 0.9605263157894737,
+        "recall": 0.9571428571428572,
+        "f1_score": 0.957063995093028,
+        "confusion_matrix": [
+          [
+            96,
+            9
+          ],
+          [
+            0,
+            105
+          ]
+        ],
+        "sensitivity": 1.0,
+        "specificity": 0.9142857142857143,
+        "roc_auc": 0.9929251700680273,
+        "average_precision": 0.9879136224621358
+      }
+    },
+    "extra_trees": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.9238095238095239,
+        "balanced_accuracy": 0.9238095238095239,
+        "precision": 0.9238095238095239,
+        "recall": 0.9238095238095239,
+        "f1_score": 0.9238095238095239,
+        "confusion_matrix": [
+          [
+            97,
+            8
+          ],
+          [
+            8,
+            97
+          ]
+        ],
+        "sensitivity": 0.9238095238095239,
+        "specificity": 0.9238095238095239,
+        "roc_auc": 0.9819501133786849,
+        "average_precision": 0.9833693205362473
+      }
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.9714285714285714,
+    "balanced_accuracy": 0.9714285714285714,
+    "precision": 0.9721137251339812,
+    "recall": 0.9714285714285714,
+    "f1_score": 0.9714182016150985,
+    "confusion_matrix": [
+      [
+        100,
+        5
+      ],
+      [
+        1,
+        104
+      ]
+    ],
+    "sensitivity": 0.9904761904761905,
+    "specificity": 0.9523809523809523,
+    "roc_auc": 0.9824036281179138,
+    "average_precision": 0.9689528109147936,
+    "train_rows": 980.0,
+    "validation_rows": 210.0,
+    "test_rows": 210.0,
+    "num_classes": 2.0
+  },
+  "feature_importance": [
+    {
+      "feature_index": 1027,
+      "importance": 10.86261368
+    },
+    {
+      "feature_index": 1025,
+      "importance": 7.15821505
+    },
+    {
+      "feature_index": 1024,
+      "importance": 6.60545349
+    },
+    {
+      "feature_index": 1271,
+      "importance": 5.89814663
+    },
+    {
+      "feature_index": 1674,
+      "importance": 5.30593061
+    },
+    {
+      "feature_index": 1094,
+      "importance": 5.17982244
+    },
+    {
+      "feature_index": 1265,
+      "importance": 4.82752371
+    },
+    {
+      "feature_index": 1095,
+      "importance": 4.76804256
+    },
+    {
+      "feature_index": 1613,
+      "importance": 4.74206352
+    },
+    {
+      "feature_index": 1174,
+      "importance": 4.71180725
+    },
+    {
+      "feature_index": 1647,
+      "importance": 4.60099649
+    },
+    {
+      "feature_index": 1238,
+      "importance": 4.37935066
+    },
+    {
+      "feature_index": 1228,
+      "importance": 4.36192226
+    },
+    {
+      "feature_index": 1710,
+      "importance": 4.36180305
+    },
+    {
+      "feature_index": 1160,
+      "importance": 4.35858727
+    },
+    {
+      "feature_index": 1688,
+      "importance": 4.32374239
+    },
+    {
+      "feature_index": 1201,
+      "importance": 4.25118876
+    },
+    {
+      "feature_index": 1690,
+      "importance": 4.17132711
+    },
+    {
+      "feature_index": 1729,
+      "importance": 4.1572032
+    },
+    {
+      "feature_index": 1300,
+      "importance": 4.12149954
+    },
+    {
+      "feature_index": 1641,
+      "importance": 4.04296398
+    },
+    {
+      "feature_index": 1640,
+      "importance": 3.74087429
+    },
+    {
+      "feature_index": 1169,
+      "importance": 3.73338509
+    },
+    {
+      "feature_index": 1097,
+      "importance": 3.71725368
+    },
+    {
+      "feature_index": 1093,
+      "importance": 3.68996358
+    }
+  ],
+  "explainability": {
+    "feature_importance": [
+      {
+        "feature_index": 1027,
+        "importance": 10.86261368
+      },
+      {
+        "feature_index": 1025,
+        "importance": 7.15821505
+      },
+      {
+        "feature_index": 1024,
+        "importance": 6.60545349
+      },
+      {
+        "feature_index": 1271,
+        "importance": 5.89814663
+      },
+      {
+        "feature_index": 1674,
+        "importance": 5.30593061
+      },
+      {
+        "feature_index": 1094,
+        "importance": 5.17982244
+      },
+      {
+        "feature_index": 1265,
+        "importance": 4.82752371
+      },
+      {
+        "feature_index": 1095,
+        "importance": 4.76804256
+      },
+      {
+        "feature_index": 1613,
+        "importance": 4.74206352
+      },
+      {
+        "feature_index": 1174,
+        "importance": 4.71180725
+      },
+      {
+        "feature_index": 1647,
+        "importance": 4.60099649
+      },
+      {
+        "feature_index": 1238,
+        "importance": 4.37935066
+      },
+      {
+        "feature_index": 1228,
+        "importance": 4.36192226
+      },
+      {
+        "feature_index": 1710,
+        "importance": 4.36180305
+      },
+      {
+        "feature_index": 1160,
+        "importance": 4.35858727
+      },
+      {
+        "feature_index": 1688,
+        "importance": 4.32374239
+      },
+      {
+        "feature_index": 1201,
+        "importance": 4.25118876
+      },
+      {
+        "feature_index": 1690,
+        "importance": 4.17132711
+      },
+      {
+        "feature_index": 1729,
+        "importance": 4.1572032
+      },
+      {
+        "feature_index": 1300,
+        "importance": 4.12149954
+      },
+      {
+        "feature_index": 1641,
+        "importance": 4.04296398
+      },
+      {
+        "feature_index": 1640,
+        "importance": 3.74087429
+      },
+      {
+        "feature_index": 1169,
+        "importance": 3.73338509
+      },
+      {
+        "feature_index": 1097,
+        "importance": 3.71725368
+      },
+      {
+        "feature_index": 1093,
+        "importance": 3.68996358
+      }
+    ],
+    "grad_cam": {
+      "available": false,
+      "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+    },
+    "integrated_gradients": {
+      "available": false,
+      "reason": "Integrated Gradients requires a differentiable deep-learning model."
+    }
+  },
+  "adversarial_robustness": {
+    "before_attack_accuracy": 0.9714285714285714,
+    "gaussian_noise_accuracy": 0.46875,
+    "brightness_shift_accuracy": 0.9375,
+    "fgsm_accuracy": null,
+    "pgd_accuracy": null,
+    "after_attack_accuracy": 0.703125,
+    "robustness_score": 0.7238,
+    "explanation_stability": 0.7,
+    "note": "FGSM/PGD require a differentiable deep-learning model; Gaussian and brightness attacks were evaluated for this OpenCV/sklearn image artifact."
+  },
+  "aecs": 0.7,
+  "dtei": 83.87,
+  "blockchain_audit": {
+    "disease_key": "tuberculosis",
+    "model_artifact": "backend\\app\\ai\\artifacts\\tuberculosis_model.pkl",
+    "model_sha256": "30dc849e70955b41a6d7590c6eba45c230253d53522bbe0523a7c4af74fbde27",
+    "dataset_fingerprint": "1f4e76dcab2c9f34eae1c2e3129228b6b28a4e89097d26e50e536baec5b66428",
+    "metrics_sha256": "8222d9c219803018f18bed17773bd5b98c6eb6fa0ed754a154406b2b9ca83f00",
+    "timestamp": "2026-07-18T15:28:57.158279+00:00",
+    "audit_type": "training_artifact_integrity",
+    "block_hash": "f10c4f6a6c1064aaa303c5021e41d4c2f96dc0151499ab474a0308d84c80ab16",
+    "audit_file": "backend\\app\\ai\\artifacts\\reports\\tuberculosis\\blockchain_audit.json"
+  },
+  "report_artifacts": {
+    "curves_json": "backend\\app\\ai\\artifacts\\reports\\tuberculosis\\curves.json",
+    "explanations_json": "backend\\app\\ai\\artifacts\\reports\\tuberculosis\\image_explanations.json"
+  },
+  "deployment_status": "ready_for_research",
+  "limitations": [
+    "Research decision-support only; not validated or approved as a medical device.",
+    "This run used OpenCV/sklearn features because TensorFlow/PyTorch was unavailable in the active Python environment.",
+    "CNN/ResNet/EfficientNet/ViT training remains implemented and will run automatically when TensorFlow is installed."
   ]
 }

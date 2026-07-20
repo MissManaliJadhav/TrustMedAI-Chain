@@ -1,46 +1,55 @@
 diseases:
   heart:
     name: Heart Disease
-    dataset: UCI Heart Disease Dataset
-    source: https://archive.ics.uci.edu/dataset/45/heart+disease
+    dataset: Heart Disease Dataset
+    source: https://www.kaggle.com/datasets/johnsmith88/heart-disease-dataset
+    kaggle_slug: johnsmith88/heart-disease-dataset
     modality: tabular
   diabetes:
     name: Diabetes
     dataset: Pima Indians Diabetes Dataset
     source: https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database
+    kaggle_slug: uciml/pima-indians-diabetes-database
     modality: tabular
   asthma:
     name: Asthma
-    dataset: Asthma Prediction Dataset
-    source: https://www.kaggle.com/search?q=asthma+prediction+dataset
+    dataset: Asthma Disease Dataset
+    source: https://www.kaggle.com/datasets/rabieelkharoua/asthma-disease-dataset
+    kaggle_slug: rabieelkharoua/asthma-disease-dataset
     modality: tabular
   pneumonia:
     name: Pneumonia
     dataset: Chest X-Ray Pneumonia Dataset
     source: https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia
+    kaggle_slug: paultimothymooney/chest-xray-pneumonia
     modality: image
   eye:
     name: Eye Disease
     dataset: Ocular Disease Recognition Dataset
     source: https://www.kaggle.com/datasets/andrewmvd/ocular-disease-recognition-odir5k
+    kaggle_slug: andrewmvd/ocular-disease-recognition-odir5k
     modality: image
   tuberculosis:
     name: Tuberculosis
     dataset: TB Chest X-Ray Dataset
     source: https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset
+    kaggle_slug: tawsifurrahman/tuberculosis-tb-chest-xray-dataset
     modality: image
   liver:
     name: Liver Disease
     dataset: Indian Liver Patient Dataset
-    source: https://archive.ics.uci.edu/dataset/225/ilpd+indian+liver+patient+dataset
+    source: https://www.kaggle.com/datasets/uciml/indian-liver-patient-records
+    kaggle_slug: uciml/indian-liver-patient-records
     modality: tabular
   parkinson:
     name: Parkinson Disease
-    dataset: UCI Parkinson Dataset
-    source: https://archive.ics.uci.edu/dataset/174/parkinsons
-    modality: voice
+    dataset: Parkinson's Disease Data Set
+    source: https://www.kaggle.com/datasets/vikasukani/parkinsons-disease-data-set
+    kaggle_slug: vikasukani/parkinsons-disease-data-set
+    modality: tabular
   brain_tumor:
     name: Brain Tumor
     dataset: Brain MRI Dataset
     source: https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset
+    kaggle_slug: masoudnickparvar/brain-tumor-mri-dataset
     modality: image

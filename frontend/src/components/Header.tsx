@@ -7,6 +7,8 @@ import { useAppDispatch, useAppSelector } from '../store';
 
 export default function Header() {
   const token = useAppSelector((state) => state.auth.accessToken);
+  const role = useAppSelector((state) => state.auth.role);
+  const canUseDiagnosis = role === 'DOCTOR' || role === 'PATIENT';
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -26,7 +28,7 @@ export default function Header() {
           <Button component={Link} to="/dashboard" color="primary">
             Dashboard
           </Button>
-          {token && (
+          {token && canUseDiagnosis && (
             <Button component={Link} to="/diagnosis" color="primary">
               Disease Diagnosis
             </Button>

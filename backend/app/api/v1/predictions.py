@@ -43,6 +43,10 @@ async def predict_tabular_with_files(
         features = json.loads(features_json)
         if not isinstance(features, dict):
             raise ValueError
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=422, detail="features_json must be a JSON object.") from exc
+
+    try:
         payload = PredictionRequest(
             disease_key=disease_key,
             patient_name=patient_name,
@@ -60,8 +64,6 @@ async def predict_tabular_with_files(
             supporting_pdf_filename=supporting_pdf.filename if supporting_pdf else None,
             supporting_pdf_content_type=supporting_pdf.content_type if supporting_pdf else None,
         )
-    except (ValueError, json.JSONDecodeError) as exc:
-        raise HTTPException(status_code=422, detail="features_json must be a JSON object.") from exc
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=exc.errors()) from exc
     except PredictionInputError as exc:
@@ -111,29 +113,18 @@ def list_predictions(
     user: User = Depends(get_current_user),
 ) -> list[DiagnosisRecordResponse]:
     """
-    List diagnosis records based on user role:
-    - SUPER_ADMIN: all records
-    - HOSPITAL_ADMIN: records from their hospital
+    List diagnosis records based on clinical role:
     - DOCTOR: records they created or patients in their hospital
     - PATIENT: only their own records
     - RESEARCHER: anonymized records
+    - ADMIN roles: system administrators cannot access clinical diagnosis records
     """
     query = db.query(DiagnosisRecord)
     user_role = Role(user.role)
     
-    if user_role == Role.SUPER_ADMIN:
-        # Super admin sees all records
-        pass
-    elif user_role == Role.HOSPITAL_ADMIN:
-        # Hospital admin sees records from their hospital
-        hospital_user_ids = db.query(User.id).filter(User.hospital_id == user.hospital_id)
-        query = query.filter(
-            or_(
-                DiagnosisRecord.doctor_id.in_(hospital_user_ids),
-                DiagnosisRecord.patient_id.in_(hospital_user_ids),
-            )
-        )
-    elif user_role == Role.DOCTOR:
+    if user_role in {Role.SUPER_ADMIN, Role.HOSPITAL_ADMIN}:
+        raise HTTPException(status_code=403, detail="Administrators manage the system but cannot access diagnosis records.")
+    if user_role == Role.DOCTOR:
         # Doctor sees records they created
         query = query.filter(DiagnosisRecord.doctor_id == user.id)
     elif user_role == Role.PATIENT:
@@ -167,6 +158,13 @@ def list_predictions(
             ethereum_tx_hash=record.ethereum_tx_hash,
             fabric_tx_id=record.fabric_tx_id,
             doctor_notes=record.doctor_notes,
+            review_status=record.review_status,
+            doctor_decision=record.doctor_decision,
+            final_clinical_decision=record.final_clinical_decision,
+            review_notes=record.review_notes,
+            reviewed_by_id=record.reviewed_by_id,
+            reviewed_at=record.reviewed_at,
+            priority=record.priority,
             created_at=record.created_at,
         )
         for record in records

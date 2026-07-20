@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -5,7 +7,17 @@ from app.core.rbac import Role
 from app.core.security import create_token, decode_token, hash_password, verify_password
 from app.db.models import User
 from app.db.session import get_db
-from app.schemas import ForgotPasswordRequest, LoginRequest, RefreshRequest, SignupRequest, TokenPair, UserRead, VerifyEmailRequest
+from app.api.deps import get_current_user
+from app.schemas import (
+    CurrentUserResponse,
+    ForgotPasswordRequest,
+    LoginRequest,
+    RefreshRequest,
+    SignupRequest,
+    TokenPair,
+    UserRead,
+    VerifyEmailRequest,
+)
 
 router = APIRouter()
 
@@ -21,8 +33,9 @@ def issue_tokens(user: User) -> TokenPair:
 
 @router.post("/signup", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 def signup(payload: SignupRequest, db: Session = Depends(get_db)) -> User:
-    if payload.role != Role.PATIENT:
-        raise HTTPException(status_code=403, detail="Only patient accounts can be self-registered")
+    allowed_self_registration_roles = {Role.PATIENT, Role.DOCTOR, Role.SUPER_ADMIN}
+    if payload.role not in allowed_self_registration_roles:
+        raise HTTPException(status_code=403, detail="This role cannot be self-registered")
     exists = db.query(User).filter(User.email == payload.email).first()
     if exists:
         raise HTTPException(status_code=409, detail="Email already registered")
@@ -44,6 +57,10 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenPair:
     user = db.query(User).filter(User.email == payload.email).first()
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+    user.last_login_at = datetime.utcnow()
+    db.add(user)
+    db.commit()
+    db.refresh(user)
     return issue_tokens(user)
 
 
@@ -59,6 +76,20 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> TokenPair
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="Inactive or missing user")
     return issue_tokens(user)
+
+
+@router.get("/me", response_model=CurrentUserResponse)
+def me(user: User = Depends(get_current_user)) -> CurrentUserResponse:
+    return CurrentUserResponse(
+        id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        role=Role(user.role),
+        is_verified=user.is_verified,
+        hospital_id=user.hospital_id,
+        hospital_name=user.hospital.name if user.hospital else None,
+        created_at=user.created_at,
+    )
 
 
 @router.post("/forgot-password")

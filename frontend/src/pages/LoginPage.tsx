@@ -28,7 +28,14 @@ export default function LoginPage() {
           userId: res.data.user_id,
         }),
       );
-      navigate('/dashboard');
+      const role = res.data.role;
+      if (role === 'SUPER_ADMIN' || role === 'HOSPITAL_ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (role === 'DOCTOR' || role === 'PATIENT') {
+        navigate('/role-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     } catch {
       setError('Invalid credentials.');
     }

@@ -1,0 +1,141 @@
+{
+  "feature_importance": [
+    {
+      "feature": "spread1",
+      "importance": 0.079545
+    },
+    {
+      "feature": "PPE",
+      "importance": 0.075284
+    },
+    {
+      "feature": "MDVP:Fhi(Hz)",
+      "importance": 0.069602
+    },
+    {
+      "feature": "D2",
+      "importance": 0.056108
+    },
+    {
+      "feature": "spread2",
+      "importance": 0.029119
+    },
+    {
+      "feature": "MDVP:APQ",
+      "importance": 0.024858
+    },
+    {
+      "feature": "MDVP:RAP",
+      "importance": 0.022017
+    },
+    {
+      "feature": "Jitter:DDP",
+      "importance": 0.022017
+    },
+    {
+      "feature": "MDVP:Fo(Hz)",
+      "importance": 0.016335
+    },
+    {
+      "feature": "HNR",
+      "importance": 0.015625
+    },
+    {
+      "feature": "RPDE",
+      "importance": 0.015625
+    },
+    {
+      "feature": "DFA",
+      "importance": 0.015625
+    },
+    {
+      "feature": "MDVP:PPQ",
+      "importance": -0.014205
+    },
+    {
+      "feature": "NHR",
+      "importance": 0.011364
+    },
+    {
+      "feature": "MDVP:Flo(Hz)",
+      "importance": 0.007812
+    },
+    {
+      "feature": "MDVP:Shimmer",
+      "importance": -0.005682
+    },
+    {
+      "feature": "Shimmer:APQ5",
+      "importance": -0.005682
+    },
+    {
+      "feature": "MDVP:Jitter(%)",
+      "importance": 0.0
+    },
+    {
+      "feature": "MDVP:Jitter(Abs)",
+      "importance": 0.0
+    },
+    {
+      "feature": "MDVP:Shimmer(dB)",
+      "importance": 0.0
+    },
+    {
+      "feature": "Shimmer:APQ3",
+      "importance": 0.0
+    },
+    {
+      "feature": "Shimmer:DDA",
+      "importance": 0.0
+    }
+  ],
+  "shap": {
+    "available": true,
+    "mean_abs_value": 0.021379805859998963
+  },
+  "lime": {
+    "available": true,
+    "rules": [
+      [
+        "21 <= -0.78",
+        -0.1248656950781095
+      ],
+      [
+        "18 <= -0.71",
+        -0.122941843375982
+      ],
+      [
+        "1 > 0.55",
+        -0.058554342001498026
+      ],
+      [
+        "12 <= -0.76",
+        -0.04965077873297044
+      ],
+      [
+        "19 <= -0.67",
+        -0.0441911790997792
+      ],
+      [
+        "17 <= -0.77",
+        -0.02624393221488061
+      ],
+      [
+        "0 > 0.66",
+        -0.025373543239430488
+      ],
+      [
+        "16 <= -0.77",
+        -0.017169391699861997
+      ],
+      [
+        "-0.30 < 5 <= 0.45",
+        0.016013255393600115
+      ],
+      [
+        "-0.77 < 11 <= -0.39",
+        -0.015402630963383117
+      ]
+    ]
+  }
+}

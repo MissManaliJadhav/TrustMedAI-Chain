@@ -85,9 +85,9 @@ class PredictionResponse(BaseModel):
     disease_key: str
     prediction: str
     confidence: float
-    metrics: dict[str, float]
+    metrics: dict[str, Any]
     explanation: ExplanationBundle
-    adversarial: dict[str, float]
+    adversarial: dict[str, Any]
     aecs: float
     trust_score: float
     dtei_components: dict[str, float]
@@ -115,6 +115,147 @@ class ContactRequest(BaseModel):
     name: str
     email: EmailStr
     message: str
+
+
+class ContactResponse(BaseModel):
+    id: str
+    status: str
+    message: str
+    created_at: datetime
+
+
+class CurrentUserResponse(BaseModel):
+    id: str
+    email: str
+    full_name: str
+    role: Role
+    is_verified: bool
+    hospital_id: str | None = None
+    hospital_name: str | None = None
+    created_at: datetime
+
+
+class PatientProfileUpdate(BaseModel):
+    full_name: str | None = Field(default=None, min_length=2, max_length=255)
+    date_of_birth: str | None = Field(default=None, max_length=20)
+    sex: str | None = Field(default=None, max_length=40)
+    gender: str | None = Field(default=None, max_length=40)
+    blood_group: str | None = Field(default=None, max_length=20)
+    phone_number: str | None = Field(default=None, max_length=40)
+    address: str | None = Field(default=None, max_length=500)
+    city: str | None = Field(default=None, max_length=120)
+    state: str | None = Field(default=None, max_length=120)
+    country: str | None = Field(default=None, max_length=120)
+    emergency_contact_name: str | None = Field(default=None, max_length=255)
+    emergency_contact_phone: str | None = Field(default=None, max_length=40)
+    medical_information: str | None = Field(default=None, max_length=2000)
+    allergies: str | None = Field(default=None, max_length=1000)
+    medications: str | None = Field(default=None, max_length=1000)
+    insurance: str | None = Field(default=None, max_length=1000)
+    lifestyle: str | None = Field(default=None, max_length=1000)
+    vaccination_history: str | None = Field(default=None, max_length=1000)
+
+
+class PatientProfileResponse(BaseModel):
+    id: str
+    email: str
+    full_name: str
+    role: Role
+    patient_id: str
+    registration_date: datetime
+    last_profile_update: datetime | None = None
+    profile_photo_url: str | None = None
+    profile_photo_available: bool = False
+    age: int | None = None
+    profile_completion: int
+    profile: dict[str, Any] = Field(default_factory=dict)
+
+
+class DoctorProfileUpdate(BaseModel):
+    full_name: str | None = Field(default=None, min_length=2, max_length=255)
+    specialization: str | None = Field(default=None, max_length=160)
+    qualifications: str | None = Field(default=None, max_length=1200)
+    experience: str | None = Field(default=None, max_length=500)
+    hospital_organization: str | None = Field(default=None, max_length=255)
+    phone_number: str | None = Field(default=None, max_length=40)
+    contact_information: str | None = Field(default=None, max_length=1000)
+    availability: str | None = Field(default=None, max_length=1000)
+
+
+class DoctorProtectedProfileUpdate(BaseModel):
+    doctor_id: str
+    medical_registration_number: str | None = Field(default=None, max_length=120)
+    profile_verification_status: str | None = Field(default=None, max_length=80)
+    account_status: str | None = Field(default=None, max_length=80)
+
+
+class DoctorProfileResponse(BaseModel):
+    id: str
+    email: str
+    full_name: str
+    doctor_id: str
+    role: Role
+    profile_photo_url: str | None = None
+    profile_photo_available: bool = False
+    medical_registration_number: str | None = None
+    specialization: str | None = None
+    qualifications: str | None = None
+    experience: str | None = None
+    hospital_organization: str | None = None
+    contact_information: str | None = None
+    phone_number: str | None = None
+    account_status: str
+    last_login: datetime | None = None
+    profile_verification_status: str
+    created_at: datetime
+    profile_updated_at: datetime | None = None
+
+
+class DoctorSummaryResponse(BaseModel):
+    total_assigned_patients: int
+    pending_diagnosis_reviews: int
+    high_risk_cases: int
+    reviewed_diagnoses: int
+    todays_new_cases: int
+    average_ai_trust_score: float
+    blockchain_verified_records: int
+    unread_notifications: int
+
+
+class NotificationResponse(BaseModel):
+    id: str
+    notification_type: str
+    title: str
+    message: str
+    diagnosis_id: str | None = None
+    severity: str
+    is_read: bool
+    metadata_json: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+    read_at: datetime | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class DoctorReviewRequest(BaseModel):
+    doctor_decision: str = Field(min_length=2, max_length=80)
+    final_clinical_decision: str = Field(min_length=2, max_length=120)
+    review_notes: str = Field(default="", max_length=3000)
+    review_status: str = Field(default="reviewed", max_length=40)
+
+
+class DoctorNoteRequest(BaseModel):
+    note: str = Field(min_length=1, max_length=3000)
+
+
+class DoctorPatientSummary(BaseModel):
+    patient_id: str | None = None
+    patient_name: str | None = None
+    patient_email: str | None = None
+    total_diagnoses: int
+    active_cases: int
+    latest_diagnosis_at: datetime | None = None
+    average_trust_score: float
 
 
 # Chatbot Schemas
@@ -262,6 +403,37 @@ class DiagnosisRecordResponse(BaseModel):
     ethereum_tx_hash: str | None = None
     fabric_tx_id: str | None = None
     doctor_notes: str | None = None
+    review_status: str | None = None
+    doctor_decision: str | None = None
+    final_clinical_decision: str | None = None
+    review_notes: str | None = None
+    reviewed_by_id: str | None = None
+    reviewed_at: datetime | None = None
+    priority: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class FederatedRoundCreateRequest(BaseModel):
+    model_name: str = Field(default="trustmedai-risk-model", min_length=3, max_length=120)
+    disease_key: str = Field(default="heart", min_length=2, max_length=80)
+    min_clients: int = Field(default=2, ge=2, le=20)
+    global_model_version: str = Field(default="v1", min_length=1, max_length=80)
+    privacy_epsilon: float = Field(default=3.0, gt=0, le=10)
+    secure_aggregation: bool = True
+    differential_privacy: bool = True
+
+
+class FederatedClientUpdateRequest(BaseModel):
+    hospital_id: str
+    sample_count: int = Field(ge=1, le=1_000_000)
+    weights_delta: list[float] | None = Field(default=None, max_length=64)
+    metrics: dict[str, float] = Field(default_factory=dict)
+    privacy_epsilon_spent: float = Field(default=0.2, ge=0, le=10)
+
+
+class FederatedSimulationRequest(BaseModel):
+    model_name: str = Field(default="trustmedai-risk-model", min_length=3, max_length=120)
+    disease_key: str = Field(default="heart", min_length=2, max_length=80)
+    participating_hospitals: int = Field(default=4, ge=2, le=8)

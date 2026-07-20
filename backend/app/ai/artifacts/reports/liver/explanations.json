@@ -1,0 +1,93 @@
+{
+  "feature_importance": [
+    {
+      "feature": "Aspartate_Aminotransferase",
+      "importance": 0.057254
+    },
+    {
+      "feature": "Total_Bilirubin",
+      "importance": 0.051434
+    },
+    {
+      "feature": "Alkaline_Phosphotase",
+      "importance": 0.051352
+    },
+    {
+      "feature": "Albumin",
+      "importance": -0.030943
+    },
+    {
+      "feature": "Direct_Bilirubin",
+      "importance": 0.027787
+    },
+    {
+      "feature": "Alamine_Aminotransferase",
+      "importance": 0.027705
+    },
+    {
+      "feature": "Albumin_and_Globulin_Ratio",
+      "importance": -0.019221
+    },
+    {
+      "feature": "Total_Protiens",
+      "importance": -0.007254
+    },
+    {
+      "feature": "Age",
+      "importance": 0.006926
+    },
+    {
+      "feature": "Gender",
+      "importance": 0.005123
+    }
+  ],
+  "shap": {
+    "available": true,
+    "mean_abs_value": 0.031451560919656195
+  },
+  "lime": {
+    "available": true,
+    "rules": [
+      [
+        "2 > 0.44",
+        0.11828787795010724
+      ],
+      [
+        "1 > 0.38",
+        0.10885790877833747
+      ],
+      [
+        "5 > 0.41",
+        0.07754046040929082
+      ],
+      [
+        "4 > 0.37",
+        0.0718538913348358
+      ],
+      [
+        "-0.39 < 3 <= 0.42",
+        0.06756678487619518
+      ],
+      [
+        "8 > 0.53",
+        -0.046813890722838494
+      ],
+      [
+        "7 > 0.83",
+        -0.04517901020722084
+      ],
+      [
+        "6 > 0.66",
+        0.029839706880796617
+      ],
+      [
+        "9 <= -0.09",
+        0.010683577059702019
+      ],
+      [
+        "10 <= 0.00",
+        0.008565760767627157
+      ]
+    ]
+  }
+}

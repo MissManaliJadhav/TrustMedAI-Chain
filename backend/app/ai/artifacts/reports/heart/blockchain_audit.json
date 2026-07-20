@@ -1,0 +1,10 @@
+{
+  "disease_key": "heart",
+  "model_artifact": "backend\\app\\ai\\artifacts\\heart_model.pkl",
+  "model_sha256": "c819cda1ca8c1f227e175fa80e805646db4bd5ee07623187faea0d0e8f50c872",
+  "dataset_fingerprint": "574f2fa2b43012fa25fca4fcdb36bd7c6bccdd0af4242f6c0e4c8633c5a072ae",
+  "metrics_sha256": "22c8db304c5bcf0c13dcc9b094c42eff01a0f43bc4efb4db9cfe957fa3be3b8c",
+  "timestamp": "2026-07-18T14:46:59.085975+00:00",
+  "audit_type": "training_artifact_integrity",
+  "block_hash": "fbd38e8b976b7dd8841c8692646aa4cc60a19dc18d018283da9ab56a430ef5ef"
+}

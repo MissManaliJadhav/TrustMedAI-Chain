@@ -1,214 +1,218 @@
 {
-  "artifact_version": 2,
-  "trained_at": "2026-06-30T14:24:25.383921+00:00",
+  "artifact_version": 3,
+  "trained_at": "2026-07-18T14:56:07.389655+00:00",
   "modality": "tabular",
-  "selected_model": "logistic_regression",
-  "decision_threshold": 0.9597103105871075,
-  "selection_metric": "0.45 balanced_accuracy + 0.35 weighted_f1 + 0.20 roc_auc",
+  "source": "kaggle_or_local_real_dataset",
+  "kaggle_slug": "vikasukani/parkinsons-disease-data-set",
+  "selected_model": "random_forest",
+  "architectures_evaluated": [
+    "random_forest",
+    "svm",
+    "neural_network"
+  ],
   "class_labels": [
     "healthy",
     "parkinson"
   ],
-  "positive_class": "parkinson",
   "input_schema": [
     {
       "name": "MDVP:Fo(Hz)",
-      "label": "MDVP Fo(Hz)",
+      "label": "Mdvp:Fo(Hz)",
       "input_type": "number",
       "required": true,
       "minimum": 88.333,
       "maximum": 260.105,
-      "default": 160.39350000000002,
+      "default": 146.0095,
       "choices": null
     },
     {
       "name": "MDVP:Fhi(Hz)",
-      "label": "MDVP Fhi(Hz)",
+      "label": "Mdvp:Fhi(Hz)",
       "input_type": "number",
       "required": true,
       "minimum": 102.145,
-      "maximum": 586.567,
-      "default": 200.483,
+      "maximum": 353.309,
+      "default": 174.402,
       "choices": null
     },
     {
       "name": "MDVP:Flo(Hz)",
-      "label": "MDVP Flo(Hz)",
+      "label": "Mdvp:Flo(Hz)",
       "input_type": "number",
       "required": true,
       "minimum": 65.476,
-      "maximum": 239.17,
-      "default": 94.11949999999999,
+      "maximum": 215.88424999999998,
+      "default": 100.715,
       "choices": null
     },
     {
       "name": "MDVP:Jitter(%)",
-      "label": "MDVP Jitter(%)",
+      "label": "Mdvp:Jitter(%)",
       "input_type": "number",
       "required": true,
-      "minimum": 0.00178,
-      "maximum": 0.03316,
-      "default": 0.00493,
+      "minimum": 0.00168,
+      "maximum": 0.013046249999999999,
+      "default": 0.0050349999999999995,
       "choices": null
     },
     {
       "name": "MDVP:Jitter(Abs)",
-      "label": "MDVP Jitter(Abs)",
+      "label": "Mdvp:Jitter(Abs)",
       "input_type": "number",
       "required": true,
       "minimum": 7e-06,
-      "maximum": 0.00026,
-      "default": 3e-05,
+      "maximum": 0.000105,
+      "default": 4e-05,
       "choices": null
     },
     {
       "name": "MDVP:RAP",
-      "label": "MDVP RAP",
+      "label": "Mdvp:Rap",
       "input_type": "number",
       "required": true,
-      "minimum": 0.00092,
-      "maximum": 0.02144,
-      "default": 0.0024549999999999997,
+      "minimum": 0.00068,
+      "maximum": 0.00718125,
+      "default": 0.0025849999999999996,
       "choices": null
     },
     {
       "name": "MDVP:PPQ",
-      "label": "MDVP PPQ",
+      "label": "Mdvp:Ppq",
       "input_type": "number",
       "required": true,
-      "minimum": 0.00106,
-      "maximum": 0.01628,
-      "default": 0.00264,
+      "minimum": 0.00092,
+      "maximum": 0.00749375,
+      "default": 0.002835,
       "choices": null
     },
     {
       "name": "Jitter:DDP",
-      "label": "Jitter DDP",
+      "label": "Jitter:Ddp",
       "input_type": "number",
       "required": true,
-      "minimum": 0.00276,
-      "maximum": 0.06433,
-      "default": 0.007365,
+      "minimum": 0.00204,
+      "maximum": 0.02153625,
+      "default": 0.0077599999999999995,
       "choices": null
     },
     {
       "name": "MDVP:Shimmer",
-      "label": "MDVP Shimmer",
+      "label": "Mdvp:Shimmer",
       "input_type": "number",
       "required": true,
       "minimum": 0.00954,
-      "maximum": 0.09419,
-      "default": 0.0216,
+      "maximum": 0.07776,
+      "default": 0.02473,
       "choices": null
     },
     {
       "name": "MDVP:Shimmer(dB)",
-      "label": "MDVP Shimmer(dB)",
+      "label": "Mdvp:Shimmer(Db)",
       "input_type": "number",
       "required": true,
       "minimum": 0.085,
-      "maximum": 0.93,
-      "default": 0.2095,
+      "maximum": 0.721625,
+      "default": 0.2305,
       "choices": null
     },
     {
       "name": "Shimmer:APQ3",
-      "label": "Shimmer APQ3",
+      "label": "Shimmer:Apq3",
       "input_type": "number",
       "required": true,
       "minimum": 0.00468,
-      "maximum": 0.05551,
-      "default": 0.011890000000000001,
+      "maximum": 0.042978749999999996,
+      "default": 0.013864999999999999,
       "choices": null
     },
     {
       "name": "Shimmer:APQ5",
-      "label": "Shimmer APQ5",
+      "label": "Shimmer:Apq5",
       "input_type": "number",
       "required": true,
       "minimum": 0.0057,
-      "maximum": 0.05005,
-      "default": 0.013315,
+      "maximum": 0.0469675,
+      "default": 0.014235000000000001,
       "choices": null
     },
     {
       "name": "MDVP:APQ",
-      "label": "MDVP APQ",
+      "label": "Mdvp:Apq",
       "input_type": "number",
       "required": true,
       "minimum": 0.00719,
-      "maximum": 0.06196,
-      "default": 0.017425000000000003,
+      "maximum": 0.06117625000000001,
+      "default": 0.019264999999999997,
       "choices": null
     },
     {
       "name": "Shimmer:DDA",
-      "label": "Shimmer DDA",
+      "label": "Shimmer:Dda",
       "input_type": "number",
       "required": true,
       "minimum": 0.01403,
-      "maximum": 0.16654,
-      "default": 0.035665,
+      "maximum": 0.12894624999999998,
+      "default": 0.0416,
       "choices": null
     },
     {
       "name": "NHR",
-      "label": "NHR",
+      "label": "Nhr",
       "input_type": "number",
       "required": true,
       "minimum": 0.00065,
-      "maximum": 0.31482,
-      "default": 0.013325,
+      "maximum": 0.05564875,
+      "default": 0.012945,
       "choices": null
     },
     {
       "name": "HNR",
-      "label": "HNR",
+      "label": "Hnr",
       "input_type": "number",
       "required": true,
-      "minimum": 8.867,
+      "minimum": 10.0785,
       "maximum": 33.047,
-      "default": 21.837,
+      "default": 21.689,
       "choices": null
     },
     {
       "name": "RPDE",
-      "label": "RPDE",
+      "label": "Rpde",
       "input_type": "number",
       "required": true,
       "minimum": 0.25657,
       "maximum": 0.685151,
-      "default": 0.4944125,
+      "default": 0.5017085,
       "choices": null
     },
     {
       "name": "DFA",
-      "label": "DFA",
+      "label": "Dfa",
       "input_type": "number",
       "required": true,
       "minimum": 0.574282,
-      "maximum": 0.798463,
-      "default": 0.7148030000000001,
+      "maximum": 0.825288,
+      "default": 0.725934,
       "choices": null
     },
     {
       "name": "spread1",
-      "label": "spread1",
+      "label": "Spread1",
       "input_type": "number",
       "required": true,
       "minimum": -7.964984,
-      "maximum": -2.929379,
-      "default": -5.8042645,
+      "maximum": -2.74032725,
+      "default": -5.634449,
       "choices": null
     },
     {
       "name": "spread2",
-      "label": "spread2",
+      "label": "Spread2",
       "input_type": "number",
       "required": true,
-      "minimum": 0.006274,
-      "maximum": 0.434326,
-      "default": 0.212174,
+      "minimum": 0.02336812499999999,
+      "maximum": 0.43369912499999996,
+      "default": 0.2213005,
       "choices": null
     },
     {
@@ -217,22 +221,23 @@
       "input_type": "number",
       "required": true,
       "minimum": 1.423287,
-      "maximum": 3.671155,
-      "default": 2.4180455,
+      "maximum": 3.5052698749999998,
+      "default": 2.4028675,
       "choices": null
     },
     {
       "name": "PPE",
-      "label": "PPE",
+      "label": "Ppe",
       "input_type": "number",
       "required": true,
       "minimum": 0.044539,
-      "maximum": 0.444774,
-      "default": 0.18735000000000002,
+      "maximum": 0.439299125,
+      "default": 0.21047349999999998,
       "choices": null
     }
   ],
   "data_quality": {
+    "source_file": "data\\raw\\parkinson\\parkinsons.csv",
     "source_rows": 195,
     "rows_after_exact_deduplication": 195,
     "exact_duplicates_removed": 0,
@@ -241,78 +246,380 @@
       "0": 48,
       "1": 147
     },
-    "notes": [
-      "Repeated voice recordings from one person are kept in a single split to prevent patient leakage.",
-      "This dataset is small, so the held-out estimate has wide uncertainty."
-    ]
+    "dataset_fingerprint": "32e6040916d2f5b80b49589d925a92bd25420687c76be19d72e37205e104abe6"
   },
   "validation_comparison": {
-    "logistic_regression": {
-      "accuracy": 0.5333333333333333,
-      "balanced_accuracy": 0.6458333333333334,
-      "precision": 0.788888888888889,
-      "recall": 0.5333333333333333,
-      "f1_score": 0.5722222222222223,
-      "auc": 0.548611111111111,
-      "sensitivity": 0.4583333333333333,
-      "specificity": 0.8333333333333334,
-      "decision_threshold": 0.9597103105871075,
-      "selection_score": 0.600625
-    },
     "random_forest": {
-      "accuracy": 0.4666666666666667,
-      "balanced_accuracy": 0.6666666666666666,
-      "precision": 0.8545454545454546,
-      "recall": 0.4666666666666667,
-      "f1_score": 0.4857142857142857,
-      "auc": 0.5625,
-      "sensitivity": 0.3333333333333333,
-      "specificity": 1.0,
-      "decision_threshold": 0.9394576245852688,
-      "selection_score": 0.5825
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.896551724137931,
+        "balanced_accuracy": 0.8831168831168831,
+        "precision": 0.9035303776683087,
+        "recall": 0.896551724137931,
+        "f1_score": 0.8987971130713713,
+        "confusion_matrix": [
+          [
+            6,
+            1
+          ],
+          [
+            2,
+            20
+          ]
+        ],
+        "sensitivity": 0.9090909090909091,
+        "specificity": 0.8571428571428571,
+        "roc_auc": 0.9415584415584416,
+        "average_precision": 0.9780577643397949
+      },
+      "best_params": {
+        "classifier__min_samples_leaf": 2,
+        "classifier__n_estimators": 450
+      },
+      "cross_validation_score": 0.8397122485357779
     },
-    "extra_trees": {
-      "accuracy": 0.3333333333333333,
-      "balanced_accuracy": 0.5833333333333334,
-      "precision": 0.8461538461538461,
-      "recall": 0.3333333333333333,
-      "f1_score": 0.3035714285714286,
-      "auc": 0.45833333333333337,
-      "sensitivity": 0.16666666666666666,
-      "specificity": 1.0,
-      "decision_threshold": 0.9541885874886283,
-      "selection_score": 0.4604166666666667
+    "svm": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.896551724137931,
+        "balanced_accuracy": 0.8831168831168831,
+        "precision": 0.9035303776683087,
+        "recall": 0.896551724137931,
+        "f1_score": 0.8987971130713713,
+        "confusion_matrix": [
+          [
+            6,
+            1
+          ],
+          [
+            2,
+            20
+          ]
+        ],
+        "sensitivity": 0.9090909090909091,
+        "specificity": 0.8571428571428571,
+        "roc_auc": 0.9415584415584415,
+        "average_precision": 0.9804507155914417
+      },
+      "best_params": {
+        "classifier__C": 2.0,
+        "classifier__gamma": "scale"
+      },
+      "cross_validation_score": 0.821275783040489
     },
     "neural_network": {
-      "accuracy": 0.4,
-      "balanced_accuracy": 0.625,
-      "precision": 0.85,
-      "recall": 0.4,
-      "f1_score": 0.4000000000000001,
-      "auc": 0.4444444444444445,
-      "sensitivity": 0.25,
-      "specificity": 1.0,
-      "decision_threshold": 0.655,
-      "selection_score": 0.5101388888888889
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.896551724137931,
+        "balanced_accuracy": 0.7857142857142857,
+        "precision": 0.9089655172413793,
+        "recall": 0.896551724137931,
+        "f1_score": 0.8857466817848328,
+        "confusion_matrix": [
+          [
+            4,
+            3
+          ],
+          [
+            0,
+            22
+          ]
+        ],
+        "sensitivity": 1.0,
+        "specificity": 0.5714285714285714,
+        "roc_auc": 0.8701298701298701,
+        "average_precision": 0.9523276498917106
+      },
+      "best_params": {
+        "classifier__alpha": 0.001
+      },
+      "cross_validation_score": 0.5812452253628724
     }
   },
   "test_metrics": {
-    "accuracy": 0.7741935483870968,
-    "balanced_accuracy": 0.86,
-    "precision": 0.8957816377171216,
-    "recall": 0.7741935483870968,
-    "f1_score": 0.797409878785486,
-    "auc": 0.8133333333333334,
-    "sensitivity": 0.72,
-    "specificity": 1.0,
-    "train_rows": 134.0,
-    "validation_rows": 30.0,
-    "test_rows": 31.0,
+    "accuracy": 0.8666666666666667,
+    "balanced_accuracy": 0.8295454545454546,
+    "precision": 0.8666666666666667,
+    "recall": 0.8666666666666667,
+    "f1_score": 0.8666666666666667,
+    "confusion_matrix": [
+      [
+        6,
+        2
+      ],
+      [
+        2,
+        20
+      ]
+    ],
+    "sensitivity": 0.9090909090909091,
+    "specificity": 0.75,
+    "roc_auc": 0.9147727272727273,
+    "average_precision": 0.9703687305960031,
+    "train_rows": 136.0,
+    "validation_rows": 29.0,
+    "test_rows": 30.0,
     "num_classes": 2.0
+  },
+  "feature_importance": [
+    {
+      "feature": "spread1",
+      "importance": 0.079545
+    },
+    {
+      "feature": "PPE",
+      "importance": 0.075284
+    },
+    {
+      "feature": "MDVP:Fhi(Hz)",
+      "importance": 0.069602
+    },
+    {
+      "feature": "D2",
+      "importance": 0.056108
+    },
+    {
+      "feature": "spread2",
+      "importance": 0.029119
+    },
+    {
+      "feature": "MDVP:APQ",
+      "importance": 0.024858
+    },
+    {
+      "feature": "MDVP:RAP",
+      "importance": 0.022017
+    },
+    {
+      "feature": "Jitter:DDP",
+      "importance": 0.022017
+    },
+    {
+      "feature": "MDVP:Fo(Hz)",
+      "importance": 0.016335
+    },
+    {
+      "feature": "HNR",
+      "importance": 0.015625
+    },
+    {
+      "feature": "RPDE",
+      "importance": 0.015625
+    },
+    {
+      "feature": "DFA",
+      "importance": 0.015625
+    },
+    {
+      "feature": "MDVP:PPQ",
+      "importance": -0.014205
+    },
+    {
+      "feature": "NHR",
+      "importance": 0.011364
+    },
+    {
+      "feature": "MDVP:Flo(Hz)",
+      "importance": 0.007812
+    },
+    {
+      "feature": "MDVP:Shimmer",
+      "importance": -0.005682
+    },
+    {
+      "feature": "Shimmer:APQ5",
+      "importance": -0.005682
+    },
+    {
+      "feature": "MDVP:Jitter(%)",
+      "importance": 0.0
+    },
+    {
+      "feature": "MDVP:Jitter(Abs)",
+      "importance": 0.0
+    },
+    {
+      "feature": "MDVP:Shimmer(dB)",
+      "importance": 0.0
+    },
+    {
+      "feature": "Shimmer:APQ3",
+      "importance": 0.0
+    },
+    {
+      "feature": "Shimmer:DDA",
+      "importance": 0.0
+    }
+  ],
+  "explainability": {
+    "feature_importance": [
+      {
+        "feature": "spread1",
+        "importance": 0.079545
+      },
+      {
+        "feature": "PPE",
+        "importance": 0.075284
+      },
+      {
+        "feature": "MDVP:Fhi(Hz)",
+        "importance": 0.069602
+      },
+      {
+        "feature": "D2",
+        "importance": 0.056108
+      },
+      {
+        "feature": "spread2",
+        "importance": 0.029119
+      },
+      {
+        "feature": "MDVP:APQ",
+        "importance": 0.024858
+      },
+      {
+        "feature": "MDVP:RAP",
+        "importance": 0.022017
+      },
+      {
+        "feature": "Jitter:DDP",
+        "importance": 0.022017
+      },
+      {
+        "feature": "MDVP:Fo(Hz)",
+        "importance": 0.016335
+      },
+      {
+        "feature": "HNR",
+        "importance": 0.015625
+      },
+      {
+        "feature": "RPDE",
+        "importance": 0.015625
+      },
+      {
+        "feature": "DFA",
+        "importance": 0.015625
+      },
+      {
+        "feature": "MDVP:PPQ",
+        "importance": -0.014205
+      },
+      {
+        "feature": "NHR",
+        "importance": 0.011364
+      },
+      {
+        "feature": "MDVP:Flo(Hz)",
+        "importance": 0.007812
+      },
+      {
+        "feature": "MDVP:Shimmer",
+        "importance": -0.005682
+      },
+      {
+        "feature": "Shimmer:APQ5",
+        "importance": -0.005682
+      },
+      {
+        "feature": "MDVP:Jitter(%)",
+        "importance": 0.0
+      },
+      {
+        "feature": "MDVP:Jitter(Abs)",
+        "importance": 0.0
+      },
+      {
+        "feature": "MDVP:Shimmer(dB)",
+        "importance": 0.0
+      },
+      {
+        "feature": "Shimmer:APQ3",
+        "importance": 0.0
+      },
+      {
+        "feature": "Shimmer:DDA",
+        "importance": 0.0
+      }
+    ],
+    "shap": {
+      "available": true,
+      "mean_abs_value": 0.021379805859998963
+    },
+    "lime": {
+      "available": true,
+      "rules": [
+        [
+          "21 <= -0.78",
+          -0.1248656950781095
+        ],
+        [
+          "18 <= -0.71",
+          -0.122941843375982
+        ],
+        [
+          "1 > 0.55",
+          -0.058554342001498026
+        ],
+        [
+          "12 <= -0.76",
+          -0.04965077873297044
+        ],
+        [
+          "19 <= -0.67",
+          -0.0441911790997792
+        ],
+        [
+          "17 <= -0.77",
+          -0.02624393221488061
+        ],
+        [
+          "0 > 0.66",
+          -0.025373543239430488
+        ],
+        [
+          "16 <= -0.77",
+          -0.017169391699861997
+        ],
+        [
+          "-0.30 < 5 <= 0.45",
+          0.016013255393600115
+        ],
+        [
+          "-0.77 < 11 <= -0.39",
+          -0.015402630963383117
+        ]
+      ]
+    }
+  },
+  "adversarial_robustness": {
+    "gaussian_noise_accuracy": 0.8666666666666667,
+    "data_poisoning_accuracy": 0.7333333333333333,
+    "before_attack_accuracy": 0.8666666666666667,
+    "after_attack_accuracy": 0.8,
+    "robustness_score": 0.9231,
+    "poisoned_label_fraction": 0.1
+  },
+  "aecs": 1.0,
+  "dtei": 89.6,
+  "blockchain_audit": {
+    "disease_key": "parkinson",
+    "model_artifact": "backend\\app\\ai\\artifacts\\parkinson_model.pkl",
+    "model_sha256": "721b69f2421d97e49bc1f9d7d0572c99c241a27a3e70d45c687dc7a6ce9cf53a",
+    "dataset_fingerprint": "32e6040916d2f5b80b49589d925a92bd25420687c76be19d72e37205e104abe6",
+    "metrics_sha256": "562014326dbeff213c66d24ca0dcbd7ba9573b8d22069803f9e677319b0c9324",
+    "timestamp": "2026-07-18T14:56:07.227272+00:00",
+    "audit_type": "training_artifact_integrity",
+    "block_hash": "3567394221e975f34ba35ab939a83c6e4c37f18bd6df3ca547129d9eab2bea7c",
+    "audit_file": "backend\\app\\ai\\artifacts\\reports\\parkinson\\blockchain_audit.json"
+  },
+  "report_artifacts": {
+    "curves_json": "backend\\app\\ai\\artifacts\\reports\\parkinson\\curves.json",
+    "explanations_json": "backend\\app\\ai\\artifacts\\reports\\parkinson\\explanations.json"
   },
   "deployment_status": "ready_for_research",
   "limitations": [
     "Research decision-support only; not validated or approved as a medical device.",
-    "Performance on this held-out source dataset does not establish clinical generalization."
+    "Real accuracy is calculated only from the held-out test split, not synthetic or demo rows."
   ]
 }

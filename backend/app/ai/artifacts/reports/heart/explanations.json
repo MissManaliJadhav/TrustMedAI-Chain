@@ -1,0 +1,105 @@
+{
+  "feature_importance": [
+    {
+      "feature": "chol",
+      "importance": 0.05356
+    },
+    {
+      "feature": "cp",
+      "importance": 0.032789
+    },
+    {
+      "feature": "oldpeak",
+      "importance": 0.024247
+    },
+    {
+      "feature": "ca",
+      "importance": 0.018968
+    },
+    {
+      "feature": "thal",
+      "importance": 0.017668
+    },
+    {
+      "feature": "age",
+      "importance": -0.016235
+    },
+    {
+      "feature": "slope",
+      "importance": 0.011964
+    },
+    {
+      "feature": "sex",
+      "importance": 0.011407
+    },
+    {
+      "feature": "restecg",
+      "importance": -0.009152
+    },
+    {
+      "feature": "trestbps",
+      "importance": 0.008913
+    },
+    {
+      "feature": "exang",
+      "importance": 0.006393
+    },
+    {
+      "feature": "thalch",
+      "importance": -0.005942
+    },
+    {
+      "feature": "fbs",
+      "importance": 0.000822
+    }
+  ],
+  "shap": {
+    "available": true,
+    "mean_abs_value": 0.020466092589182184
+  },
+  "lime": {
+    "available": true,
+    "rules": [
+      [
+        "14 > 0.00",
+        -0.2539574827229316
+      ],
+      [
+        "5 <= -0.36",
+        -0.24787616736693643
+      ],
+      [
+        "4 <= -0.85",
+        -0.1662203753358812
+      ],
+      [
+        "8 <= -0.27",
+        -0.15314882876022687
+      ],
+      [
+        "26 <= 0.00",
+        0.13627020295547165
+      ],
+      [
+        "23 <= 0.00",
+        -0.10381063984111467
+      ],
+      [
+        "13 <= 0.00",
+        -0.09871345103466986
+      ],
+      [
+        "15 <= 0.00",
+        0.09589663329158757
+      ],
+      [
+        "11 <= 0.00",
+        0.09079527277169168
+      ],
+      [
+        "7 <= -0.19",
+        0.08072881107581843
+      ]
+    ]
+  }
+}

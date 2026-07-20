@@ -1,0 +1,112 @@
+{
+  "feature_importance": [
+    {
+      "feature_index": 575,
+      "importance": 0.0752154
+    },
+    {
+      "feature_index": 316,
+      "importance": 0.07283511
+    },
+    {
+      "feature_index": 29,
+      "importance": 0.07225549
+    },
+    {
+      "feature_index": 1002,
+      "importance": 0.07211715
+    },
+    {
+      "feature_index": 1303,
+      "importance": 0.07145183
+    },
+    {
+      "feature_index": 1043,
+      "importance": 0.07092771
+    },
+    {
+      "feature_index": 1359,
+      "importance": 0.06873727
+    },
+    {
+      "feature_index": 314,
+      "importance": 0.06797554
+    },
+    {
+      "feature_index": 925,
+      "importance": 0.0675115
+    },
+    {
+      "feature_index": 1047,
+      "importance": 0.06715077
+    },
+    {
+      "feature_index": 287,
+      "importance": 0.06567247
+    },
+    {
+      "feature_index": 1163,
+      "importance": 0.06519274
+    },
+    {
+      "feature_index": 479,
+      "importance": 0.06492021
+    },
+    {
+      "feature_index": 703,
+      "importance": 0.06485148
+    },
+    {
+      "feature_index": 1167,
+      "importance": 0.06426932
+    },
+    {
+      "feature_index": 21,
+      "importance": 0.06298276
+    },
+    {
+      "feature_index": 1276,
+      "importance": 0.0627649
+    },
+    {
+      "feature_index": 1060,
+      "importance": 0.06260344
+    },
+    {
+      "feature_index": 2745,
+      "importance": 0.06256021
+    },
+    {
+      "feature_index": 118,
+      "importance": 0.06254271
+    },
+    {
+      "feature_index": 2759,
+      "importance": 0.06237369
+    },
+    {
+      "feature_index": 2610,
+      "importance": 0.06217482
+    },
+    {
+      "feature_index": 222,
+      "importance": 0.06171417
+    },
+    {
+      "feature_index": 318,
+      "importance": 0.06036145
+    },
+    {
+      "feature_index": 378,
+      "importance": 0.06011161
+    }
+  ],
+  "grad_cam": {
+    "available": false,
+    "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+  },
+  "integrated_gradients": {
+    "available": false,
+    "reason": "Integrated Gradients requires a differentiable deep-learning model."
+  }
+}

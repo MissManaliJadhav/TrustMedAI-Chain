@@ -1,0 +1,10 @@
+{
+  "disease_key": "liver",
+  "model_artifact": "backend\\app\\ai\\artifacts\\liver_model.pkl",
+  "model_sha256": "72291dcf507cb69ca043a772064627ec85e73d921289abb03759ee52680ef017",
+  "dataset_fingerprint": "b0deaf3f8b1923a7a8bca4c5c6bd93f0db74f571c40675b7043fe88f3f7cd4fc",
+  "metrics_sha256": "e36b6359057f30b20b0eea7c667665350759516af11c628bb4172ba6e6162316",
+  "timestamp": "2026-07-18T14:51:11.334174+00:00",
+  "audit_type": "training_artifact_integrity",
+  "block_hash": "e21f7cd01507b808d5cd22e0bd0e571892f028b5cb2cf44ec85cd28cec86c98a"
+}

@@ -1,10 +1,455 @@
 {
+  "artifact_version": 3,
+  "trained_at": "2026-07-18T15:25:37.729734+00:00",
   "modality": "image",
-  "feature_count": 4096,
+  "source": "kaggle_or_local_real_dataset",
+  "kaggle_slug": "andrewmvd/ocular-disease-recognition-odir5k",
+  "selected_model": "logistic_regression",
+  "architectures_requested": [
+    "custom_cnn",
+    "efficientnet_b0",
+    "vision_transformer"
+  ],
+  "architectures_evaluated": [
+    "logistic_regression",
+    "extra_trees",
+    "random_forest"
+  ],
+  "feature_extractor": "opencv_hog_histogram_v1",
   "class_labels": [
     "normal",
     "cataract",
     "glaucoma",
     "retina"
+  ],
+  "image_size": [
+    96,
+    96
+  ],
+  "data_processing": {
+    "resize": [
+      96,
+      96
+    ],
+    "normalization": "0_1_grayscale",
+    "noise_removal": "gaussian_blur",
+    "contrast_adjustment": "histogram_equalization",
+    "features": [
+      "32x32 intensity thumbnail",
+      "HSV color histogram",
+      "HOG",
+      "intensity statistics"
+    ],
+    "augmentation": "not applied for deterministic classical feature training"
+  },
+  "data_quality": {
+    "source_rows": 601,
+    "feature_count": 2920,
+    "class_distribution": {
+      "normal": 300,
+      "cataract": 100,
+      "glaucoma": 101,
+      "retina": 100
+    },
+    "dataset_fingerprint": "0bf1f4b4d82e8a9d07dba6dc3aff0552c76ee9a018a6d620d3956690af8a8a4d"
+  },
+  "validation_comparison": {
+    "logistic_regression": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.5111111111111111,
+        "balanced_accuracy": 0.38888888888888884,
+        "precision": 0.4808857808857808,
+        "recall": 0.5111111111111111,
+        "f1_score": 0.48978835978835983,
+        "confusion_matrix": [
+          [
+            34,
+            2,
+            5,
+            4
+          ],
+          [
+            6,
+            6,
+            2,
+            1
+          ],
+          [
+            7,
+            3,
+            3,
+            2
+          ],
+          [
+            8,
+            1,
+            3,
+            3
+          ]
+        ],
+        "roc_auc": 0.6983703703703703
+      }
+    },
+    "extra_trees": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.5777777777777777,
+        "balanced_accuracy": 0.3666666666666667,
+        "precision": 0.4377510040160642,
+        "recall": 0.5777777777777777,
+        "f1_score": 0.4576231060606061,
+        "confusion_matrix": [
+          [
+            45,
+            0,
+            0,
+            0
+          ],
+          [
+            8,
+            7,
+            0,
+            0
+          ],
+          [
+            15,
+            0,
+            0,
+            0
+          ],
+          [
+            15,
+            0,
+            0,
+            0
+          ]
+        ],
+        "roc_auc": 0.6903456790123457
+      }
+    },
+    "random_forest": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.5666666666666667,
+        "balanced_accuracy": 0.35,
+        "precision": 0.4345238095238096,
+        "recall": 0.5666666666666667,
+        "f1_score": 0.4440753045404208,
+        "confusion_matrix": [
+          [
+            45,
+            0,
+            0,
+            0
+          ],
+          [
+            9,
+            6,
+            0,
+            0
+          ],
+          [
+            15,
+            0,
+            0,
+            0
+          ],
+          [
+            15,
+            0,
+            0,
+            0
+          ]
+        ],
+        "roc_auc": 0.7097283950617284
+      }
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.4945054945054945,
+    "balanced_accuracy": 0.4357638888888889,
+    "precision": 0.4739403453689168,
+    "recall": 0.4945054945054945,
+    "f1_score": 0.4829509671614935,
+    "confusion_matrix": [
+      [
+        28,
+        2,
+        6,
+        9
+      ],
+      [
+        1,
+        12,
+        2,
+        0
+      ],
+      [
+        12,
+        0,
+        3,
+        1
+      ],
+      [
+        9,
+        1,
+        3,
+        2
+      ]
+    ],
+    "roc_auc": 0.6229778459526744,
+    "train_rows": 420.0,
+    "validation_rows": 90.0,
+    "test_rows": 91.0,
+    "num_classes": 4.0
+  },
+  "feature_importance": [
+    {
+      "feature_index": 575,
+      "importance": 0.0752154
+    },
+    {
+      "feature_index": 316,
+      "importance": 0.07283511
+    },
+    {
+      "feature_index": 29,
+      "importance": 0.07225549
+    },
+    {
+      "feature_index": 1002,
+      "importance": 0.07211715
+    },
+    {
+      "feature_index": 1303,
+      "importance": 0.07145183
+    },
+    {
+      "feature_index": 1043,
+      "importance": 0.07092771
+    },
+    {
+      "feature_index": 1359,
+      "importance": 0.06873727
+    },
+    {
+      "feature_index": 314,
+      "importance": 0.06797554
+    },
+    {
+      "feature_index": 925,
+      "importance": 0.0675115
+    },
+    {
+      "feature_index": 1047,
+      "importance": 0.06715077
+    },
+    {
+      "feature_index": 287,
+      "importance": 0.06567247
+    },
+    {
+      "feature_index": 1163,
+      "importance": 0.06519274
+    },
+    {
+      "feature_index": 479,
+      "importance": 0.06492021
+    },
+    {
+      "feature_index": 703,
+      "importance": 0.06485148
+    },
+    {
+      "feature_index": 1167,
+      "importance": 0.06426932
+    },
+    {
+      "feature_index": 21,
+      "importance": 0.06298276
+    },
+    {
+      "feature_index": 1276,
+      "importance": 0.0627649
+    },
+    {
+      "feature_index": 1060,
+      "importance": 0.06260344
+    },
+    {
+      "feature_index": 2745,
+      "importance": 0.06256021
+    },
+    {
+      "feature_index": 118,
+      "importance": 0.06254271
+    },
+    {
+      "feature_index": 2759,
+      "importance": 0.06237369
+    },
+    {
+      "feature_index": 2610,
+      "importance": 0.06217482
+    },
+    {
+      "feature_index": 222,
+      "importance": 0.06171417
+    },
+    {
+      "feature_index": 318,
+      "importance": 0.06036145
+    },
+    {
+      "feature_index": 378,
+      "importance": 0.06011161
+    }
+  ],
+  "explainability": {
+    "feature_importance": [
+      {
+        "feature_index": 575,
+        "importance": 0.0752154
+      },
+      {
+        "feature_index": 316,
+        "importance": 0.07283511
+      },
+      {
+        "feature_index": 29,
+        "importance": 0.07225549
+      },
+      {
+        "feature_index": 1002,
+        "importance": 0.07211715
+      },
+      {
+        "feature_index": 1303,
+        "importance": 0.07145183
+      },
+      {
+        "feature_index": 1043,
+        "importance": 0.07092771
+      },
+      {
+        "feature_index": 1359,
+        "importance": 0.06873727
+      },
+      {
+        "feature_index": 314,
+        "importance": 0.06797554
+      },
+      {
+        "feature_index": 925,
+        "importance": 0.0675115
+      },
+      {
+        "feature_index": 1047,
+        "importance": 0.06715077
+      },
+      {
+        "feature_index": 287,
+        "importance": 0.06567247
+      },
+      {
+        "feature_index": 1163,
+        "importance": 0.06519274
+      },
+      {
+        "feature_index": 479,
+        "importance": 0.06492021
+      },
+      {
+        "feature_index": 703,
+        "importance": 0.06485148
+      },
+      {
+        "feature_index": 1167,
+        "importance": 0.06426932
+      },
+      {
+        "feature_index": 21,
+        "importance": 0.06298276
+      },
+      {
+        "feature_index": 1276,
+        "importance": 0.0627649
+      },
+      {
+        "feature_index": 1060,
+        "importance": 0.06260344
+      },
+      {
+        "feature_index": 2745,
+        "importance": 0.06256021
+      },
+      {
+        "feature_index": 118,
+        "importance": 0.06254271
+      },
+      {
+        "feature_index": 2759,
+        "importance": 0.06237369
+      },
+      {
+        "feature_index": 2610,
+        "importance": 0.06217482
+      },
+      {
+        "feature_index": 222,
+        "importance": 0.06171417
+      },
+      {
+        "feature_index": 318,
+        "importance": 0.06036145
+      },
+      {
+        "feature_index": 378,
+        "importance": 0.06011161
+      }
+    ],
+    "grad_cam": {
+      "available": false,
+      "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+    },
+    "integrated_gradients": {
+      "available": false,
+      "reason": "Integrated Gradients requires a differentiable deep-learning model."
+    }
+  },
+  "adversarial_robustness": {
+    "before_attack_accuracy": 0.4945054945054945,
+    "gaussian_noise_accuracy": 0.4945054945054945,
+    "brightness_shift_accuracy": 0.32967032967032966,
+    "fgsm_accuracy": null,
+    "pgd_accuracy": null,
+    "after_attack_accuracy": 0.41208791208791207,
+    "robustness_score": 0.8333,
+    "explanation_stability": 0.7,
+    "note": "FGSM/PGD require a differentiable deep-learning model; Gaussian and brightness attacks were evaluated for this OpenCV/sklearn image artifact."
+  },
+  "aecs": 0.7,
+  "dtei": 69.99,
+  "blockchain_audit": {
+    "disease_key": "eye",
+    "model_artifact": "backend\\app\\ai\\artifacts\\eye_model.pkl",
+    "model_sha256": "910bac116243a20e11edc77e09b78887039efd7c0a7c53403afad6b949be4e6d",
+    "dataset_fingerprint": "0bf1f4b4d82e8a9d07dba6dc3aff0552c76ee9a018a6d620d3956690af8a8a4d",
+    "metrics_sha256": "fd1f36786558e518b1da9f7cb315a1e0f62d4943e6ea726ef3f2944ef3980154",
+    "timestamp": "2026-07-18T15:25:37.559733+00:00",
+    "audit_type": "training_artifact_integrity",
+    "block_hash": "0d89284fbde521dcdc185a062bc6a68022795d8ab119175d8a82c7adcf8fddeb",
+    "audit_file": "backend\\app\\ai\\artifacts\\reports\\eye\\blockchain_audit.json"
+  },
+  "report_artifacts": {
+    "curves_json": "backend\\app\\ai\\artifacts\\reports\\eye\\curves.json",
+    "explanations_json": "backend\\app\\ai\\artifacts\\reports\\eye\\image_explanations.json"
+  },
+  "deployment_status": "blocked_low_quality",
+  "limitations": [
+    "Research decision-support only; not validated or approved as a medical device.",
+    "This run used OpenCV/sklearn features because TensorFlow/PyTorch was unavailable in the active Python environment.",
+    "CNN/ResNet/EfficientNet/ViT training remains implemented and will run automatically when TensorFlow is installed."
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "disease_key": "parkinson",
+  "model_artifact": "backend\\app\\ai\\artifacts\\parkinson_model.pkl",
+  "model_sha256": "721b69f2421d97e49bc1f9d7d0572c99c241a27a3e70d45c687dc7a6ce9cf53a",
+  "dataset_fingerprint": "32e6040916d2f5b80b49589d925a92bd25420687c76be19d72e37205e104abe6",
+  "metrics_sha256": "562014326dbeff213c66d24ca0dcbd7ba9573b8d22069803f9e677319b0c9324",
+  "timestamp": "2026-07-18T14:56:07.227272+00:00",
+  "audit_type": "training_artifact_integrity",
+  "block_hash": "3567394221e975f34ba35ab939a83c6e4c37f18bd6df3ca547129d9eab2bea7c"
+}

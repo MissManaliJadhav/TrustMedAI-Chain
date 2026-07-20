@@ -15,12 +15,14 @@ reportlab==4.2.5
 numpy==1.26.4
 pandas==2.2.3
 scikit-learn==1.6.0
+xgboost==2.1.4
 tensorflow==2.15.0
 torch==2.2.2
 shap==0.46.0
 lime==0.2.0.1
 captum==0.7.0
 opencv-python-headless==4.10.0.84
+kaggle==1.7.4.5
 flower==2.0.1
 pytest==8.3.4
 httpx==0.28.1

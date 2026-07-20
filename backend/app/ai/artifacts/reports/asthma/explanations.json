@@ -1,0 +1,117 @@
+{
+  "feature_importance": [
+    {
+      "feature": "Tiredness",
+      "importance": 0.0
+    },
+    {
+      "feature": "Dry-Cough",
+      "importance": 0.0
+    },
+    {
+      "feature": "Difficulty-in-Breathing",
+      "importance": 0.0
+    },
+    {
+      "feature": "Sore-Throat",
+      "importance": 0.0
+    },
+    {
+      "feature": "None_Sympton",
+      "importance": 0.0
+    },
+    {
+      "feature": "Pains",
+      "importance": 0.0
+    },
+    {
+      "feature": "Nasal-Congestion",
+      "importance": 0.0
+    },
+    {
+      "feature": "Runny-Nose",
+      "importance": 0.0
+    },
+    {
+      "feature": "None_Experiencing",
+      "importance": 0.0
+    },
+    {
+      "feature": "Age_0-9",
+      "importance": 0.0
+    },
+    {
+      "feature": "Age_10-19",
+      "importance": 0.0
+    },
+    {
+      "feature": "Age_20-24",
+      "importance": 0.0
+    },
+    {
+      "feature": "Age_25-59",
+      "importance": 0.0
+    },
+    {
+      "feature": "Age_60+",
+      "importance": 0.0
+    },
+    {
+      "feature": "Gender_Female",
+      "importance": 0.0
+    },
+    {
+      "feature": "Gender_Male",
+      "importance": 0.0
+    }
+  ],
+  "shap": {
+    "available": true,
+    "mean_abs_value": 0.015346497665937901
+  },
+  "lime": {
+    "available": true,
+    "rules": [
+      [
+        "12 <= -0.49",
+        -0.029019902007184215
+      ],
+      [
+        "3 <= -0.70",
+        -0.008315313483615689
+      ],
+      [
+        "5 <= -0.77",
+        -0.007605572010297523
+      ],
+      [
+        "4 <= -0.30",
+        0.00688486151895365
+      ],
+      [
+        "14 <= -0.72",
+        -0.006224522236794258
+      ],
+      [
+        "10 <= -0.50",
+        0.005977970418681388
+      ],
+      [
+        "0 <= -0.71",
+        0.0051067771488791155
+      ],
+      [
+        "8 <= -0.38",
+        -0.004394884886384161
+      ],
+      [
+        "13 <= -0.50",
+        -0.0029966388676344467
+      ],
+      [
+        "0.00 < 1 <= 1.00",
+        -0.0027715729462749776
+      ]
+    ]
+  }
+}

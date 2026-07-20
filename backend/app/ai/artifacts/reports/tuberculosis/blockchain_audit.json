@@ -1,0 +1,10 @@
+{
+  "disease_key": "tuberculosis",
+  "model_artifact": "backend\\app\\ai\\artifacts\\tuberculosis_model.pkl",
+  "model_sha256": "30dc849e70955b41a6d7590c6eba45c230253d53522bbe0523a7c4af74fbde27",
+  "dataset_fingerprint": "1f4e76dcab2c9f34eae1c2e3129228b6b28a4e89097d26e50e536baec5b66428",
+  "metrics_sha256": "8222d9c219803018f18bed17773bd5b98c6eb6fa0ed754a154406b2b9ca83f00",
+  "timestamp": "2026-07-18T15:28:57.158279+00:00",
+  "audit_type": "training_artifact_integrity",
+  "block_hash": "f10c4f6a6c1064aaa303c5021e41d4c2f96dc0151499ab474a0308d84c80ab16"
+}

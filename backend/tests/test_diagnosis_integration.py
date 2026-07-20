@@ -1,4 +1,5 @@
 from io import BytesIO
+from uuid import uuid4
 
 import cv2
 import numpy as np
@@ -30,15 +31,41 @@ def _admin_headers(client: TestClient) -> dict[str, str]:
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
+def _doctor_headers(client: TestClient) -> dict[str, str]:
+    email = f"doctor-{uuid4().hex[:8]}@example.com"
+    password = "StrongPass123!"
+    signup = client.post(
+        "/api/v1/auth/signup",
+        json={"email": email, "password": password, "full_name": "Integration Doctor", "role": "DOCTOR"},
+    )
+    assert signup.status_code == 201
+    response = client.post("/api/v1/auth/login", json={"email": email, "password": password})
+    assert response.status_code == 200
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+
 def test_tabular_and_image_artifacts_persist_end_to_end(tmp_path) -> None:
     settings.artifact_storage_backend = "local"
     settings.local_artifact_dir = str(tmp_path)
 
     with TestClient(app) as client:
-        headers = _admin_headers(client)
+        admin_headers = _admin_headers(client)
+        headers = _doctor_headers(client)
         schema = client.get("/api/v1/datasets/diseases/diabetes/features").json()["features"]
         features = {item["name"]: item["default"] for item in schema}
         pdf = _pdf_bytes()
+        forbidden_admin_prediction = client.post(
+            "/api/v1/predictions/tabular",
+            headers=admin_headers,
+            data={
+                "disease_key": "diabetes",
+                "patient_name": "Admin Forbidden Patient",
+                "patient_email": "admin-forbidden@example.com",
+                "features_json": __import__("json").dumps(features),
+            },
+        )
+        assert forbidden_admin_prediction.status_code == 403
+
         tabular = client.post(
             "/api/v1/predictions/tabular",
             headers=headers,
@@ -57,6 +84,17 @@ def test_tabular_and_image_artifacts_persist_end_to_end(tmp_path) -> None:
             "supporting_pdf",
             "generated_report",
         }
+        tabular_ledger = tabular_body["blockchain_status"]["local_ledger"]
+        assert tabular_ledger["verified"] is True
+        assert tabular_ledger["block_number"] >= 1
+        assert tabular_ledger["tx_id"].startswith("TX-")
+        assert tabular_ledger["network"] == "TrustMedAI-Chain Local Ledger"
+        assert tabular_body["blockchain_status"]["ledger_status"] == "immutable"
+        assert tabular_body["dtei_components"]["blockchain_integrity"] == 1.0
+        dtei = tabular_body["metrics"]["dtei"]
+        assert dtei["formula"] == "DTEI = alpha*F + beta*I + gamma*R + delta*B + lambda*C"
+        assert round(sum(dtei["weights"].values()), 5) == 1.0
+        assert dtei["status"] in {"High Trust", "Moderate Trust", "Low Trust", "Critical Review Required"}
 
         image = np.zeros((64, 64, 3), dtype=np.uint8)
         ok, encoded = cv2.imencode(".png", image)
@@ -96,6 +134,8 @@ def test_tabular_and_image_artifacts_persist_end_to_end(tmp_path) -> None:
         )
         assert verification.status_code == 200
         assert verification.json()["local_hash_match"] is True
+        assert verification.json()["local_ledger"]["verified"] is True
+        assert verification.json()["verified"] is True
 
     db = SessionLocal()
     try:

@@ -1,10 +1,417 @@
 {
+  "artifact_version": 3,
+  "trained_at": "2026-07-18T15:39:46.162575+00:00",
   "modality": "image",
-  "feature_count": 4096,
+  "source": "kaggle_or_local_real_dataset",
+  "kaggle_slug": "masoudnickparvar/brain-tumor-mri-dataset",
+  "selected_model": "extra_trees",
+  "architectures_requested": [
+    "custom_cnn",
+    "resnet50",
+    "vision_transformer"
+  ],
+  "architectures_evaluated": [
+    "sgd_logistic",
+    "extra_trees"
+  ],
+  "feature_extractor": "opencv_hog_histogram_v1",
   "class_labels": [
     "no_tumor",
     "glioma",
     "meningioma",
     "pituitary"
+  ],
+  "image_size": [
+    64,
+    64
+  ],
+  "data_processing": {
+    "resize": [
+      64,
+      64
+    ],
+    "normalization": "0_1_grayscale",
+    "noise_removal": "gaussian_blur",
+    "contrast_adjustment": "histogram_equalization",
+    "features": [
+      "32x32 intensity thumbnail",
+      "HSV color histogram",
+      "HOG",
+      "intensity statistics"
+    ],
+    "augmentation": "not applied for deterministic classical feature training"
+  },
+  "data_quality": {
+    "source_rows": 2800,
+    "feature_count": 1732,
+    "class_distribution": {
+      "no_tumor": 700,
+      "glioma": 700,
+      "meningioma": 700,
+      "pituitary": 700
+    },
+    "dataset_fingerprint": "109fbf64cc7bd7374c19b952f6f31d465a642538c6e243e8942552adcb4feff7"
+  },
+  "validation_comparison": {
+    "sgd_logistic": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.8047619047619048,
+        "balanced_accuracy": 0.8047619047619048,
+        "precision": 0.803775056311869,
+        "recall": 0.8047619047619048,
+        "f1_score": 0.8002697361060618,
+        "confusion_matrix": [
+          [
+            101,
+            0,
+            3,
+            1
+          ],
+          [
+            3,
+            89,
+            12,
+            1
+          ],
+          [
+            18,
+            17,
+            62,
+            8
+          ],
+          [
+            7,
+            1,
+            11,
+            86
+          ]
+        ],
+        "roc_auc": 0.0
+      }
+    },
+    "extra_trees": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.8904761904761904,
+        "balanced_accuracy": 0.8904761904761904,
+        "precision": 0.8930993209688863,
+        "recall": 0.8904761904761904,
+        "f1_score": 0.8889855079710756,
+        "confusion_matrix": [
+          [
+            98,
+            1,
+            2,
+            4
+          ],
+          [
+            0,
+            93,
+            10,
+            2
+          ],
+          [
+            6,
+            5,
+            79,
+            15
+          ],
+          [
+            0,
+            0,
+            1,
+            104
+          ]
+        ],
+        "roc_auc": 0.9827551020408164
+      }
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.8857142857142857,
+    "balanced_accuracy": 0.8857142857142857,
+    "precision": 0.8877416387627951,
+    "recall": 0.8857142857142857,
+    "f1_score": 0.8845484713237768,
+    "confusion_matrix": [
+      [
+        101,
+        2,
+        1,
+        1
+      ],
+      [
+        0,
+        90,
+        9,
+        6
+      ],
+      [
+        7,
+        3,
+        81,
+        14
+      ],
+      [
+        0,
+        3,
+        2,
+        100
+      ]
+    ],
+    "roc_auc": 0.9818027210884355,
+    "train_rows": 1960.0,
+    "validation_rows": 420.0,
+    "test_rows": 420.0,
+    "num_classes": 4.0
+  },
+  "feature_importance": [
+    {
+      "feature_index": 476,
+      "importance": 0.00600098
+    },
+    {
+      "feature_index": 579,
+      "importance": 0.00569115
+    },
+    {
+      "feature_index": 1189,
+      "importance": 0.00526988
+    },
+    {
+      "feature_index": 540,
+      "importance": 0.00487358
+    },
+    {
+      "feature_index": 1026,
+      "importance": 0.00443151
+    },
+    {
+      "feature_index": 355,
+      "importance": 0.0039811
+    },
+    {
+      "feature_index": 419,
+      "importance": 0.00391193
+    },
+    {
+      "feature_index": 515,
+      "importance": 0.00386633
+    },
+    {
+      "feature_index": 668,
+      "importance": 0.00384054
+    },
+    {
+      "feature_index": 572,
+      "importance": 0.0037855
+    },
+    {
+      "feature_index": 412,
+      "importance": 0.00377579
+    },
+    {
+      "feature_index": 547,
+      "importance": 0.00376307
+    },
+    {
+      "feature_index": 444,
+      "importance": 0.00368534
+    },
+    {
+      "feature_index": 643,
+      "importance": 0.00358721
+    },
+    {
+      "feature_index": 1198,
+      "importance": 0.00349322
+    },
+    {
+      "feature_index": 451,
+      "importance": 0.00348197
+    },
+    {
+      "feature_index": 965,
+      "importance": 0.00345479
+    },
+    {
+      "feature_index": 380,
+      "importance": 0.00344987
+    },
+    {
+      "feature_index": 732,
+      "importance": 0.00341413
+    },
+    {
+      "feature_index": 636,
+      "importance": 0.0033848
+    },
+    {
+      "feature_index": 739,
+      "importance": 0.0033287
+    },
+    {
+      "feature_index": 675,
+      "importance": 0.00325677
+    },
+    {
+      "feature_index": 1363,
+      "importance": 0.00317363
+    },
+    {
+      "feature_index": 700,
+      "importance": 0.00306313
+    },
+    {
+      "feature_index": 1390,
+      "importance": 0.00287611
+    }
+  ],
+  "explainability": {
+    "feature_importance": [
+      {
+        "feature_index": 476,
+        "importance": 0.00600098
+      },
+      {
+        "feature_index": 579,
+        "importance": 0.00569115
+      },
+      {
+        "feature_index": 1189,
+        "importance": 0.00526988
+      },
+      {
+        "feature_index": 540,
+        "importance": 0.00487358
+      },
+      {
+        "feature_index": 1026,
+        "importance": 0.00443151
+      },
+      {
+        "feature_index": 355,
+        "importance": 0.0039811
+      },
+      {
+        "feature_index": 419,
+        "importance": 0.00391193
+      },
+      {
+        "feature_index": 515,
+        "importance": 0.00386633
+      },
+      {
+        "feature_index": 668,
+        "importance": 0.00384054
+      },
+      {
+        "feature_index": 572,
+        "importance": 0.0037855
+      },
+      {
+        "feature_index": 412,
+        "importance": 0.00377579
+      },
+      {
+        "feature_index": 547,
+        "importance": 0.00376307
+      },
+      {
+        "feature_index": 444,
+        "importance": 0.00368534
+      },
+      {
+        "feature_index": 643,
+        "importance": 0.00358721
+      },
+      {
+        "feature_index": 1198,
+        "importance": 0.00349322
+      },
+      {
+        "feature_index": 451,
+        "importance": 0.00348197
+      },
+      {
+        "feature_index": 965,
+        "importance": 0.00345479
+      },
+      {
+        "feature_index": 380,
+        "importance": 0.00344987
+      },
+      {
+        "feature_index": 732,
+        "importance": 0.00341413
+      },
+      {
+        "feature_index": 636,
+        "importance": 0.0033848
+      },
+      {
+        "feature_index": 739,
+        "importance": 0.0033287
+      },
+      {
+        "feature_index": 675,
+        "importance": 0.00325677
+      },
+      {
+        "feature_index": 1363,
+        "importance": 0.00317363
+      },
+      {
+        "feature_index": 700,
+        "importance": 0.00306313
+      },
+      {
+        "feature_index": 1390,
+        "importance": 0.00287611
+      }
+    ],
+    "grad_cam": {
+      "available": false,
+      "reason": "Grad-CAM requires a convolutional deep-learning checkpoint; this run used an OpenCV HOG/color feature model because TensorFlow/PyTorch was unavailable."
+    },
+    "integrated_gradients": {
+      "available": false,
+      "reason": "Integrated Gradients requires a differentiable deep-learning model."
+    }
+  },
+  "adversarial_robustness": {
+    "before_attack_accuracy": 0.8857142857142857,
+    "gaussian_noise_accuracy": 0.53125,
+    "brightness_shift_accuracy": 0.9125,
+    "fgsm_accuracy": null,
+    "pgd_accuracy": null,
+    "after_attack_accuracy": 0.721875,
+    "robustness_score": 0.815,
+    "explanation_stability": 0.7,
+    "note": "FGSM/PGD require a differentiable deep-learning model; Gaussian and brightness attacks were evaluated for this OpenCV/sklearn image artifact."
+  },
+  "aecs": 0.7,
+  "dtei": 83.12,
+  "blockchain_audit": {
+    "disease_key": "brain_tumor",
+    "model_artifact": "backend\\app\\ai\\artifacts\\brain_tumor_model.pkl",
+    "model_sha256": "30343f91acb66f96e79a3bb3055cb1e057dbad982e808dd7f9dfffab5a3a6b49",
+    "dataset_fingerprint": "109fbf64cc7bd7374c19b952f6f31d465a642538c6e243e8942552adcb4feff7",
+    "metrics_sha256": "4cc29619a1521230778d45a75647542a04d23a3c1c1f22048d5f2bfd1082f872",
+    "timestamp": "2026-07-18T15:39:46.071887+00:00",
+    "audit_type": "training_artifact_integrity",
+    "block_hash": "5032203992f18e0dfc218429401c720b2432d3fae88cc918ac92c89fe91751fa",
+    "audit_file": "backend\\app\\ai\\artifacts\\reports\\brain_tumor\\blockchain_audit.json"
+  },
+  "report_artifacts": {
+    "curves_json": "backend\\app\\ai\\artifacts\\reports\\brain_tumor\\curves.json",
+    "explanations_json": "backend\\app\\ai\\artifacts\\reports\\brain_tumor\\image_explanations.json"
+  },
+  "deployment_status": "ready_for_research",
+  "limitations": [
+    "Research decision-support only; not validated or approved as a medical device.",
+    "This run used OpenCV/sklearn features because TensorFlow/PyTorch was unavailable in the active Python environment.",
+    "CNN/ResNet/EfficientNet/ViT training remains implemented and will run automatically when TensorFlow is installed."
   ]
 }

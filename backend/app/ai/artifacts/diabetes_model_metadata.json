@@ -1,15 +1,20 @@
 {
-  "artifact_version": 2,
-  "trained_at": "2026-06-30T14:19:53.658161+00:00",
+  "artifact_version": 3,
+  "trained_at": "2026-07-18T14:12:22.691231+00:00",
   "modality": "tabular",
-  "selected_model": "random_forest",
-  "decision_threshold": 0.28192760498187236,
-  "selection_metric": "0.45 balanced_accuracy + 0.35 weighted_f1 + 0.20 roc_auc",
+  "source": "kaggle_or_local_real_dataset",
+  "kaggle_slug": "uciml/pima-indians-diabetes-database",
+  "selected_model": "xgboost",
+  "architectures_evaluated": [
+    "logistic_regression",
+    "random_forest",
+    "neural_network",
+    "xgboost"
+  ],
   "class_labels": [
     "negative",
     "positive"
   ],
-  "positive_class": "positive",
   "input_schema": [
     {
       "name": "Pregnancies",
@@ -17,7 +22,7 @@
       "input_type": "number",
       "required": true,
       "minimum": 0.0,
-      "maximum": 17.0,
+      "maximum": 13.5,
       "default": 3.0,
       "choices": null
     },
@@ -33,21 +38,21 @@
     },
     {
       "name": "BloodPressure",
-      "label": "BloodPressure",
+      "label": "Bloodpressure",
       "input_type": "number",
       "required": true,
-      "minimum": 24.0,
-      "maximum": 122.0,
+      "minimum": 40.0,
+      "maximum": 104.0,
       "default": 72.0,
       "choices": null
     },
     {
       "name": "SkinThickness",
-      "label": "SkinThickness",
+      "label": "Skinthickness",
       "input_type": "number",
       "required": true,
       "minimum": 7.0,
-      "maximum": 60.0,
+      "maximum": 57.0,
       "default": 29.0,
       "choices": null
     },
@@ -57,27 +62,27 @@
       "input_type": "number",
       "required": true,
       "minimum": 16.0,
-      "maximum": 744.0,
+      "maximum": 341.0,
       "default": 126.0,
       "choices": null
     },
     {
       "name": "BMI",
-      "label": "BMI",
+      "label": "Bmi",
       "input_type": "number",
       "required": true,
       "minimum": 18.2,
-      "maximum": 67.1,
+      "maximum": 49.55,
       "default": 32.4,
       "choices": null
     },
     {
       "name": "DiabetesPedigreeFunction",
-      "label": "DiabetesPedigreeFunction",
+      "label": "Diabetespedigreefunction",
       "input_type": "number",
       "required": true,
       "minimum": 0.084,
-      "maximum": 2.329,
+      "maximum": 1.2435,
       "default": 0.385,
       "choices": null
     },
@@ -87,12 +92,13 @@
       "input_type": "number",
       "required": true,
       "minimum": 21.0,
-      "maximum": 81.0,
+      "maximum": 66.5,
       "default": 30.0,
       "choices": null
     }
   ],
   "data_quality": {
+    "source_file": "data\\raw\\diabetes\\diabetes.csv",
     "source_rows": 768,
     "rows_after_exact_deduplication": 768,
     "exact_duplicates_removed": 0,
@@ -101,77 +107,295 @@
       "0": 500,
       "1": 268
     },
-    "notes": [
-      "Physiologically impossible zero measurements are treated as missing and imputed from training data."
-    ]
+    "dataset_fingerprint": "698c203a14aa31941d2251175330c9199f3ccdb31597abbba2a3e35416257a72"
   },
   "validation_comparison": {
     "logistic_regression": {
-      "accuracy": 0.7565217391304347,
-      "balanced_accuracy": 0.7725,
-      "precision": 0.7898946701512631,
-      "recall": 0.7565217391304347,
-      "f1_score": 0.7621211296729608,
-      "auc": 0.8136666666666666,
-      "sensitivity": 0.825,
-      "specificity": 0.72,
-      "decision_threshold": 0.4314491977023114,
-      "selection_score": 0.7771007287188696
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.7391304347826086,
+        "balanced_accuracy": 0.7358333333333333,
+        "precision": 0.7552455115725719,
+        "recall": 0.7391304347826086,
+        "f1_score": 0.7436397038356621,
+        "confusion_matrix": [
+          [
+            56,
+            19
+          ],
+          [
+            11,
+            29
+          ]
+        ],
+        "sensitivity": 0.725,
+        "specificity": 0.7466666666666667,
+        "roc_auc": 0.818,
+        "average_precision": 0.7014266456294679
+      },
+      "best_params": {
+        "classifier__C": 0.5
+      },
+      "cross_validation_score": 0.719685090791876
     },
     "random_forest": {
-      "accuracy": 0.7478260869565218,
-      "balanced_accuracy": 0.8008333333333333,
-      "precision": 0.8410528877352369,
-      "recall": 0.7478260869565218,
-      "f1_score": 0.7519647971774314,
-      "auc": 0.8333333333333333,
-      "sensitivity": 0.975,
-      "specificity": 0.6266666666666667,
-      "decision_threshold": 0.28192760498187236,
-      "selection_score": 0.7902293456787676
-    },
-    "extra_trees": {
-      "accuracy": 0.7478260869565218,
-      "balanced_accuracy": 0.7775000000000001,
-      "precision": 0.800281608590378,
-      "recall": 0.7478260869565218,
-      "f1_score": 0.7537371725888156,
-      "auc": 0.8263333333333334,
-      "sensitivity": 0.875,
-      "specificity": 0.68,
-      "decision_threshold": 0.4183838273128006,
-      "selection_score": 0.7789496770727522
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.7217391304347827,
+        "balanced_accuracy": 0.7166666666666666,
+        "precision": 0.7382651957603289,
+        "recall": 0.7217391304347827,
+        "f1_score": 0.7265490174247062,
+        "confusion_matrix": [
+          [
+            55,
+            20
+          ],
+          [
+            12,
+            28
+          ]
+        ],
+        "sensitivity": 0.7,
+        "specificity": 0.7333333333333333,
+        "roc_auc": 0.833,
+        "average_precision": 0.7064492224250812
+      },
+      "best_params": {
+        "classifier__min_samples_leaf": 4,
+        "classifier__n_estimators": 450
+      },
+      "cross_validation_score": 0.7295636222221317
     },
     "neural_network": {
-      "accuracy": 0.6869565217391305,
-      "balanced_accuracy": 0.7541666666666667,
-      "precision": 0.8195809807686796,
-      "recall": 0.6869565217391305,
-      "f1_score": 0.6877613824666614,
-      "auc": 0.7813333333333333,
-      "sensitivity": 0.975,
-      "specificity": 0.5333333333333333,
-      "decision_threshold": 0.19639420336522198,
-      "selection_score": 0.7363581505299981
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.7043478260869566,
+        "balanced_accuracy": 0.6508333333333334,
+        "precision": 0.6936877946568883,
+        "recall": 0.7043478260869566,
+        "f1_score": 0.6954075704763651,
+        "confusion_matrix": [
+          [
+            62,
+            13
+          ],
+          [
+            21,
+            19
+          ]
+        ],
+        "sensitivity": 0.475,
+        "specificity": 0.8266666666666667,
+        "roc_auc": 0.783,
+        "average_precision": 0.5799445443829745
+      },
+      "best_params": {
+        "classifier__alpha": 0.001
+      },
+      "cross_validation_score": 0.72881770003572
+    },
+    "xgboost": {
+      "status": "completed",
+      "validation_metrics": {
+        "accuracy": 0.7652173913043478,
+        "balanced_accuracy": 0.7383333333333333,
+        "precision": 0.7639206712433256,
+        "recall": 0.7652173913043478,
+        "f1_score": 0.7645088512831353,
+        "confusion_matrix": [
+          [
+            62,
+            13
+          ],
+          [
+            14,
+            26
+          ]
+        ],
+        "sensitivity": 0.65,
+        "specificity": 0.8266666666666667,
+        "roc_auc": 0.8323333333333333,
+        "average_precision": 0.6913948936998396
+      },
+      "best_params": {
+        "mode": "direct_fit_due_sklearn_tag_compatibility"
+      },
+      "cross_validation_score": null
     }
   },
   "test_metrics": {
-    "accuracy": 0.7586206896551724,
-    "balanced_accuracy": 0.7746341463414634,
-    "precision": 0.7908525617965979,
-    "recall": 0.7586206896551724,
-    "f1_score": 0.7637973292765381,
-    "auc": 0.8364227642276423,
-    "sensitivity": 0.8292682926829268,
-    "specificity": 0.72,
+    "accuracy": 0.7327586206896551,
+    "balanced_accuracy": 0.6882926829268292,
+    "precision": 0.7254427843467076,
+    "recall": 0.7327586206896551,
+    "f1_score": 0.7262449666886303,
+    "confusion_matrix": [
+      [
+        63,
+        12
+      ],
+      [
+        19,
+        22
+      ]
+    ],
+    "sensitivity": 0.5365853658536586,
+    "specificity": 0.84,
+    "roc_auc": 0.7804878048780488,
+    "average_precision": 0.6815062621764065,
     "train_rows": 537.0,
     "validation_rows": 115.0,
     "test_rows": 116.0,
     "num_classes": 2.0
   },
+  "feature_importance": [
+    {
+      "feature": "Glucose",
+      "importance": 0.087337
+    },
+    {
+      "feature": "BMI",
+      "importance": 0.04252
+    },
+    {
+      "feature": "Pregnancies",
+      "importance": 0.034533
+    },
+    {
+      "feature": "Insulin",
+      "importance": 0.017297
+    },
+    {
+      "feature": "DiabetesPedigreeFunction",
+      "importance": 0.009533
+    },
+    {
+      "feature": "SkinThickness",
+      "importance": -0.005691
+    },
+    {
+      "feature": "Age",
+      "importance": 0.004533
+    },
+    {
+      "feature": "BloodPressure",
+      "importance": -0.003069
+    }
+  ],
+  "explainability": {
+    "feature_importance": [
+      {
+        "feature": "Glucose",
+        "importance": 0.087337
+      },
+      {
+        "feature": "BMI",
+        "importance": 0.04252
+      },
+      {
+        "feature": "Pregnancies",
+        "importance": 0.034533
+      },
+      {
+        "feature": "Insulin",
+        "importance": 0.017297
+      },
+      {
+        "feature": "DiabetesPedigreeFunction",
+        "importance": 0.009533
+      },
+      {
+        "feature": "SkinThickness",
+        "importance": -0.005691
+      },
+      {
+        "feature": "Age",
+        "importance": 0.004533
+      },
+      {
+        "feature": "BloodPressure",
+        "importance": -0.003069
+      }
+    ],
+    "shap": {
+      "available": true,
+      "mean_abs_value": 0.46586740802394044
+    },
+    "lime": {
+      "available": true,
+      "rules": [
+        [
+          "5 <= -0.72",
+          -0.1821113332316037
+        ],
+        [
+          "-0.75 < 1 <= -0.15",
+          -0.1429543139984597
+        ],
+        [
+          "6 <= -0.76",
+          -0.09804793843951465
+        ],
+        [
+          "7 <= -0.82",
+          -0.0906848625572756
+        ],
+        [
+          "8 <= -0.07",
+          -0.06086307767896658
+        ],
+        [
+          "-0.20 < 4 <= -0.14",
+          0.0512865849539346
+        ],
+        [
+          "9 <= -0.21",
+          -0.03112810391283838
+        ],
+        [
+          "-0.70 < 2 <= -0.02",
+          0.024781018606410396
+        ],
+        [
+          "12 <= -0.12",
+          -0.021488029677578655
+        ],
+        [
+          "0 <= -0.87",
+          -0.015844855243983047
+        ]
+      ]
+    }
+  },
+  "adversarial_robustness": {
+    "gaussian_noise_accuracy": 0.7672413793103449,
+    "data_poisoning_accuracy": 0.7155172413793104,
+    "before_attack_accuracy": 0.7327586206896551,
+    "after_attack_accuracy": 0.7413793103448276,
+    "robustness_score": 1.0,
+    "poisoned_label_fraction": 0.1
+  },
+  "aecs": 1.0,
+  "dtei": 86.9,
+  "blockchain_audit": {
+    "disease_key": "diabetes",
+    "model_artifact": "backend\\app\\ai\\artifacts\\diabetes_model.pkl",
+    "model_sha256": "e823efd153fc246864a59cb09ef5c894c97fc0e96eff36b51f3eace81760992a",
+    "dataset_fingerprint": "698c203a14aa31941d2251175330c9199f3ccdb31597abbba2a3e35416257a72",
+    "metrics_sha256": "0e8093c29857ec6ac9585c0fb6c96de6233ab057522d6b03ebe154dc2ffabfb1",
+    "timestamp": "2026-07-18T14:12:22.680225+00:00",
+    "audit_type": "training_artifact_integrity",
+    "block_hash": "2204d56aa71c7297db0998076531a9da0bfde96223f8e1db148f8804e8e14364",
+    "audit_file": "backend\\app\\ai\\artifacts\\reports\\diabetes\\blockchain_audit.json"
+  },
+  "report_artifacts": {
+    "curves_json": "backend\\app\\ai\\artifacts\\reports\\diabetes\\curves.json",
+    "explanations_json": "backend\\app\\ai\\artifacts\\reports\\diabetes\\explanations.json"
+  },
   "deployment_status": "ready_for_research",
   "limitations": [
     "Research decision-support only; not validated or approved as a medical device.",
-    "Performance on this held-out source dataset does not establish clinical generalization."
+    "Real accuracy is calculated only from the held-out test split, not synthetic or demo rows."
   ]
 }

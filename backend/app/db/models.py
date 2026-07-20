@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -10,6 +10,10 @@ from app.db.session import Base
 
 def uuid_str() -> str:
     return str(uuid4())
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class User(Base):
@@ -23,7 +27,12 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     hospital_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("hospitals.id"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    profile: Mapped[dict] = mapped_column(JSON, default=dict)
+    profile_photo_object_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    profile_photo_content_type: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    profile_updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     hospital = relationship("Hospital", back_populates="users")
 
@@ -36,7 +45,7 @@ class Hospital(Base):
     region: Mapped[str] = mapped_column(String(120), default="Global")
     reputation_score: Mapped[float] = mapped_column(Float, default=0.82)
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     users = relationship("User", back_populates="hospital")
 
@@ -68,7 +77,14 @@ class DiagnosisRecord(Base):
     blockchain_status: Mapped[dict] = mapped_column(JSON, default=dict)
     report_object_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
     doctor_notes: Mapped[str] = mapped_column(Text, default="")
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    review_status: Mapped[str] = mapped_column(String(40), default="pending", index=True)
+    doctor_decision: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    final_clinical_decision: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    review_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reviewed_by_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    priority: Mapped[str] = mapped_column(String(40), default="routine", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     artifacts = relationship("DiagnosisArtifact", back_populates="diagnosis", cascade="all, delete-orphan")
 
@@ -86,7 +102,7 @@ class DiagnosisArtifact(Base):
     content_type: Mapped[str] = mapped_column(String(120))
     size_bytes: Mapped[int] = mapped_column(Integer)
     sha256: Mapped[str] = mapped_column(String(64), index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     diagnosis = relationship("DiagnosisRecord", back_populates="artifacts")
 
@@ -103,7 +119,7 @@ class TrustHistory(Base):
     blockchain_integrity: Mapped[float] = mapped_column(Float)
     compliance: Mapped[float] = mapped_column(Float)
     dtei: Mapped[float] = mapped_column(Float)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
 
 class AuditEvent(Base):
@@ -116,7 +132,79 @@ class AuditEvent(Base):
     resource_id: Mapped[str | None] = mapped_column(String(120), nullable=True)
     payload_hash: Mapped[str] = mapped_column(String(128))
     metadata_json: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), index=True)
+    notification_type: Mapped[str] = mapped_column(String(80), index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    message: Mapped[str] = mapped_column(Text)
+    diagnosis_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("diagnosis_records.id"), nullable=True)
+    severity: Mapped[str] = mapped_column(String(40), default="info", index=True)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    metadata_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    user = relationship("User")
+    diagnosis = relationship("DiagnosisRecord")
+
+
+class ContactMessage(Base):
+    __tablename__ = "contact_messages"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    name: Mapped[str] = mapped_column(String(255))
+    email: Mapped[str] = mapped_column(String(255), index=True)
+    message: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(40), default="new", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class FederatedRound(Base):
+    __tablename__ = "federated_rounds"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    round_number: Mapped[int] = mapped_column(Integer, index=True)
+    model_name: Mapped[str] = mapped_column(String(120), index=True)
+    disease_key: Mapped[str] = mapped_column(String(80), index=True)
+    status: Mapped[str] = mapped_column(String(40), default="collecting", index=True)
+    strategy: Mapped[str] = mapped_column(String(80), default="FedAvg")
+    min_clients: Mapped[int] = mapped_column(Integer, default=2)
+    global_model_version: Mapped[str] = mapped_column(String(80), default="v1")
+    global_weights: Mapped[dict] = mapped_column(JSON, default=dict)
+    aggregated_weights: Mapped[dict] = mapped_column(JSON, default=dict)
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+    privacy_config: Mapped[dict] = mapped_column(JSON, default=dict)
+    update_hash: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    updates = relationship("FederatedClientUpdate", back_populates="round", cascade="all, delete-orphan")
+
+
+class FederatedClientUpdate(Base):
+    __tablename__ = "federated_client_updates"
+    __table_args__ = (UniqueConstraint("round_id", "hospital_id", name="uq_federated_update_round_hospital"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    round_id: Mapped[str] = mapped_column(String(36), ForeignKey("federated_rounds.id"), index=True)
+    hospital_id: Mapped[str] = mapped_column(String(36), ForeignKey("hospitals.id"), index=True)
+    sample_count: Mapped[int] = mapped_column(Integer)
+    weights_delta: Mapped[dict] = mapped_column(JSON, default=dict)
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+    privacy_report: Mapped[dict] = mapped_column(JSON, default=dict)
+    payload_hash: Mapped[str] = mapped_column(String(128), index=True)
+    accepted: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+    round = relationship("FederatedRound", back_populates="updates")
+    hospital = relationship("Hospital")
 
 
 class ChatSession(Base):
@@ -133,8 +221,8 @@ class ChatSession(Base):
     possible_conditions: Mapped[dict] = mapped_column(JSON, default=dict)  # Store predicted conditions
     recommendations: Mapped[dict] = mapped_column(JSON, default=dict)  # Store recommendations
     conversation_stage: Mapped[str] = mapped_column(String(50), default="profile_collection")  # Track stage
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
 
     messages = relationship("ChatMessage", back_populates="session", cascade="all, delete-orphan")
 
@@ -148,7 +236,7 @@ class ChatMessage(Base):
     content: Mapped[str] = mapped_column(Text)
     message_type: Mapped[str] = mapped_column(String(50), default="text")  # text, structured_data, assessment, recommendation
     metadata_json: Mapped[dict] = mapped_column(JSON, default=dict)  # Store additional data like questions asked, confidence scores
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
     # When ORM loads an object from the database, populate an instance-level
     # `metadata` attribute so APIs that expect `message.metadata` continue to work

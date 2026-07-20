@@ -1,0 +1,100 @@
+diseases:
+  brain_tumor:
+    name: Brain Tumor Detection
+    modality: image
+    task: tumor classification and MRI feature extraction
+    kaggle_slug: masoudnickparvar/brain-tumor-mri-dataset
+    local_dir: data/raw/brain_tumor
+    labels: [no_tumor, glioma, meningioma, pituitary]
+    architectures: [custom_cnn, resnet50, vision_transformer]
+    explainability: [grad_cam, integrated_gradients]
+  pneumonia:
+    name: Pneumonia Detection
+    modality: image
+    task: normal versus pneumonia chest X-ray classification
+    kaggle_slug: paultimothymooney/chest-xray-pneumonia
+    local_dir: data/raw/pneumonia
+    labels: [normal, pneumonia]
+    architectures: [custom_cnn, densenet121, efficientnet_b0]
+    explainability: [grad_cam]
+  tuberculosis:
+    name: Tuberculosis Detection
+    modality: image
+    task: tuberculosis versus normal chest X-ray classification
+    kaggle_slug: tawsifurrahman/tuberculosis-tb-chest-xray-dataset
+    local_dir: data/raw/tuberculosis
+    labels: [normal, tuberculosis]
+    architectures: [custom_cnn, resnet50, transfer_learning]
+    explainability: [grad_cam]
+  diabetes:
+    name: Diabetes Prediction
+    modality: tabular
+    task: diabetes risk prediction from clinical measurements
+    kaggle_slug: uciml/pima-indians-diabetes-database
+    local_dir: data/raw/diabetes
+    labels: [negative, positive]
+    architectures: [logistic_regression, random_forest, xgboost, neural_network]
+    explainability: [shap, lime]
+  heart:
+    name: Heart Disease Prediction
+    modality: tabular
+    task: cardiovascular disease risk prediction
+    kaggle_slug: johnsmith88/heart-disease-dataset
+    local_dir: data/raw/heart
+    labels: [low_risk, high_risk]
+    architectures: [xgboost, random_forest, neural_network]
+    explainability: [shap]
+  liver:
+    name: Liver Disease Prediction
+    modality: tabular
+    task: liver disease prediction from clinical records
+    kaggle_slug: uciml/indian-liver-patient-records
+    local_dir: data/raw/liver
+    labels: [normal, disease]
+    architectures: [random_forest, xgboost, gradient_boosting]
+    explainability: [shap]
+  parkinson:
+    name: Parkinson Disease Prediction
+    modality: tabular
+    task: Parkinson prediction from voice and clinical features
+    kaggle_slug: vikasukani/parkinsons-disease-data-set
+    local_dir: data/raw/parkinson
+    labels: [healthy, parkinson]
+    architectures: [svm, random_forest, neural_network]
+    explainability: [shap]
+  asthma:
+    name: Asthma Prediction
+    modality: tabular
+    task: asthma risk prediction from symptoms and patient history
+    kaggle_slug: rabieelkharoua/asthma-disease-dataset
+    local_dir: data/raw/asthma
+    labels: [controlled, risk]
+    architectures: [random_forest, gradient_boosting, neural_network]
+    explainability: [shap, lime]
+  eye:
+    name: Eye Disease Detection
+    modality: image
+    task: retinal image disease classification
+    kaggle_slug: andrewmvd/ocular-disease-recognition-odir5k
+    local_dir: data/raw/eye
+    labels: [normal, cataract, glaucoma, retina]
+    architectures: [custom_cnn, efficientnet_b0, vision_transformer]
+    explainability: [grad_cam]
+
+split:
+  train: 0.70
+  validation: 0.15
+  test: 0.15
+
+image_processing:
+  resize: [224, 224]
+  normalize: true
+  noise_removal: gaussian_blur
+  augmentation: [rotation, horizontal_flip, brightness, contrast]
+
+tabular_processing:
+  missing_values: training_fold_imputation
+  outliers: iqr_clipping
+  scaling: standard_scaler
+  encoding: one_hot_encoding
+  feature_selection: model_based_or_permutation_importance
