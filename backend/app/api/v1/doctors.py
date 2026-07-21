@@ -29,6 +29,8 @@ from app.services.access import can_access_diagnosis
 from app.services.audit import record_audit_event
 from app.services.blockchain import verify_diagnosis
 from app.services.notifications import is_high_risk, mark_notification_read, notify_user
+from app.services.patient_ids import find_patient_user, public_patient_id_for_record
+from app.services.reports import refresh_stored_pdf_report
 from app.services.storage import read_object, store_object
 
 router = APIRouter()
@@ -54,16 +56,17 @@ def _doctor_records(db: Session, user: User) -> list[DiagnosisRecord]:
     role = Role(user.role)
     query = db.query(DiagnosisRecord)
     if role == Role.DOCTOR:
-        query = query.filter(DiagnosisRecord.doctor_id == user.id)
+        query = query.filter(or_(DiagnosisRecord.doctor_id == user.id, DiagnosisRecord.doctor_id.is_(None)))
     else:
         query = query.filter(False)
     return query.order_by(DiagnosisRecord.created_at.desc()).all()
 
 
-def _record_response(record: DiagnosisRecord) -> DiagnosisRecordResponse:
+def _record_response(db: Session, record: DiagnosisRecord) -> DiagnosisRecordResponse:
     return DiagnosisRecordResponse(
         diagnosis_id=record.id,
         patient_id=record.patient_id,
+        patient_public_id=public_patient_id_for_record(db, record),
         patient_name=record.patient_name,
         patient_email=record.patient_email,
         doctor_id=record.doctor_id,
@@ -261,6 +264,7 @@ def my_patients(
         patients.append(
             DoctorPatientSummary(
                 patient_id=latest.patient_id,
+                patient_public_id=public_patient_id_for_record(db, latest),
                 patient_name=latest.patient_name,
                 patient_email=latest.patient_email,
                 total_diagnoses=len(records),
@@ -287,7 +291,7 @@ def patient_history(
     for record in records:
         record_audit_event(db, actor=user, action="patient_record.accessed", resource_type="patient", resource_id=patient_key, metadata={"diagnosis_id": record.id})
     db.commit()
-    return [_record_response(record) for record in sorted(records, key=lambda item: item.created_at or datetime.min)]
+    return [_record_response(db, record) for record in sorted(records, key=lambda item: item.created_at or datetime.min)]
 
 
 @router.get("/reviews", response_model=list[DiagnosisRecordResponse])
@@ -300,13 +304,13 @@ def diagnosis_reviews(
     records = _doctor_records(db, user)
     if status != "all":
         records = [record for record in records if (record.review_status or "pending") == status]
-    return [_record_response(record) for record in records]
+    return [_record_response(db, record) for record in records]
 
 
 @router.get("/high-risk", response_model=list[DiagnosisRecordResponse])
 def high_risk_cases(db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> list[DiagnosisRecordResponse]:
     _doctor_required(user)
-    return [_record_response(record) for record in _doctor_records(db, user) if is_high_risk(record)]
+    return [_record_response(db, record) for record in _doctor_records(db, user) if is_high_risk(record)]
 
 
 @router.post("/diagnoses/{diagnosis_id}/view", response_model=DiagnosisRecordResponse)
@@ -322,7 +326,7 @@ def view_diagnosis(
         raise HTTPException(status_code=404, detail="Diagnosis not found")
     record_audit_event(db, actor=user, action="diagnosis.viewed", resource_type="diagnosis", resource_id=record.id, request=request)
     db.commit()
-    return _record_response(record)
+    return _record_response(db, record)
 
 
 @router.post("/diagnoses/{diagnosis_id}/note", response_model=DiagnosisRecordResponse)
@@ -343,7 +347,7 @@ def add_doctor_note(
     db.add(record)
     db.commit()
     db.refresh(record)
-    return _record_response(record)
+    return _record_response(db, record)
 
 
 @router.post("/diagnoses/{diagnosis_id}/finalize", response_model=DiagnosisRecordResponse)
@@ -394,10 +398,12 @@ def finalize_review(
             diagnosis_id=record.id,
             severity="info",
         )
+    patient_user = find_patient_user(db, record.patient_id, record.patient_email)
+    refresh_stored_pdf_report(record, patient_user)
     db.add(record)
     db.commit()
     db.refresh(record)
-    return _record_response(record)
+    return _record_response(db, record)
 
 
 @router.get("/notifications", response_model=list[NotificationResponse])

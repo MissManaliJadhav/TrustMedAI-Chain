@@ -25,6 +25,7 @@ DIAGNOSIS_RECORD_COLUMNS: dict[str, str] = {
 
 
 USER_COLUMNS: dict[str, str] = {
+    "public_patient_id": "VARCHAR(16)",
     "profile": "JSON",
     "profile_photo_object_path": "VARCHAR(512)",
     "profile_photo_content_type": "VARCHAR(120)",

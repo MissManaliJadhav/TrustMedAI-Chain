@@ -11,6 +11,7 @@ from app.api.deps import get_current_user
 from app.db.models import User
 from app.db.session import get_db
 from app.schemas import PatientProfileResponse, PatientProfileUpdate
+from app.services.patient_ids import ensure_user_public_patient_id
 from app.services.storage import read_object, store_object
 
 router = APIRouter()
@@ -83,7 +84,7 @@ def _profile_response(user: User) -> PatientProfileResponse:
         email=user.email,
         full_name=user.full_name,
         role=user.role,
-        patient_id=user.id,
+        patient_id=user.public_patient_id or user.id,
         registration_date=user.created_at,
         last_profile_update=user.profile_updated_at,
         profile_photo_url="/patients/profile/photo" if user.profile_photo_object_path else None,
@@ -95,7 +96,13 @@ def _profile_response(user: User) -> PatientProfileResponse:
 
 
 @router.get("/profile", response_model=PatientProfileResponse)
-def get_profile(user: User = Depends(get_current_user)) -> PatientProfileResponse:
+def get_profile(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> PatientProfileResponse:
+    ensure_user_public_patient_id(db, user)
+    db.commit()
+    db.refresh(user)
     return _profile_response(user)
 
 
@@ -105,6 +112,7 @@ def update_profile(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> PatientProfileResponse:
+    ensure_user_public_patient_id(db, user)
     profile = dict(user.profile or {})
     updates = payload.model_dump(exclude_unset=True)
     if "full_name" in updates and updates["full_name"]:
@@ -131,6 +139,7 @@ async def upload_profile_photo(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> PatientProfileResponse:
+    ensure_user_public_patient_id(db, user)
     content_type = photo.content_type or ""
     if content_type not in PROFILE_PHOTO_TYPES:
         raise HTTPException(status_code=422, detail="Upload a JPEG, PNG, or WebP profile photo.")

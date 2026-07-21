@@ -227,15 +227,35 @@ const formatDateTime = (value: unknown) => {
   })} IST`;
 };
 
-const dteiDisplayLabel = (key: string) => (
-  key === 'fidelity' ? 'Predictive Fidelity' : cleanText(key)
-);
+const dteiDisplayLabel = (key: string) => ({
+  fidelity: 'Predictive Fidelity',
+  interpretability: 'Interpretability Alignment',
+  robustness: 'Adversarial Robustness',
+  blockchain_integrity: 'Blockchain Integrity',
+  compliance: 'Compliance Reliability',
+}[key] ?? cleanText(key));
 
 const confidenceExplanation = (confidence: number) => {
   if (confidence >= 0.8) return 'High model certainty for the submitted patient-specific data.';
   if (confidence >= 0.6) return 'Moderate certainty; clinician review should confirm the AI result.';
   return 'Low confidence usually means the patient-specific values are near the model decision boundary, input quality is limited, or the model is uncertain for this case.';
 };
+
+const performanceLabels: Array<[string, string]> = [
+  ['accuracy', 'Clean/Test Accuracy'],
+  ['balanced_accuracy', 'Balanced Accuracy'],
+  ['precision', 'Precision'],
+  ['recall', 'Recall'],
+  ['f1_score', 'F1 Score'],
+  ['sensitivity', 'Sensitivity'],
+  ['specificity', 'Specificity'],
+  ['roc_auc', 'ROC-AUC'],
+  ['robustness_score', 'Robustness Score'],
+];
+
+const metricPercent = (value: unknown) => (
+  value === null || value === undefined ? 'Not Evaluated' : formatPercent(value)
+);
 
 const metricValue = (value: unknown) => {
   if (typeof value === 'number') return value <= 1 ? formatPercent(value) : value.toFixed(3);
@@ -248,6 +268,44 @@ const compactHash = (value: unknown) => {
   if (!text) return 'Not Available';
   if (text.length <= 18) return text;
   return `${text.slice(0, 8)}...${text.slice(-6)}`;
+};
+
+const artifactSize = (bytes?: number) => {
+  if (!bytes || !Number.isFinite(bytes)) return 'Not Available';
+  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`;
+};
+
+const accuracyDegradation = (before: unknown, after: unknown) => {
+  const beforeValue = Number(before);
+  const afterValue = Number(after);
+  if (!Number.isFinite(beforeValue) || !Number.isFinite(afterValue)) return 'Not Evaluated';
+  return `${((beforeValue - afterValue) * 100).toFixed(1)} percentage points`;
+};
+
+const percentagePoints = (value: unknown) => {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) return 'Not Evaluated';
+  return `${(numberValue * 100).toFixed(1)} percentage points`;
+};
+
+const attackImpactLabel = (before: unknown, after: unknown) => {
+  const beforeValue = Number(before);
+  const afterValue = Number(after);
+  if (!Number.isFinite(beforeValue) || !Number.isFinite(afterValue)) return 'Not Evaluated';
+  const degradation = beforeValue - afterValue;
+  if (degradation >= 0.25) return 'High';
+  if (degradation >= 0.08) return 'Moderate';
+  return 'Low';
+};
+
+const explanationGenerated = (payload?: AnyRecord) => {
+  if (!payload || payload.available === false || payload.status === 'not_evaluated') return false;
+  return Object.keys(payload).some((key) => (
+    !['available', 'status', 'reason'].includes(key)
+    && payload[key] !== null
+    && payload[key] !== undefined
+    && payload[key] !== ''
+  ));
 };
 
 const attackStability = (adversarial?: AnyRecord) => {
@@ -294,11 +352,6 @@ const pickFeatureImportance = (explanation?: PredictionResult['explanation']) =>
   }));
 };
 
-const hasUsefulPayload = (payload?: AnyRecord) => {
-  if (!payload) return false;
-  return Object.keys(payload).some((key) => payload[key] !== null && payload[key] !== undefined && payload[key] !== '');
-};
-
 export default function DiseaseDiagnosisPage() {
   const { diseaseKey = '' } = useParams();
   const role = useAppSelector((state) => state.auth.role);
@@ -308,6 +361,13 @@ export default function DiseaseDiagnosisPage() {
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [submittedCase, setSubmittedCase] = useState<SubmittedCase | null>(null);
   const [federated, setFederated] = useState<FederatedDashboard | null>(null);
+  const [artifactPreviews, setArtifactPreviews] = useState<Record<string, string>>({});
+  const [artifactPreviewErrors, setArtifactPreviewErrors] = useState<Record<string, boolean>>({});
+  const [selectedImagePreview, setSelectedImagePreview] = useState<{
+    title: string;
+    url: string;
+    artifact: DiagnosisArtifact;
+  } | null>(null);
   const [verification, setVerification] = useState<Record<string, unknown> | null>(null);
   const [doctorReview, setDoctorReview] = useState<DoctorReviewResult | null>(null);
   const [reviewDecision, setReviewDecision] = useState('Confirmed');
@@ -365,6 +425,29 @@ export default function DiseaseDiagnosisPage() {
       .catch(() => setFederated(null));
     return () => controller.abort();
   }, [canDiagnose]);
+
+  useEffect(() => {
+    const urls: string[] = [];
+    setArtifactPreviews({});
+    setArtifactPreviewErrors({});
+    if (!result) return () => {};
+    const imageArtifacts = (result.artifacts ?? []).filter((artifact) => artifact.content_type?.startsWith('image/'));
+    imageArtifacts.forEach((artifact) => {
+      api.get(`/reports/${result.diagnosis_id}/artifacts/${artifact.id}`, {
+        responseType: 'blob',
+        timeout: 120000,
+      })
+        .then((response) => {
+          const url = URL.createObjectURL(response.data);
+          urls.push(url);
+          setArtifactPreviews((current) => ({ ...current, [artifact.kind]: url }));
+        })
+        .catch(() => null);
+    });
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [result]);
 
   const chooseImage = (event: ChangeEvent<HTMLInputElement>) => {
     setImageFile(event.target.files?.[0] ?? null);
@@ -604,7 +687,7 @@ export default function DiseaseDiagnosisPage() {
         { name: 'LIME', payload: result.explanation?.lime, bestFor: 'Local explanation' },
       ]
     : [];
-  const hasExplainability = explanationMethods.some((method) => hasUsefulPayload(method.payload));
+  const hasExplainability = explanationMethods.some((method) => explanationGenerated(method.payload));
   const governanceRows = [
     ['Transparency', hasExplainability ? 'Passed' : 'Pending Explanation Payload'],
     ['Accountability', result?.diagnosis_id && result?.blockchain_hash ? 'Passed' : 'Pending'],
@@ -672,12 +755,80 @@ export default function DiseaseDiagnosisPage() {
     ?? ledgerTimestamp
     ?? result?.created_at;
   const featureImportance = pickFeatureImportance(result?.explanation);
-  const adversarialRows = Object.entries(result?.adversarial ?? {})
-    .filter(([, value]) => typeof value !== 'object' || value === null)
-    .slice(0, 8);
   const metricRows = Object.entries(result?.metrics ?? {})
     .filter(([, value]) => typeof value !== 'object' || value === null)
     .slice(0, 8);
+  const adversarialWorkflow = result?.adversarial ?? {};
+  const patientAttack = adversarialWorkflow.patient_attack ?? {};
+  const beforeAttackMetrics = adversarialWorkflow.before_attack_metrics ?? {};
+  const underAttackMetrics = adversarialWorkflow.under_attack_metrics ?? {};
+  const attackImpact = adversarialWorkflow.attack_impact ?? {};
+  const defense = adversarialWorkflow.defense ?? {};
+  const modelName = cleanText(adversarialWorkflow.model_name ?? inputSpec.model_info?.selected_model);
+  const modelVersion = cleanText(adversarialWorkflow.model_version ?? inputSpec.model_info?.artifact_version);
+  const defenseAfterMetrics = defense.after_defense_metrics ?? null;
+  const resultModality = result?.input_modality ?? (isImageDisease ? 'image' : 'tabular');
+  const artifactByKind = Object.fromEntries((result?.artifacts ?? []).map((artifact) => [artifact.kind, artifact]));
+  const imageVisualCards = [
+    {
+      kind: 'input_image',
+      title: 'Original Medical Image',
+      description: 'Actual uploaded image used for this diagnosis.',
+      unavailable: 'Original image unavailable.',
+    },
+    {
+      kind: 'adversarial_image',
+      title: 'Adversarially Perturbed Image',
+      description: `Attack: ${cleanText(patientAttack.attack_type ?? adversarialWorkflow.attack_type, 'Not Evaluated')}`,
+      unavailable: 'Adversarial image not generated.',
+    },
+    {
+      kind: 'perturbation_map',
+      title: 'Adversarial Perturbation Map',
+      description: 'Generated from the measured difference between the adversarial image and original image.',
+      unavailable: 'Perturbation visualization unavailable.',
+    },
+    {
+      kind: 'affected_region_overlay',
+      title: 'Affected Region Overlay',
+      description: 'Highlighted regions indicate areas with the highest adversarial perturbation intensity. They do not necessarily represent the anatomical disease location.',
+      unavailable: 'Affected region overlay unavailable.',
+    },
+  ];
+  const evaluatedAttackRows = [
+    ['gaussian_noise_accuracy', 'Gaussian Noise'],
+    ['brightness_shift_accuracy', 'Brightness Shift'],
+    ['fgsm_accuracy', 'FGSM'],
+    ['pgd_accuracy', 'PGD'],
+    ['data_poisoning_accuracy', 'Data Poisoning'],
+  ].filter(([key]) => (
+    resultModality === 'image'
+      ? ['gaussian_noise_accuracy', 'brightness_shift_accuracy', 'fgsm_accuracy', 'pgd_accuracy'].includes(key)
+      : ['gaussian_noise_accuracy', 'data_poisoning_accuracy'].includes(key)
+  ));
+  const affectedFeatures = Array.isArray(patientAttack.affected_features) ? patientAttack.affected_features : [];
+  const patientAttackStatus = cleanText(patientAttack.status, 'Not Evaluated');
+  const meanAttackAccuracy = adversarialWorkflow.after_attack_accuracy ?? underAttackMetrics.accuracy;
+  const dteiContributionRows = dteiRows.map((component) => {
+    const weight = dteiWeightRows.find((item) => item.key === component.key)?.value ?? 0;
+    return {
+      ...component,
+      weight,
+      contribution: Number(component.value) * weight,
+    };
+  });
+  const trustEvolution = adversarialWorkflow.trust_evolution ?? result?.metrics?.dtei?.attack_comparison ?? {};
+  const trustEvolutionBefore = trustEvolution.before_components ?? {};
+  const trustEvolutionAfter = trustEvolution.after_components ?? {};
+  const trustEvolutionRows = ['fidelity', 'interpretability', 'robustness', 'blockchain_integrity', 'compliance'].map((key) => ({
+    key,
+    label: dteiDisplayLabel(key),
+    before: trustEvolutionBefore[key],
+    after: trustEvolutionAfter[key] ?? result?.dtei_components?.[key],
+  }));
+  const trustChange = Number(trustEvolution.trust_change);
+  const securityEvent = adversarialWorkflow.security_event ?? {};
+  const securityFindings = Array.isArray(securityEvent.findings) ? securityEvent.findings : [];
   const attackStatusClass = attackSummary.severity === 'emerald'
     ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
     : attackSummary.severity === 'amber'
@@ -865,13 +1016,16 @@ export default function DiseaseDiagnosisPage() {
                 </span>
               </div>
 
-              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {[
                   ['Disease Detected Name', inputSpec.name],
                   ['AI Prediction', cleanText(result.prediction)],
-                  ['Confidence', formatPercent(result.confidence)],
-                  ['Trust Score', formatPercent(result.trust_score)],
-                  ['DTEI Status', dteiStatus],
+                  ['Patient-Specific Confidence', formatPercent(result.confidence)],
+                  ['Model', modelName],
+                  ['Model Version', modelVersion],
+                  ['Input Modality', cleanText(result.input_modality ?? submittedCase?.inputMode)],
+                  ['Diagnosis Timestamp', formatDateTime(result.created_at)],
+                  ['DTEI / Trust Score', `${formatPercent(result.trust_score)} (${dteiStatus})`],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded border border-slate-200 bg-slate-50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
@@ -970,6 +1124,302 @@ export default function DiseaseDiagnosisPage() {
               </section>
             </div>
 
+            <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-black text-trust-ink">Original Model Performance</h3>
+                  <p className="mt-1 text-sm font-bold uppercase tracking-wide text-trust-teal">
+                    Status: Before Adversarial Attack
+                  </p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    These are overall trained-model test metrics from the stored evaluation pipeline, not this patient's prediction confidence.
+                  </p>
+                </div>
+                <span className="rounded bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">
+                  {modelName} v{modelVersion}
+                </span>
+              </div>
+              <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                {performanceLabels.filter(([key]) => key !== 'robustness_score').map(([key, label]) => (
+                  <div key={key} className="rounded border border-slate-100 bg-slate-50 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+                    <p className="mt-1 text-xl font-black text-trust-ink">{metricPercent(beforeAttackMetrics[key] ?? result.metrics?.[key])}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {resultModality === 'image' ? (
+              <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-black text-trust-ink">Medical Image & Adversarial Robustness Analysis</h3>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Attack visualizations are separate from model explanation heatmaps and are loaded from protected diagnosis artifacts.
+                    </p>
+                  </div>
+                  <span className="rounded bg-teal-50 px-3 py-2 text-sm font-black text-trust-teal">
+                    {patientAttackStatus}
+                  </span>
+                </div>
+                <div className="mt-5 grid gap-5 lg:grid-cols-2">
+                  {imageVisualCards.map((card) => {
+                    const artifact = artifactByKind[card.kind] as DiagnosisArtifact | undefined;
+                    const previewUrl = artifactPreviews[card.kind];
+                    const previewFailed = artifactPreviewErrors[card.kind];
+                    return (
+                      <div key={card.kind} className="rounded border border-slate-100 bg-slate-50 p-4">
+                        <div className="aspect-[4/3] overflow-hidden rounded border border-slate-200 bg-white">
+                          {artifact && previewUrl && !previewFailed ? (
+                            <img
+                              src={previewUrl}
+                              alt={card.title}
+                              className="h-full w-full object-contain"
+                              onError={() => setArtifactPreviewErrors((current) => ({ ...current, [card.kind]: true }))}
+                            />
+                          ) : (
+                            <div className="grid h-full place-items-center p-4 text-center text-sm font-semibold text-slate-500">
+                              {artifact ? 'Image visualization unavailable' : card.unavailable}
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-4">
+                          <h4 className="font-black text-slate-800">{card.title}</h4>
+                          <p className="mt-1 text-sm leading-6 text-slate-600">{card.description}</p>
+                          <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                            <div className="rounded bg-white p-2">
+                              <span className="block text-xs font-bold uppercase text-slate-500">Filename</span>
+                              <span className="break-words font-semibold text-slate-800">{cleanText(artifact?.original_filename)}</span>
+                            </div>
+                            <div className="rounded bg-white p-2">
+                              <span className="block text-xs font-bold uppercase text-slate-500">File Type</span>
+                              <span className="font-semibold text-slate-800">{cleanText(artifact?.content_type)}</span>
+                            </div>
+                            <div className="rounded bg-white p-2">
+                              <span className="block text-xs font-bold uppercase text-slate-500">File Size</span>
+                              <span className="font-semibold text-slate-800">{artifactSize(artifact?.size_bytes)}</span>
+                            </div>
+                            <div className="rounded bg-white p-2">
+                              <span className="block text-xs font-bold uppercase text-slate-500">Dimensions</span>
+                              <span className="font-semibold text-slate-800">
+                                {card.kind === 'input_image' && submittedCase?.features?.image_width && submittedCase?.features?.image_height
+                                  ? `${submittedCase.features.image_width} x ${submittedCase.features.image_height}`
+                                  : 'Not Available'}
+                              </span>
+                            </div>
+                          </div>
+                          {artifact && previewUrl && !previewFailed && (
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <Button size="small" variant="outlined" onClick={() => setSelectedImagePreview({ title: card.title, url: previewUrl, artifact })}>
+                                View Full Size
+                              </Button>
+                              <Button
+                                size="small"
+                                variant="text"
+                                onClick={() => downloadFile(
+                                  `/reports/${result.diagnosis_id}/artifacts/${artifact.id}`,
+                                  artifact.original_filename,
+                                )}
+                              >
+                                Download
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-5 grid gap-3 md:grid-cols-4">
+                  {[
+                    ['Perturbation Magnitude', patientAttack.perturbation_magnitude],
+                    ['Pixels Affected', patientAttack.percentage_pixels_affected],
+                    ['Prediction Before Attack', patientAttack.prediction_before_attack],
+                    ['Prediction Under Attack', patientAttack.prediction_under_attack],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded bg-slate-50 p-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+                      <p className="mt-1 font-semibold text-slate-800">
+                        {label === 'Pixels Affected' ? metricPercent(value) : metricValue(value)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ) : (
+              <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-black text-trust-ink">Tabular Adversarial Robustness Analysis</h3>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Only features actually modified by the configured tabular perturbation are listed.
+                    </p>
+                  </div>
+                  <span className="rounded bg-teal-50 px-3 py-2 text-sm font-black text-trust-teal">
+                    {cleanText(patientAttack.attack_type, 'Not Evaluated')}
+                  </span>
+                </div>
+                {affectedFeatures.length ? (
+                  <div className="mt-5 overflow-x-auto">
+                    <table className="min-w-full border-separate border-spacing-y-2 text-sm">
+                      <thead>
+                        <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                          <th className="px-3 py-2">Feature</th>
+                          <th className="px-3 py-2">Original Value</th>
+                          <th className="px-3 py-2">Perturbed Value</th>
+                          <th className="px-3 py-2">Absolute Change</th>
+                          <th className="px-3 py-2">Relative Change</th>
+                          <th className="px-3 py-2">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {affectedFeatures.map((feature: AnyRecord) => (
+                          <tr key={cleanText(feature.feature_name ?? feature.feature)} className="bg-slate-50">
+                            <td className="rounded-l px-3 py-3 font-bold text-slate-800">{cleanText(feature.feature_name ?? feature.feature)}</td>
+                            <td className="px-3 py-3">{metricValue(feature.original_value)}</td>
+                            <td className="px-3 py-3">{metricValue(feature.adversarial_value)}</td>
+                            <td className="px-3 py-3">{metricValue(feature.absolute_change)}</td>
+                            <td className="px-3 py-3">{metricPercent(feature.relative_change)}</td>
+                            <td className="rounded-r px-3 py-3">{cleanText(feature.perturbation_status, 'Modified')}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <Alert className="mt-5" severity="info">No tabular feature perturbation was evaluated for this diagnosis.</Alert>
+                )}
+                <div className="mt-5 grid gap-3 md:grid-cols-4">
+                  {[
+                    ['Affected Features', patientAttack.affected_features_count ?? affectedFeatures.length],
+                    ['Perturbation Rate', patientAttack.perturbation_rate],
+                    ['Prediction Changed', patientAttack.prediction_changed],
+                    ['Attack Status', patientAttackStatus],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded bg-slate-50 p-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+                      <p className="mt-1 font-semibold text-slate-800">{label === 'Perturbation Rate' ? metricPercent(value) : metricValue(value)}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-black text-trust-ink">Adversarial Attack Results</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Patient confidence, clean model accuracy, under-attack accuracy, and robustness are displayed as separate values.
+                  </p>
+                </div>
+                <span className={`rounded border px-3 py-2 text-sm font-black ${attackStatusClass}`}>
+                  {attackSummary.label}
+                </span>
+              </div>
+              <div className="mt-5 overflow-x-auto">
+                <table className="min-w-full border-separate border-spacing-y-2 text-sm">
+                  <thead>
+                    <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                      <th className="px-3 py-2">Attack</th>
+                      <th className="px-3 py-2">Before Attack Accuracy</th>
+                      <th className="px-3 py-2">Under Attack Accuracy</th>
+                      <th className="px-3 py-2">Accuracy Degradation</th>
+                      <th className="px-3 py-2">Impact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {evaluatedAttackRows.map(([key, label]) => {
+                      const attackAccuracy = adversarialWorkflow[key];
+                      return (
+                        <tr key={key} className="bg-slate-50">
+                          <td className="rounded-l px-3 py-3 font-bold text-slate-800">{label}</td>
+                          <td className="px-3 py-3">{metricPercent(beforeAttackMetrics.accuracy)}</td>
+                          <td className="px-3 py-3">{metricPercent(attackAccuracy)}</td>
+                          <td className="px-3 py-3">{attackAccuracy === null || attackAccuracy === undefined ? 'Not Evaluated' : accuracyDegradation(beforeAttackMetrics.accuracy, attackAccuracy)}</td>
+                          <td className="rounded-r px-3 py-3">{attackAccuracy === null || attackAccuracy === undefined ? 'Not Evaluated' : attackImpactLabel(beforeAttackMetrics.accuracy, attackAccuracy)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-5 grid gap-3 md:grid-cols-4">
+                {[
+                  ['Aggregate Adversarial Accuracy', meanAttackAccuracy],
+                  ['Accuracy Degradation', attackImpact.accuracy_degradation],
+                  ['Robustness Score', adversarialWorkflow.robustness_score],
+                  ['Prediction Changed', patientAttack.prediction_changed],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded bg-slate-50 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+                    <p className="mt-1 font-semibold text-slate-800">
+                      {label === 'Accuracy Degradation' ? percentagePoints(value) : metricValue(value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <Alert className="mt-5" severity={attackSummary.severity === 'rose' ? 'warning' : 'info'}>
+                {adversarialWorkflow.conclusion ?? attackSummary.detail}
+              </Alert>
+              {securityEvent.generated && (
+                <div className="mt-5 rounded border border-rose-200 bg-rose-50 p-4">
+                  <p className="text-sm font-bold uppercase tracking-wide text-rose-700">Security Event Generated</p>
+                  <p className="mt-2 text-sm leading-6 text-rose-900">
+                    Authorized doctors and system administrators were notified because this diagnosis met adversarial security thresholds.
+                  </p>
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {securityFindings.map((finding: AnyRecord) => (
+                      <div key={cleanText(finding.code)} className="rounded bg-white p-3">
+                        <p className="font-bold text-slate-800">{cleanText(finding.label)}</p>
+                        <p className="mt-1 text-xs text-slate-500">Severity: {cleanText(finding.severity)}</p>
+                        <p className="mt-1 text-xs text-slate-500">Threshold: {metricValue(finding.threshold)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-black text-trust-ink">Defense / Adversarial Retraining</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Defense metrics are shown only when a real defended model evaluation exists for the model version used.
+                  </p>
+                </div>
+                <span className="rounded bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">
+                  {cleanText(defense.training_status ?? defense.status, 'Defense evaluation not available')}
+                </span>
+              </div>
+              {defenseAfterMetrics ? (
+                <div className="mt-5 overflow-x-auto">
+                  <table className="min-w-full border-separate border-spacing-y-2 text-sm">
+                    <thead>
+                      <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                        <th className="px-3 py-2">Metric</th>
+                        <th className="px-3 py-2">Before Defense</th>
+                        <th className="px-3 py-2">After Defense</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {performanceLabels.map(([key, label]) => (
+                        <tr key={key} className="bg-slate-50">
+                          <td className="rounded-l px-3 py-3 font-bold text-slate-800">{label}</td>
+                          <td className="px-3 py-3">{metricPercent(key === 'robustness_score' ? adversarialWorkflow.robustness_score : underAttackMetrics[key] ?? beforeAttackMetrics[key])}</td>
+                          <td className="rounded-r px-3 py-3">{metricPercent(defenseAfterMetrics[key])}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <Alert className="mt-5" severity="info">Defense Evaluation: Not Yet Evaluated</Alert>
+              )}
+              <p className="mt-4 text-sm leading-6 text-slate-600">{cleanText(adversarialWorkflow.conclusion, 'No defense conclusion is available for this diagnosis.')}</p>
+            </section>
+
             <div className="grid gap-6 xl:grid-cols-3">
               <section className="rounded border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2">
                 <h3 className="text-xl font-black text-trust-ink">Dynamic Trust Evolution</h3>
@@ -984,6 +1434,48 @@ export default function DiseaseDiagnosisPage() {
                   <p className="mt-2 text-sm text-slate-600">
                     Status: <span className="font-black text-trust-teal">{dteiStatus}</span>
                   </p>
+                  <div className="mt-4 overflow-x-auto rounded border border-teal-100 bg-white">
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+                          <th className="px-3 py-3">Component</th>
+                          <th className="px-3 py-3">Before Attack</th>
+                          <th className="px-3 py-3">After Attack</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {trustEvolutionRows.map((item) => (
+                          <tr key={item.key} className="border-t border-slate-100">
+                            <td className="px-3 py-3 font-bold text-slate-800">{item.label}</td>
+                            <td className="px-3 py-3 font-semibold text-slate-700">{metricPercent(item.before)}</td>
+                            <td className="px-3 py-3 font-semibold text-trust-teal">{metricPercent(item.after)}</td>
+                          </tr>
+                        ))}
+                        <tr className="border-t border-slate-200 bg-teal-50/70">
+                          <td className="px-3 py-3 font-black text-trust-ink">DTEI / Trust Score</td>
+                          <td className="px-3 py-3 font-black text-trust-ink">{metricPercent(trustEvolution.before_score)}</td>
+                          <td className="px-3 py-3 font-black text-trust-teal">{metricPercent(trustEvolution.after_score ?? result.trust_score)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded bg-white p-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Trust Change</p>
+                      <p className={`mt-1 text-lg font-black ${trustChange < 0 ? 'text-rose-700' : 'text-emerald-700'}`}>
+                        {Number.isFinite(trustChange) ? `${(trustChange * 100).toFixed(1)} percentage points` : 'Not Available'}
+                      </p>
+                    </div>
+                    <div className="rounded bg-white p-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Status</p>
+                      <p className="mt-1 text-lg font-black text-trust-ink">
+                        {cleanText(trustEvolution.before_status)} {'->'} {cleanText(trustEvolution.after_status ?? dteiStatus)}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs leading-5 text-slate-600">
+                    {cleanText(trustEvolution.basis, 'Before/after trust evolution is calculated from normalized DTEI components returned by the backend.')}
+                  </p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-5">
                     {dteiWeightRows.map((weight) => (
                       <div key={weight.key} className="rounded bg-white p-2 text-center">
@@ -992,6 +1484,19 @@ export default function DiseaseDiagnosisPage() {
                       </div>
                     ))}
                   </div>
+                  {dteiContributionRows.length > 0 && (
+                    <div className="mt-4 grid gap-2 sm:grid-cols-5">
+                      {dteiContributionRows.map((item) => (
+                        <div key={item.key} className="rounded border border-teal-100 bg-white p-2 text-center">
+                          <p className="text-[11px] font-bold uppercase text-slate-500">{item.label} Contribution</p>
+                          <p className="text-sm font-black text-trust-teal">{formatPercent(item.contribution)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="mt-3 text-sm font-semibold text-trust-ink">
+                    Final DTEI: {formatPercent(result.trust_score)}
+                  </p>
                 </div>
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
                   {(dteiRows.length ? dteiRows : [
@@ -1095,8 +1600,8 @@ export default function DiseaseDiagnosisPage() {
                           <p className="font-black text-slate-800">{method.name}</p>
                           <p className="mt-1 text-xs text-slate-500">{method.bestFor}</p>
                         </div>
-                        <span className={`rounded px-2 py-1 text-xs font-bold ${hasUsefulPayload(method.payload) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
-                          {hasUsefulPayload(method.payload) ? 'Generated' : 'Not Available'}
+                        <span className={`rounded px-2 py-1 text-xs font-bold ${explanationGenerated(method.payload) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
+                          {explanationGenerated(method.payload) ? 'Generated' : 'Not Evaluated'}
                         </span>
                       </div>
                     </div>
@@ -1122,24 +1627,6 @@ export default function DiseaseDiagnosisPage() {
                 </div>
               </section>
 
-              <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="text-xl font-black text-trust-ink">Adversarial Attacks</h3>
-                <div className={`mt-4 rounded border p-4 ${attackStatusClass}`}>
-                  <p className="text-sm font-bold uppercase tracking-wide">Disease stability status</p>
-                  <p className="mt-1 text-3xl font-black">{attackSummary.label}</p>
-                  <p className="mt-2 text-sm">{attackSummary.detail}</p>
-                </div>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  {adversarialRows.length ? adversarialRows.map(([label, value]) => (
-                    <div key={label} className="rounded bg-slate-50 p-3">
-                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{cleanText(label)}</p>
-                      <p className="mt-1 font-semibold text-slate-800">{metricValue(value)}</p>
-                    </div>
-                  )) : (
-                    <p className="text-sm text-slate-500">FGSM, PGD, Gaussian noise, and poisoning metrics were not returned for this run.</p>
-                  )}
-                </div>
-              </section>
             </div>
 
             <div className="grid gap-6 xl:grid-cols-2">
@@ -1291,6 +1778,42 @@ export default function DiseaseDiagnosisPage() {
               </div>
             </section>
           </section>
+        )}
+        {selectedImagePreview && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/80 p-4" role="dialog" aria-modal="true">
+            <div className="max-h-[92vh] w-full max-w-5xl overflow-hidden rounded bg-white shadow-2xl">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 p-4">
+                <div>
+                  <h3 className="font-black text-trust-ink">{selectedImagePreview.title}</h3>
+                  <p className="mt-1 break-words text-sm text-slate-500">
+                    {selectedImagePreview.artifact.original_filename}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => downloadFile(
+                      `/reports/${result?.diagnosis_id}/artifacts/${selectedImagePreview.artifact.id}`,
+                      selectedImagePreview.artifact.original_filename,
+                    )}
+                  >
+                    Download
+                  </Button>
+                  <Button size="small" variant="contained" onClick={() => setSelectedImagePreview(null)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+              <div className="max-h-[76vh] overflow-auto bg-slate-100 p-4">
+                <img
+                  src={selectedImagePreview.url}
+                  alt={selectedImagePreview.title}
+                  className="mx-auto max-h-[70vh] max-w-full object-contain"
+                />
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>

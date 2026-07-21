@@ -51,6 +51,13 @@ class Settings(BaseSettings):
     fabric_chaincode_name: str = "trustledger"
     fabric_peer_names: str = ""
 
+    adversarial_accuracy_degradation_threshold: float = 0.10
+    adversarial_high_impact_degradation_threshold: float = 0.25
+    adversarial_robustness_threshold: float = 0.75
+    adversarial_trust_drop_threshold: float = 0.05
+    adversarial_explanation_stability_threshold: float = 0.75
+    adversarial_input_perturbation_threshold: float = 0.30
+
     model_config = SettingsConfigDict(
         env_file=(PROJECT_ROOT / ".env", BACKEND_ROOT / ".env", ".env"),
         case_sensitive=False,

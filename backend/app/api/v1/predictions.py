@@ -10,6 +10,7 @@ from app.core.rbac import Role
 from app.db.models import DiagnosisRecord, User
 from app.db.session import get_db
 from app.schemas import DiagnosisRecordResponse, PredictionRequest, PredictionResponse
+from app.services.patient_ids import public_patient_id_for_record
 from app.services.prediction import PredictionInputError, run_diagnosis, run_image_diagnosis
 
 router = APIRouter()
@@ -125,8 +126,8 @@ def list_predictions(
     if user_role in {Role.SUPER_ADMIN, Role.HOSPITAL_ADMIN}:
         raise HTTPException(status_code=403, detail="Administrators manage the system but cannot access diagnosis records.")
     if user_role == Role.DOCTOR:
-        # Doctor sees records they created
-        query = query.filter(DiagnosisRecord.doctor_id == user.id)
+        # Doctor sees records they created plus unassigned patient-created diagnoses awaiting review.
+        query = query.filter(or_(DiagnosisRecord.doctor_id == user.id, DiagnosisRecord.doctor_id.is_(None)))
     elif user_role == Role.PATIENT:
         # Patient sees only their own records
         query = query.filter(
@@ -145,6 +146,7 @@ def list_predictions(
         DiagnosisRecordResponse(
             diagnosis_id=record.id,
             patient_id=None if hide_patient_identity else record.patient_id,
+            patient_public_id=None if hide_patient_identity else public_patient_id_for_record(db, record),
             patient_name=None if hide_patient_identity else record.patient_name,
             patient_email=None if hide_patient_identity else record.patient_email,
             doctor_id=record.doctor_id,

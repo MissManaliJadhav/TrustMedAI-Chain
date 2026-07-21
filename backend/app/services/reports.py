@@ -18,7 +18,7 @@ from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Tabl
 from app.core.config import BACKEND_ROOT, settings
 from app.db.models import DiagnosisArtifact, DiagnosisRecord, User
 from app.services.catalog import get_disease
-from app.services.storage import read_object
+from app.services.storage import read_object, store_object
 
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -78,7 +78,7 @@ def _patient_profile(record: DiagnosisRecord, patient: User | None) -> dict[str,
     age = _calculate_age(profile.get("date_of_birth"))
     return {
         "Full Name": _safe(full_name),
-        "Patient ID": _safe(patient.id if patient else record.patient_id),
+        "Patient ID": _safe(patient.public_patient_id if patient else None),
         "Age": _safe(age),
         "Date of Birth": _safe(profile.get("date_of_birth")),
         "Sex": _safe(profile.get("sex")),
@@ -246,6 +246,61 @@ def _explainability_rows(record: DiagnosisRecord) -> list[tuple[str, Any]]:
     return rows
 
 
+def _percent(value: Any) -> str:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return "Not Evaluated"
+    if not number == number:
+        return "Not Evaluated"
+    percent = number * 100 if number <= 1 else number
+    return f"{percent:.1f}%"
+
+
+def _adversarial_rows(record: DiagnosisRecord) -> list[tuple[str, Any]]:
+    adversarial = (record.metrics or {}).get("adversarial", {})
+    if not isinstance(adversarial, dict):
+        adversarial = {}
+    patient_attack = adversarial.get("patient_attack") if isinstance(adversarial.get("patient_attack"), dict) else {}
+    before = adversarial.get("before_attack_metrics") if isinstance(adversarial.get("before_attack_metrics"), dict) else {}
+    under = adversarial.get("under_attack_metrics") if isinstance(adversarial.get("under_attack_metrics"), dict) else {}
+    impact = adversarial.get("attack_impact") if isinstance(adversarial.get("attack_impact"), dict) else {}
+    defense = adversarial.get("defense") if isinstance(adversarial.get("defense"), dict) else {}
+    return [
+        ("Model", adversarial.get("model_name")),
+        ("Model Version", adversarial.get("model_version")),
+        ("Input Modality", adversarial.get("input_modality") or record.input_modality),
+        ("Evaluation Dataset", adversarial.get("evaluation_dataset")),
+        ("Random Seed", adversarial.get("random_seed")),
+        ("Attack Type", patient_attack.get("attack_type") or adversarial.get("attack_type")),
+        ("Patient-Specific Confidence", _percent(record.confidence)),
+        ("Original Model Clean/Test Accuracy", _percent(before.get("accuracy"))),
+        ("Aggregate Under-Attack Accuracy", _percent(adversarial.get("after_attack_accuracy") or under.get("accuracy"))),
+        ("Accuracy Degradation", _percent(impact.get("accuracy_degradation"))),
+        ("Prediction Before Attack", patient_attack.get("prediction_before_attack")),
+        ("Prediction Under Attack", patient_attack.get("prediction_under_attack")),
+        ("Prediction Changed", patient_attack.get("prediction_changed")),
+        ("Robustness Score", _percent(adversarial.get("robustness_score"))),
+        ("AECS", _percent(record.aecs)),
+        ("Defense Evaluation", defense.get("training_status") or defense.get("status") or "Not Yet Evaluated"),
+        ("Evidence-Based Conclusion", adversarial.get("conclusion")),
+    ]
+
+
+def _adversarial_artifact_rows(record: DiagnosisRecord) -> list[tuple[str, Any]]:
+    labels = {
+        "input_image": "Original Medical Image",
+        "adversarial_image": "Adversarially Perturbed Image",
+        "perturbation_map": "Adversarial Perturbation Map",
+        "affected_region_overlay": "Affected Region Overlay",
+    }
+    rows: list[tuple[str, Any]] = []
+    for kind, label in labels.items():
+        artifact = next((item for item in record.artifacts if item.kind == kind), None)
+        rows.append((label, artifact.original_filename if isinstance(artifact, DiagnosisArtifact) else "Not Available"))
+    return rows
+
+
 def _report_payload_hash(record: DiagnosisRecord, patient_profile: dict[str, Any], verification_id: str) -> str:
     payload = {
         "diagnosis_id": record.id,
@@ -362,15 +417,28 @@ def build_pdf_report(record: DiagnosisRecord, patient: User | None = None) -> by
     if image:
         story.extend([Spacer(1, 0.08 * inch), Paragraph("Uploaded Medical Image", STYLES["Section"]), image])
 
-    story.extend(_section("5. AI Explainability"))
+    story.extend(_section("5. Adversarial Robustness Analysis"))
+    story.append(_table(_adversarial_rows(record)))
+    if record.input_modality == "image":
+        story.append(Spacer(1, 0.08 * inch))
+        story.append(_table(_adversarial_artifact_rows(record)))
+        story.append(Spacer(1, 0.04 * inch))
+        story.append(
+            Paragraph(
+                "Attack perturbation artifacts show measured input changes and are distinct from model explanation heatmaps.",
+                STYLES["Small"],
+            )
+        )
+
+    story.extend(_section("6. AI Explainability"))
     story.append(_table(_explainability_rows(record)))
 
-    story.extend(_section("6. Recommendations"))
+    story.extend(_section("7. Recommendations"))
     story.append(Paragraph(_recommendation(record), STYLES["Body"]))
     story.append(Spacer(1, 0.08 * inch))
     story.append(Paragraph(DISCLAIMER, STYLES["Disclaimer"]))
 
-    story.extend(_section("7. Blockchain Verification"))
+    story.extend(_section("8. Blockchain Verification"))
     blockchain = record.blockchain_status or {}
     ethereum = blockchain.get("ethereum", {}) if isinstance(blockchain.get("ethereum"), dict) else {}
     fabric = blockchain.get("fabric", {}) if isinstance(blockchain.get("fabric"), dict) else {}
@@ -396,7 +464,7 @@ def build_pdf_report(record: DiagnosisRecord, patient: User | None = None) -> by
         )
     )
 
-    story.extend(_section("8. Digital Signature / Integrity"))
+    story.extend(_section("9. Digital Signature / Integrity"))
     story.append(
         _table(
             [
@@ -420,3 +488,37 @@ def build_pdf_report(record: DiagnosisRecord, patient: User | None = None) -> by
 
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
     return buffer.getvalue()
+
+
+def refresh_stored_pdf_report(record: DiagnosisRecord, patient: User | None = None) -> DiagnosisArtifact:
+    content = build_pdf_report(record, patient)
+    artifact = next((item for item in record.artifacts if item.kind == "generated_report"), None)
+    if artifact is None:
+        stored = store_object(
+            f"diagnoses/{record.id}/generated_report-{record.id}.pdf",
+            content,
+            "application/pdf",
+        )
+        artifact = DiagnosisArtifact(
+            diagnosis_id=record.id,
+            kind="generated_report",
+            object_path=stored.object_path,
+            original_filename=f"trustmedai-{record.id}.pdf",
+            content_type="application/pdf",
+            size_bytes=len(content),
+            sha256=sha256(content).hexdigest(),
+        )
+        record.artifacts.append(artifact)
+        return artifact
+
+    object_name = artifact.object_path
+    if object_name.startswith("local:"):
+        object_name = object_name.removeprefix("local:")
+    elif object_name.startswith("minio:"):
+        object_name = object_name.removeprefix("minio:")
+    stored = store_object(object_name, content, "application/pdf")
+    artifact.object_path = stored.object_path
+    artifact.size_bytes = len(content)
+    artifact.sha256 = sha256(content).hexdigest()
+    artifact.content_type = "application/pdf"
+    return artifact

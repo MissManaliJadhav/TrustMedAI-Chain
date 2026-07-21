@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from reportlab.pdfgen import canvas
 
 from app.core.config import settings
-from app.db.models import DiagnosisRecord, User
+from app.db.models import AuditEvent, DiagnosisRecord, Notification, User
 from app.db.session import SessionLocal
 from app.main import app
 from app.services.blockchain import build_diagnosis_anchor_payload, hash_payload
@@ -95,6 +95,9 @@ def test_tabular_and_image_artifacts_persist_end_to_end(tmp_path) -> None:
         assert dtei["formula"] == "DTEI = alpha*F + beta*I + gamma*R + delta*B + lambda*C"
         assert round(sum(dtei["weights"].values()), 5) == 1.0
         assert dtei["status"] in {"High Trust", "Moderate Trust", "Low Trust", "Critical Review Required"}
+        assert tabular_body["adversarial"]["patient_attack"]["status"] in {"Evaluated", "Not Evaluated"}
+        assert "before_attack_metrics" in tabular_body["adversarial"]
+        assert "under_attack_metrics" in tabular_body["adversarial"]
 
         image = np.zeros((64, 64, 3), dtype=np.uint8)
         ok, encoded = cv2.imencode(".png", image)
@@ -115,11 +118,25 @@ def test_tabular_and_image_artifacts_persist_end_to_end(tmp_path) -> None:
         assert image_response.status_code == 200, image_response.text
         image_body = image_response.json()
         assert image_body["input_modality"] == "image"
+        assert image_body["adversarial"]["security_event"]["generated"] is True
+        assert image_body["adversarial"]["trust_evolution"]["trust_change"] <= 0
         assert {item["kind"] for item in image_body["artifacts"]} == {
             "input_image",
+            "gradcam_heatmap",
+            "adversarial_image",
+            "perturbation_map",
+            "affected_region_overlay",
             "supporting_pdf",
             "generated_report",
         }
+        assert image_body["adversarial"]["patient_attack"]["status"] == "Evaluated"
+        assert set(image_body["adversarial"]["patient_attack"]["visual_artifact_kinds"]) == {
+            "input_image",
+            "adversarial_image",
+            "perturbation_map",
+            "affected_region_overlay",
+        }
+        assert image_body["adversarial"]["patient_attack"]["percentage_pixels_affected"] >= 0
 
         report = client.get(
             f"/api/v1/reports/{image_body['diagnosis_id']}.pdf",
@@ -141,9 +158,20 @@ def test_tabular_and_image_artifacts_persist_end_to_end(tmp_path) -> None:
     try:
         record = db.query(DiagnosisRecord).filter(DiagnosisRecord.id == image_body["diagnosis_id"]).one()
         assert record.input_features["image_width"] == 64
-        assert len(record.artifacts) == 3
+        assert len(record.artifacts) == 7
         assert all(len(artifact.sha256) == 64 for artifact in record.artifacts)
         assert all(read_object(artifact.object_path) for artifact in record.artifacts)
+        security_notifications = db.query(Notification).filter(
+            Notification.diagnosis_id == record.id,
+            Notification.notification_type == "adversarial_security_event",
+        ).all()
+        assert security_notifications
+        assert any(notification.severity in {"warning", "critical"} for notification in security_notifications)
+        security_audit = db.query(AuditEvent).filter(
+            AuditEvent.resource_id == record.id,
+            AuditEvent.action == "security.adversarial_event_detected",
+        ).first()
+        assert security_audit is not None
         actor = db.query(User).filter(User.id == record.doctor_id).one()
         assert hash_payload(build_diagnosis_anchor_payload(record, actor)) == record.blockchain_hash
     finally:

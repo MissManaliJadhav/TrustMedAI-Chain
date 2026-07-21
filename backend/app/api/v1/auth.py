@@ -8,6 +8,7 @@ from app.core.security import create_token, decode_token, hash_password, verify_
 from app.db.models import User
 from app.db.session import get_db
 from app.api.deps import get_current_user
+from app.services.patient_ids import ensure_user_public_patient_id
 from app.schemas import (
     CurrentUserResponse,
     ForgotPasswordRequest,
@@ -47,6 +48,8 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)) -> User:
         is_verified=False,
     )
     db.add(user)
+    db.flush()
+    ensure_user_public_patient_id(db, user)
     db.commit()
     db.refresh(user)
     return user
@@ -82,6 +85,7 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> TokenPair
 def me(user: User = Depends(get_current_user)) -> CurrentUserResponse:
     return CurrentUserResponse(
         id=user.id,
+        public_patient_id=user.public_patient_id,
         email=user.email,
         full_name=user.full_name,
         role=Role(user.role),

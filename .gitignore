@@ -5,7 +5,8 @@ __pycache__/
 *.pyd
 venv/
 .env
-myenv
+myenv/
+
 # Node
 node_modules/
 npm-debug.log
@@ -32,10 +33,11 @@ keystore/
 dist/
 build/
 coverage/
-.artifacts-browser
+.artifacts-browser/
+.artifacts/
 # Python cache
 .pytest_cache/
-
+.agents/
 # Large datasets
 data/raw/
 data/train/
@@ -49,3 +51,4 @@ data/validation/
 
 # Environment examples stay in GitHub
 !.env.example
+k8s

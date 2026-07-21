@@ -4,6 +4,7 @@ from app.core.config import settings
 from app.core.rbac import Role
 from app.core.security import hash_password
 from app.db.models import Hospital, User
+from app.services.patient_ids import assign_missing_public_patient_ids
 
 
 def ensure_bootstrap_data(db: Session) -> None:
@@ -26,3 +27,4 @@ def ensure_bootstrap_data(db: Session) -> None:
             )
         )
     db.commit()
+    assign_missing_public_patient_ids(db)

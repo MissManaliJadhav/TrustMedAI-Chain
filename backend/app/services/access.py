@@ -9,7 +9,7 @@ def can_access_diagnosis(db: Session, user: User, record: DiagnosisRecord) -> bo
     if role == Role.SUPER_ADMIN:
         return False
     if role == Role.DOCTOR:
-        return record.doctor_id == user.id
+        return record.doctor_id in {None, user.id}
     if role == Role.PATIENT:
         return record.patient_id == user.id or (
             bool(record.patient_email) and record.patient_email.lower() == user.email.lower()

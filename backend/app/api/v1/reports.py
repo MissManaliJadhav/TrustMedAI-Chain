@@ -8,6 +8,7 @@ from app.db.session import get_db
 from app.schemas import DiagnosisArtifactResponse
 from app.services.access import can_access_diagnosis
 from app.services.audit import record_audit_event
+from app.services.patient_ids import ensure_user_public_patient_id
 from app.services.reports import build_pdf_report
 from app.services.storage import read_object
 
@@ -83,6 +84,8 @@ def report(
         patient_user = db.query(User).filter(User.id == record.patient_id).first()
     if patient_user is None and record.patient_email:
         patient_user = db.query(User).filter(User.email == record.patient_email.lower()).first()
+    if patient_user:
+        ensure_user_public_patient_id(db, patient_user)
     pdf = build_pdf_report(record, patient_user)
     record_audit_event(
         db,

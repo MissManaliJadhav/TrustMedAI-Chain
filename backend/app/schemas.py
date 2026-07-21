@@ -34,6 +34,7 @@ class SignupRequest(BaseModel):
 
 class UserRead(BaseModel):
     id: str
+    public_patient_id: str | None = None
     email: EmailStr
     full_name: str
     role: Role
@@ -82,6 +83,7 @@ class DiagnosisArtifactResponse(BaseModel):
 
 class PredictionResponse(BaseModel):
     diagnosis_id: str
+    patient_public_id: str | None = None
     disease_key: str
     prediction: str
     confidence: float
@@ -126,6 +128,7 @@ class ContactResponse(BaseModel):
 
 class CurrentUserResponse(BaseModel):
     id: str
+    public_patient_id: str | None = None
     email: str
     full_name: str
     role: Role
@@ -250,6 +253,7 @@ class DoctorNoteRequest(BaseModel):
 
 class DoctorPatientSummary(BaseModel):
     patient_id: str | None = None
+    patient_public_id: str | None = None
     patient_name: str | None = None
     patient_email: str | None = None
     total_diagnoses: int
@@ -390,6 +394,7 @@ class DiagnosisRecordResponse(BaseModel):
     """Response schema for diagnosis records with role-based filtering."""
     diagnosis_id: str
     patient_id: str | None
+    patient_public_id: str | None = None
     patient_name: str | None = None
     patient_email: str | None = None
     doctor_id: str | None
