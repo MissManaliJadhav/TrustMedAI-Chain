@@ -232,20 +232,22 @@ def compute_dtei(
     return round(max(0.0, min(100.0, score * 100.0)), 2)
 
 
-def compute_aecs_from_vectors(original: np.ndarray, attacked: np.ndarray) -> float:
+def compute_aecs_from_vectors(original: np.ndarray, attacked: np.ndarray) -> tuple[float, float]:
     original = np.asarray(original, dtype=float).ravel()
     attacked = np.asarray(attacked, dtype=float).ravel()
     if original.size == 0 or attacked.size == 0:
-        return 0.0
+        return 0.0, 0.0
     limit = min(original.size, attacked.size)
     original = original[:limit]
     attacked = attacked[:limit]
     if np.allclose(original, 0) and np.allclose(attacked, 0):
-        return 1.0
-    original_norm = original / (np.linalg.norm(original) + 1e-12)
-    attacked_norm = attacked / (np.linalg.norm(attacked) + 1e-12)
-    similarity = float(np.dot(original_norm, attacked_norm))
-    return round(max(0.0, min(1.0, (similarity + 1.0) / 2.0)), 4)
+        return 1.0, 0.0
+    # Compute Euclidean distance
+    distance = float(np.linalg.norm(original - attacked))
+    denom = float(np.linalg.norm(original)) + 1e-12
+    similarity_pct = max(0.0, min(100.0, (1.0 - distance / denom) * 100.0))
+    aecs_val = float(round(similarity_pct / 100.0, 4))
+    return aecs_val, distance
 
 
 def split_70_15_15(
@@ -680,7 +682,7 @@ def train_tabular_disease(spec: DiseaseTrainingSpec, config: TrainingRunConfig) 
         float(metrics["accuracy"]),
         config.poisoning_fraction,
     )
-    aecs = compute_aecs_from_vectors(
+    aecs, _ = compute_aecs_from_vectors(
         np.array([item.get("importance", 0.0) for item in feature_importance[:20]], dtype=float),
         np.array([item.get("importance", 0.0) for item in feature_importance[:20]], dtype=float),
     )
@@ -873,7 +875,7 @@ def train_image_disease(spec: DiseaseTrainingSpec, config: TrainingRunConfig) ->
     )
     robustness = _image_robustness(tf, best_model, test_ds, float(metrics["accuracy"]))
     explanations = _image_explanations(tf, best_model, test_ds, spec, config)
-    aecs = compute_aecs_from_vectors(
+    aecs, _ = compute_aecs_from_vectors(
         np.asarray(explanations.get("grad_cam_sample", []), dtype=float),
         np.asarray(explanations.get("attacked_grad_cam_sample", explanations.get("grad_cam_sample", [])), dtype=float),
     )

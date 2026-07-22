@@ -266,6 +266,7 @@ def _adversarial_rows(record: DiagnosisRecord) -> list[tuple[str, Any]]:
     under = adversarial.get("under_attack_metrics") if isinstance(adversarial.get("under_attack_metrics"), dict) else {}
     impact = adversarial.get("attack_impact") if isinstance(adversarial.get("attack_impact"), dict) else {}
     defense = adversarial.get("defense") if isinstance(adversarial.get("defense"), dict) else {}
+    aecs_details = adversarial.get("aecs") if isinstance(adversarial.get("aecs"), dict) else {}
     return [
         ("Model", adversarial.get("model_name")),
         ("Model Version", adversarial.get("model_version")),
@@ -281,7 +282,7 @@ def _adversarial_rows(record: DiagnosisRecord) -> list[tuple[str, Any]]:
         ("Prediction Under Attack", patient_attack.get("prediction_under_attack")),
         ("Prediction Changed", patient_attack.get("prediction_changed")),
         ("Robustness Score", _percent(adversarial.get("robustness_score"))),
-        ("AECS", _percent(record.aecs)),
+        ("AECS", adversarial.get("aecs_reason") if adversarial.get("aecs_available") is False else _percent(record.aecs)),
         ("Defense Evaluation", defense.get("training_status") or defense.get("status") or "Not Yet Evaluated"),
         ("Evidence-Based Conclusion", adversarial.get("conclusion")),
     ]
@@ -299,6 +300,44 @@ def _adversarial_artifact_rows(record: DiagnosisRecord) -> list[tuple[str, Any]]
         artifact = next((item for item in record.artifacts if item.kind == kind), None)
         rows.append((label, artifact.original_filename if isinstance(artifact, DiagnosisArtifact) else "Not Available"))
     return rows
+
+
+def _adversarial_artifact_image_table(label: str, image: Image) -> Table:
+    table = Table(
+        [[Paragraph(f"<b>{label}</b>", STYLES["Body"])], [image]],
+        colWidths=[3.3 * inch],
+    )
+    table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 4),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ]
+        )
+    )
+    return table
+
+
+def _adversarial_artifact_images(record: DiagnosisRecord) -> list[Table]:
+    labels = {
+        "adversarial_image": "Adversarially Perturbed Image",
+        "perturbation_map": "Adversarial Perturbation Map",
+        "affected_region_overlay": "Affected Region Overlay",
+    }
+    images: list[Table] = []
+    for kind, label in labels.items():
+        artifact = next((item for item in record.artifacts if item.kind == kind), None)
+        if isinstance(artifact, DiagnosisArtifact):
+            try:
+                image = _image_from_bytes(read_object(artifact.object_path), 3.3 * inch, 2.4 * inch)
+                if image is not None:
+                    images.append(_adversarial_artifact_image_table(label, image))
+            except Exception:
+                continue
+    return images
 
 
 def _report_payload_hash(record: DiagnosisRecord, patient_profile: dict[str, Any], verification_id: str) -> str:
@@ -422,6 +461,32 @@ def build_pdf_report(record: DiagnosisRecord, patient: User | None = None) -> by
     if record.input_modality == "image":
         story.append(Spacer(1, 0.08 * inch))
         story.append(_table(_adversarial_artifact_rows(record)))
+        adversarial_images = _adversarial_artifact_images(record)
+        if adversarial_images:
+            story.append(Spacer(1, 0.08 * inch))
+            story.append(Paragraph("Adversarial Image Artifacts", STYLES["Section"]))
+            story.append(Spacer(1, 0.04 * inch))
+            rows: list[list[Any]] = []
+            for i in range(0, len(adversarial_images), 2):
+                row = [adversarial_images[i]]
+                if i + 1 < len(adversarial_images):
+                    row.append(adversarial_images[i + 1])
+                else:
+                    row.append("")
+                rows.append(row)
+            artifact_table = Table(rows, colWidths=[3.45 * inch, 3.45 * inch], hAlign="LEFT")
+            artifact_table.setStyle(
+                TableStyle(
+                    [
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                        ("TOPPADDING", (0, 0), (-1, -1), 4),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                    ]
+                )
+            )
+            story.append(artifact_table)
         story.append(Spacer(1, 0.04 * inch))
         story.append(
             Paragraph(

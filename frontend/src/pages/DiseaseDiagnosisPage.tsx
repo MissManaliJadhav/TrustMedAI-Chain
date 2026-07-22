@@ -56,6 +56,7 @@ interface PredictionResult {
     captum?: AnyRecord;
     integrated_gradients?: AnyRecord;
     counterfactuals?: AnyRecord;
+    aecs?: AnyRecord;
   };
   adversarial?: AnyRecord;
   trust_score: number;
@@ -769,6 +770,11 @@ export default function DiseaseDiagnosisPage() {
   const defenseAfterMetrics = defense.after_defense_metrics ?? null;
   const resultModality = result?.input_modality ?? (isImageDisease ? 'image' : 'tabular');
   const artifactByKind = Object.fromEntries((result?.artifacts ?? []).map((artifact) => [artifact.kind, artifact]));
+  const reportArtifact = artifactByKind['generated_report'] as DiagnosisArtifact | undefined;
+  const attackDetected = Boolean((adversarialWorkflow.security_event && adversarialWorkflow.security_event.generated) || patientAttack.status === 'Evaluated' || adversarialWorkflow.attack_type);
+  const attackName = cleanText(patientAttack.attack_type ?? adversarialWorkflow.attack_type, 'Not Evaluated');
+  const imageDiseaseKeywords = ['tuberculosis', 'pneumonia', 'brain', 'cataract', 'eye'];
+  const isListedImageDisease = inputSpec.name ? imageDiseaseKeywords.some((k) => inputSpec.name.toLowerCase().includes(k)) : false;
   const imageVisualCards = [
     {
       kind: 'input_image',
@@ -779,7 +785,7 @@ export default function DiseaseDiagnosisPage() {
     {
       kind: 'adversarial_image',
       title: 'Adversarially Perturbed Image',
-      description: `Attack: ${cleanText(patientAttack.attack_type ?? adversarialWorkflow.attack_type, 'Not Evaluated')}`,
+      description: `Attack: ${attackName}`,
       unavailable: 'Adversarial image not generated.',
     },
     {
@@ -829,6 +835,11 @@ export default function DiseaseDiagnosisPage() {
   const trustChange = Number(trustEvolution.trust_change);
   const securityEvent = adversarialWorkflow.security_event ?? {};
   const securityFindings = Array.isArray(securityEvent.findings) ? securityEvent.findings : [];
+  const aecsDetails = adversarialWorkflow.aecs ?? result?.explanation?.aecs ?? {};
+  const aecsAvailable = aecsDetails.available === true;
+  const aecsDisplay = aecsAvailable ? formatPercent(aecsDetails.score ?? result?.aecs) : 'Not Available';
+  const aecsSimilarityDisplay = aecsAvailable ? formatPercent(aecsDetails.similarity ?? aecsDetails.score) : 'Not Available';
+  const aecsDistanceDisplay = aecsDetails.distance === null || aecsDetails.distance === undefined ? 'Not Available' : Number(aecsDetails.distance).toFixed(4);
   const attackStatusClass = attackSummary.severity === 'emerald'
     ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
     : attackSummary.severity === 'amber'
@@ -1225,25 +1236,20 @@ export default function DiseaseDiagnosisPage() {
                               </Button>
                             </div>
                           )}
+                          {attackDetected && reportArtifact && card.kind === 'adversarial_image' && (
+                            <div className="mt-3">
+                              <Button size="small" variant="contained" onClick={() => downloadFile(
+                                `/reports/${result.diagnosis_id}/artifacts/${reportArtifact.id}`,
+                                reportArtifact.original_filename,
+                              )}>
+                                Downloadable PDF Diagnosis Report
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
                   })}
-                </div>
-                <div className="mt-5 grid gap-3 md:grid-cols-4">
-                  {[
-                    ['Perturbation Magnitude', patientAttack.perturbation_magnitude],
-                    ['Pixels Affected', patientAttack.percentage_pixels_affected],
-                    ['Prediction Before Attack', patientAttack.prediction_before_attack],
-                    ['Prediction Under Attack', patientAttack.prediction_under_attack],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded bg-slate-50 p-3">
-                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
-                      <p className="mt-1 font-semibold text-slate-800">
-                        {label === 'Pixels Affected' ? metricPercent(value) : metricValue(value)}
-                      </p>
-                    </div>
-                  ))}
                 </div>
               </section>
             ) : (
@@ -1256,8 +1262,15 @@ export default function DiseaseDiagnosisPage() {
                     </p>
                   </div>
                   <span className="rounded bg-teal-50 px-3 py-2 text-sm font-black text-trust-teal">
-                    {cleanText(patientAttack.attack_type, 'Not Evaluated')}
+                    Attack: {attackName}
                   </span>
+                  {attackDetected && reportArtifact && (
+                    <div className="ml-3 inline-block">
+                      <Button size="small" variant="contained" onClick={() => downloadFile(`/reports/${result.diagnosis_id}/artifacts/${reportArtifact.id}`, reportArtifact.original_filename)}>
+                        Download Report
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 {affectedFeatures.length ? (
                   <div className="mt-5 overflow-x-auto">
@@ -1305,6 +1318,28 @@ export default function DiseaseDiagnosisPage() {
               </section>
             )}
 
+            {/* If a tabular diagnosis hit an attack but this disease is an image-based disease, surface the original image artifact */}
+            { !isImageDisease && isListedImageDisease && attackDetected && artifactByKind['input_image'] && (
+              <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
+                <h3 className="text-xl font-black text-trust-ink">Actual Medical Image (sourced)</h3>
+                <p className="mt-1 text-sm text-slate-600">This image is shown because adversarial activity was detected for a disease typically diagnosed from images.</p>
+                <div className="mt-4">
+                  <div className="aspect-[4/3] overflow-hidden rounded border border-slate-200 bg-white">
+                    {artifactPreviews['input_image'] ? (
+                      <img src={artifactPreviews['input_image']} alt="Actual medical image" className="h-full w-full object-contain" />
+                    ) : (
+                      <div className="grid h-full place-items-center p-4 text-center text-sm font-semibold text-slate-500">Original image unavailable</div>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <Button size="small" variant="contained" onClick={() => downloadFile(`/reports/${result.diagnosis_id}/artifacts/${artifactByKind['input_image'].id}`, artifactByKind['input_image'].original_filename)}>
+                      Download Actual Image
+                    </Button>
+                  </div>
+                </div>
+              </section>
+            )}
+
             <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
@@ -1333,7 +1368,16 @@ export default function DiseaseDiagnosisPage() {
                       const attackAccuracy = adversarialWorkflow[key];
                       return (
                         <tr key={key} className="bg-slate-50">
-                          <td className="rounded-l px-3 py-3 font-bold text-slate-800">{label}</td>
+                          <td className="rounded-l px-3 py-3 font-bold text-slate-800">
+                            <div className="flex items-center gap-3">
+                              <span>{label}</span>
+                              {attackDetected && reportArtifact && (
+                                <Button size="small" variant="text" onClick={() => downloadFile(`/reports/${result.diagnosis_id}/artifacts/${reportArtifact.id}`, reportArtifact.original_filename)}>
+                                  Download
+                                </Button>
+                              )}
+                            </div>
+                          </td>
                           <td className="px-3 py-3">{metricPercent(beforeAttackMetrics.accuracy)}</td>
                           <td className="px-3 py-3">{metricPercent(attackAccuracy)}</td>
                           <td className="px-3 py-3">{attackAccuracy === null || attackAccuracy === undefined ? 'Not Evaluated' : accuracyDegradation(beforeAttackMetrics.accuracy, attackAccuracy)}</td>
@@ -1523,11 +1567,27 @@ export default function DiseaseDiagnosisPage() {
 
               <section className="rounded border border-slate-200 bg-white p-6 shadow-sm">
                 <h3 className="text-xl font-black text-trust-ink">AECS</h3>
-                <p className="mt-1 text-sm text-slate-500">Adversarial Explanation Consistency Score.</p>
-                <p className="mt-5 text-5xl font-black text-trust-teal">{formatPercent(result.aecs)}</p>
-                <p className="mt-3 text-sm text-slate-600">
-                  Compares explanation stability before and after attack simulation.
-                </p>
+                <p className="mt-1 text-sm text-slate-500">Adversarial Explanation Consistency Score calculated from current diagnosis explanation vectors.</p>
+                <p className="mt-5 text-5xl font-black text-trust-teal">{aecsDisplay}</p>
+                <div className="mt-5 grid gap-3">
+                  {[
+                    ['Original Explanation', cleanText(aecsDetails.original_explanation, aecsAvailable ? 'Generated' : 'Not Available')],
+                    ['Adversarial Explanation', cleanText(aecsDetails.adversarial_explanation, aecsAvailable ? 'Generated' : 'Not Available')],
+                    ['Explanation Similarity', aecsSimilarityDisplay],
+                    ['Explanation Distance', aecsDistanceDisplay],
+                    ['Status', cleanText(aecsDetails.status, 'Not Available')],
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded bg-slate-50 p-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+                      <p className="mt-1 font-semibold text-slate-800">{value}</p>
+                    </div>
+                  ))}
+                </div>
+                {!aecsAvailable && (
+                  <Alert className="mt-4" severity="info">
+                    {cleanText(aecsDetails.reason, 'AECS is not available because original and adversarial explanation vectors were not generated.')}
+                  </Alert>
+                )}
               </section>
             </div>
 

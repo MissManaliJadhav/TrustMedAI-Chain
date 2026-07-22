@@ -24,7 +24,7 @@ def disease_features(disease_key: str) -> dict:
         **disease.model_dump(),
         "input_mode": "image" if disease.modality == "image" else "features",
         "model_available": (
-            bool(features) and not is_blocked
+            bool(features)
             if disease.modality != "image"
             else load_model(disease_key) is not None
         ),

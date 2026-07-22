@@ -50,5 +50,7 @@ def test_trust_and_aecs_are_bounded() -> None:
     assert compute_dtei(1.0, 1.0, 1.0, 1.0, 1.0) == 100.0
     assert compute_dtei(-2.0, 0.0, 0.0, 0.0, 0.0) == 0.0
 
-    assert compute_aecs_from_vectors(np.array([1.0, 0.0]), np.array([1.0, 0.0])) == 1.0
-    assert 0.0 <= compute_aecs_from_vectors(np.array([1.0, 0.0]), np.array([0.0, 1.0])) <= 1.0
+    aecs_val_1, dist_1 = compute_aecs_from_vectors(np.array([1.0, 0.0]), np.array([1.0, 0.0]))
+    assert aecs_val_1 == 1.0
+    aecs_val_2, dist_2 = compute_aecs_from_vectors(np.array([1.0, 0.0]), np.array([0.0, 1.0]))
+    assert 0.0 <= aecs_val_2 <= 1.0

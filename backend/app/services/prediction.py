@@ -705,6 +705,264 @@ def _robustness_conclusion(defense: dict[str, Any], robustness_status: str) -> s
     return "The model remains vulnerable to the evaluated attack conditions and requires further robustness improvement."
 
 
+
+def _aecs_status(score: float | None) -> str:
+    if score is None:
+        return "Not Available"
+    if score >= 0.85:
+        return "Highly Stable"
+    if score >= 0.65:
+        return "Moderately Stable"
+    if score >= 0.40:
+        return "Low Stability"
+    return "Unstable"
+
+
+def _aecs_from_vectors(
+    before: list[float],
+    after: list[float],
+    *,
+    modality: str,
+    method: str,
+    feature_names: list[str] | None = None,
+) -> dict[str, Any]:
+    if not before or not after:
+        return {
+            "available": False,
+            "score": None,
+            "reason": "Original and adversarial explanation vectors are required for AECS.",
+            "original_explanation": "Not Available",
+            "adversarial_explanation": "Not Available",
+            "status": "Not Available",
+            "method": method,
+            "modality": modality,
+        }
+    if len(before) != len(after):
+        return {
+            "available": False,
+            "score": None,
+            "reason": "Original and adversarial explanation vectors have different dimensions.",
+            "original_explanation": "Generated",
+            "adversarial_explanation": "Generated",
+            "status": "Not Available",
+            "method": method,
+            "modality": modality,
+        }
+    before_vector = np.asarray(before, dtype=np.float64)
+    after_vector = np.asarray(after, dtype=np.float64)
+    distance = float(np.linalg.norm(before_vector - after_vector))
+    denominator = float(np.linalg.norm(before_vector)) + 1e-9
+    similarity = float(np.clip(1.0 - (distance / denominator), 0.0, 1.0))
+    return {
+        "available": True,
+        "score": round(similarity, 4),
+        "score_percent": round(similarity * 100, 2),
+        "similarity": round(similarity, 4),
+        "similarity_percent": round(similarity * 100, 2),
+        "distance": round(distance, 6),
+        "original_explanation": "Generated",
+        "adversarial_explanation": "Generated",
+        "status": _aecs_status(similarity),
+        "method": method,
+        "formula": "AECS = max(0, min(100, (1 - ||E_before - E_after||2 / (||E_before||2 + epsilon)) * 100))",
+        "epsilon": 1e-9,
+        "modality": modality,
+        "feature_names": feature_names or [],
+    }
+
+
+def _tabular_explanation_vector(
+    disease_key: str,
+    features: dict[str, Any],
+    *,
+    model_class: int,
+    confidence: float,
+) -> tuple[list[float], list[str]]:
+    schema = get_feature_schema(disease_key)
+    vector: list[float] = []
+    names: list[str] = []
+    for item in schema:
+        if item.get("input_type") in {"boolean", "category"}:
+            continue
+        name = item["name"]
+        if name not in features:
+            continue
+        original = float(features[name])
+        minimum = item.get("minimum")
+        maximum = item.get("maximum")
+        if minimum is not None and maximum is not None and float(maximum) > float(minimum):
+            delta = 0.01 * (float(maximum) - float(minimum))
+        else:
+            delta = max(abs(original) * 0.01, 0.01)
+        trial = dict(features)
+        attacked = original + delta
+        if maximum is not None:
+            attacked = min(attacked, float(maximum))
+        if np.isclose(attacked, original):
+            attacked = original - delta
+            if minimum is not None:
+                attacked = max(attacked, float(minimum))
+        if np.isclose(attacked, original):
+            continue
+        trial[name] = attacked
+        perturbed_class, perturbed_confidence, _ = _tabular_prediction(trial, disease_key)
+        contribution = abs(float(confidence) - float(perturbed_confidence))
+        if perturbed_class != model_class:
+            contribution += 1.0
+        vector.append(round(float(contribution), 8))
+        names.append(name)
+    return vector, names
+
+
+def _calculate_tabular_aecs(
+    disease_key: str,
+    features: dict[str, Any],
+    *,
+    model_class: int,
+    confidence: float,
+    patient_attack: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if not patient_attack or patient_attack.get("status") != "Evaluated":
+        return {
+            "available": False,
+            "score": None,
+            "reason": "Tabular adversarial values were not evaluated for this diagnosis.",
+            "original_explanation": "Not Available",
+            "adversarial_explanation": "Not Available",
+            "status": "Not Available",
+            "modality": "tabular",
+        }
+    adversarial_values = patient_attack.get("adversarial_values")
+    if not isinstance(adversarial_values, dict):
+        return {
+            "available": False,
+            "score": None,
+            "reason": "Adversarial tabular feature values are missing.",
+            "original_explanation": "Not Available",
+            "adversarial_explanation": "Not Available",
+            "status": "Not Available",
+            "modality": "tabular",
+        }
+    before_vector, feature_names = _tabular_explanation_vector(
+        disease_key,
+        features,
+        model_class=model_class,
+        confidence=confidence,
+    )
+    adversarial_class, adversarial_confidence, normalized_adversarial = _tabular_prediction(
+        adversarial_values,
+        disease_key,
+    )
+    after_vector, _ = _tabular_explanation_vector(
+        disease_key,
+        normalized_adversarial,
+        model_class=adversarial_class,
+        confidence=adversarial_confidence,
+    )
+    return _aecs_from_vectors(
+        before_vector,
+        after_vector,
+        modality="tabular",
+        method="local_feature_sensitivity_l2",
+        feature_names=feature_names,
+    )
+
+
+def _image_occlusion_vector(
+    disease_key: str,
+    image_bytes: bytes,
+    *,
+    model_class: int,
+    confidence: float,
+    grid: int = 4,
+) -> list[float]:
+    import cv2
+
+    encoded = np.frombuffer(image_bytes, dtype=np.uint8)
+    image = cv2.imdecode(encoded, cv2.IMREAD_COLOR)
+    if image is None:
+        raise ValueError("Image could not be decoded for AECS.")
+    height, width = image.shape[:2]
+    blurred = cv2.GaussianBlur(image, (31, 31), 0)
+    vector: list[float] = []
+    for row in range(grid):
+        y0 = int(row * height / grid)
+        y1 = int((row + 1) * height / grid)
+        for column in range(grid):
+            x0 = int(column * width / grid)
+            x1 = int((column + 1) * width / grid)
+            occluded = image.copy()
+            occluded[y0:y1, x0:x1] = blurred[y0:y1, x0:x1]
+            ok, encoded_occluded = cv2.imencode(".png", occluded)
+            if not ok:
+                vector.append(0.0)
+                continue
+            occluded_class, occluded_confidence, _ = _image_prediction(
+                encoded_occluded.tobytes(),
+                disease_key,
+                "image/png",
+            )
+            contribution = abs(float(confidence) - float(occluded_confidence))
+            if occluded_class != model_class:
+                contribution += 1.0
+            vector.append(round(float(contribution), 8))
+    return vector
+
+
+def _calculate_image_aecs(
+    disease_key: str,
+    image_bytes: bytes,
+    adversarial_image_bytes: bytes | None,
+    *,
+    model_class: int,
+    confidence: float,
+) -> dict[str, Any]:
+    if not adversarial_image_bytes:
+        return {
+            "available": False,
+            "score": None,
+            "reason": "Adversarial image artifact was not generated for this diagnosis.",
+            "original_explanation": "Not Available",
+            "adversarial_explanation": "Not Available",
+            "status": "Not Available",
+            "modality": "image",
+        }
+    try:
+        before_vector = _image_occlusion_vector(
+            disease_key,
+            image_bytes,
+            model_class=model_class,
+            confidence=confidence,
+        )
+        adversarial_class, adversarial_confidence, _ = _image_prediction(
+            adversarial_image_bytes,
+            disease_key,
+            "image/png",
+        )
+        after_vector = _image_occlusion_vector(
+            disease_key,
+            adversarial_image_bytes,
+            model_class=adversarial_class,
+            confidence=adversarial_confidence,
+        )
+        return _aecs_from_vectors(
+            before_vector,
+            after_vector,
+            modality="image",
+            method="occlusion_saliency_l2",
+            feature_names=[f"grid_cell_{index + 1}" for index in range(len(before_vector))],
+        )
+    except Exception as exc:
+        return {
+            "available": False,
+            "score": None,
+            "reason": str(exc),
+            "original_explanation": "Not Available",
+            "adversarial_explanation": "Not Available",
+            "status": "Not Available",
+            "modality": "image",
+        }
+
 def _build_adversarial_report(
     *,
     disease_key: str,
@@ -815,12 +1073,38 @@ def _runtime_trust_bundle(
     disease_key: str,
     features: dict[str, Any],
     confidence: float,
+    patient_attack: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], float, float, Any]:
     metadata = load_model_metadata(disease_key)
     explanation = _merge_metadata_explanations(disease_key, features, confidence, metadata)
     trained_adversarial = metadata.get("adversarial_robustness")
     adversarial = trained_adversarial if isinstance(trained_adversarial, dict) else evaluate_attacks(confidence)
-    aecs = _as_float(metadata.get("aecs"), calculate_aecs(confidence))
+    # Compute AECS dynamically from per-case explanations when possible. If
+    # unavailable, do not silently fall back to stored metadata AECS.
+    try:
+        aecs_value, aecs_reason, aecs_distance = calculate_aecs(
+            confidence, explanation=explanation, adversarial=adversarial, patient_attack=patient_attack
+        )
+    except TypeError:
+        # Backwards compatibility: older calculate_aecs implementations accepted
+        # only confidence and returned a float. Fall back to that behavior.
+        aecs_value, aecs_reason, aecs_distance = (calculate_aecs(confidence), None, None)
+
+    if aecs_value is None:
+        # Indicate unavailability in the adversarial report for presentation;
+        # store a conservative default (0.0) to satisfy DB schema while
+        # ensuring the UI/report shows the explanatory reason.
+        aecs = 0.0
+        adversarial["aecs_available"] = False
+        adversarial["aecs_reason"] = aecs_reason or "AECS not computed for this diagnosis."
+    else:
+        aecs = float(aecs_value)
+        adversarial["aecs_available"] = True
+        adversarial.pop("aecs_reason", None)
+    if aecs_distance is not None:
+        adversarial["explanation_distance"] = float(aecs_distance)
+        adversarial["explanation_similarity"] = float(aecs if isinstance(aecs, float) else 0.0)
+
     explanation_stability = _as_float(adversarial.get("explanation_stability"), aecs)
     robustness_score = _as_float(adversarial.get("robustness_score"), 0.0)
     compliance = 1.0 if metadata.get("deployment_status") == "ready_for_research" else 0.5
@@ -888,6 +1172,7 @@ def _save_diagnosis(
     input_artifacts: list[dict[str, Any]] | None = None,
     patient_attack_analysis: dict[str, Any] | None = None,
     extra_explanation: dict[str, Any] | None = None,
+    aecs_analysis: dict[str, Any] | None = None,
 ) -> PredictionResponse:
     disease = get_disease(disease_key)
     if len(patient_name.strip()) < 2:
@@ -911,6 +1196,7 @@ def _save_diagnosis(
         disease.key,
         features,
         confidence,
+        patient_attack=patient_attack_analysis,
     )
     for key, value in (extra_explanation or {}).items():
         if isinstance(value, dict) and isinstance(explanation.get(key), dict):
@@ -924,6 +1210,36 @@ def _save_diagnosis(
         metrics=metrics,
         adversarial=adversarial,
         patient_attack=patient_attack_analysis,
+    )
+    if aecs_analysis is None and input_modality == "tabular":
+        aecs_analysis = _calculate_tabular_aecs(
+            disease.key,
+            features,
+            model_class=model_class,
+            confidence=confidence,
+            patient_attack=patient_attack_analysis,
+        )
+    if aecs_analysis is None:
+        aecs_analysis = {
+            "available": False,
+            "score": None,
+            "reason": "Dynamic AECS explanation vectors were not generated for this diagnosis.",
+            "original_explanation": "Not Available",
+            "adversarial_explanation": "Not Available",
+            "status": "Not Available",
+            "modality": input_modality,
+        }
+    aecs = _as_float(aecs_analysis.get("score"), 0.0) if aecs_analysis.get("available") else 0.0
+    explanation["aecs"] = aecs_analysis
+    adversarial["aecs"] = aecs_analysis
+    metadata = load_model_metadata(disease.key)
+    compliance = 1.0 if metadata.get("deployment_status") == "ready_for_research" else 0.5
+    trust_score, components = calculate_dtei(
+        confidence=confidence,
+        explanation_stability=aecs,
+        robustness_score=_as_float(adversarial.get("robustness_score"), 0.0),
+        blockchain_integrity=1.0,
+        compliance=compliance,
     )
     trust_evolution = _build_attack_trust_evolution(components, trust_score)
     adversarial["trust_evolution"] = trust_evolution
@@ -1136,6 +1452,17 @@ def run_image_diagnosis(
         model_class=model_class,
         confidence=round(confidence, 3),
     )
+    adversarial_image_bytes = next(
+        (item.get("content") for item in attack_artifacts if item.get("kind") == "adversarial_image"),
+        None,
+    )
+    aecs_analysis = _calculate_image_aecs(
+        disease_key,
+        image_bytes,
+        adversarial_image_bytes,
+        model_class=model_class,
+        confidence=round(confidence, 3),
+    )
     artifacts = [
         {
             "kind": "input_image",
@@ -1168,6 +1495,7 @@ def run_image_diagnosis(
         input_artifacts=artifacts,
         patient_attack_analysis=patient_attack,
         extra_explanation=image_explanation,
+        aecs_analysis=aecs_analysis,
     )
 
 
