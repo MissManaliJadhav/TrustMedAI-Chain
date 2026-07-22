@@ -837,9 +837,12 @@ export default function DiseaseDiagnosisPage() {
   const securityFindings = Array.isArray(securityEvent.findings) ? securityEvent.findings : [];
   const aecsDetails = adversarialWorkflow.aecs ?? result?.explanation?.aecs ?? {};
   const aecsAvailable = aecsDetails.available === true;
-  const aecsDisplay = aecsAvailable ? formatPercent(aecsDetails.score ?? result?.aecs) : 'Not Available';
-  const aecsSimilarityDisplay = aecsAvailable ? formatPercent(aecsDetails.similarity ?? aecsDetails.score) : 'Not Available';
-  const aecsDistanceDisplay = aecsDetails.distance === null || aecsDetails.distance === undefined ? 'Not Available' : Number(aecsDetails.distance).toFixed(4);
+  const originalAecsVector = Array.isArray(aecsDetails.original_explanation_vector) ? aecsDetails.original_explanation_vector : [];
+  const adversarialAecsVector = Array.isArray(aecsDetails.adversarial_explanation_vector) ? aecsDetails.adversarial_explanation_vector : [];
+  const aecsDisplay = aecsAvailable ? formatPercent(aecsDetails.percentage ?? aecsDetails.score ?? result?.aecs) : 'Not Available';
+  const aecsSimilarityDisplay = aecsAvailable ? formatPercent(aecsDetails.percentage ?? aecsDetails.similarity ?? aecsDetails.score) : 'Not Available';
+  const aecsDistanceValue = aecsDetails.explanation_distance ?? aecsDetails.distance;
+  const aecsDistanceDisplay = aecsDistanceValue === null || aecsDistanceValue === undefined ? 'Not Available' : Number(aecsDistanceValue).toFixed(4);
   const attackStatusClass = attackSummary.severity === 'emerald'
     ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
     : attackSummary.severity === 'amber'
@@ -1571,11 +1574,15 @@ export default function DiseaseDiagnosisPage() {
                 <p className="mt-5 text-5xl font-black text-trust-teal">{aecsDisplay}</p>
                 <div className="mt-5 grid gap-3">
                   {[
+                    ['Method', cleanText(aecsDetails.method)],
+                    ['Attack Evaluated', aecsDetails.attack_evaluated === true ? 'Yes' : 'No'],
                     ['Original Explanation', cleanText(aecsDetails.original_explanation, aecsAvailable ? 'Generated' : 'Not Available')],
                     ['Adversarial Explanation', cleanText(aecsDetails.adversarial_explanation, aecsAvailable ? 'Generated' : 'Not Available')],
                     ['Explanation Similarity', aecsSimilarityDisplay],
                     ['Explanation Distance', aecsDistanceDisplay],
                     ['Status', cleanText(aecsDetails.status, 'Not Available')],
+                    ['Original Vector Size', originalAecsVector.length || 'Not Available'],
+                    ['Adversarial Vector Size', adversarialAecsVector.length || 'Not Available'],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded bg-slate-50 p-3">
                       <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
@@ -1583,6 +1590,22 @@ export default function DiseaseDiagnosisPage() {
                     </div>
                   ))}
                 </div>
+                {aecsAvailable && (
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="rounded bg-slate-50 p-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Original Explanation Vector Preview</p>
+                      <p className="mt-1 break-words font-mono text-xs text-slate-700">
+                        [{originalAecsVector.slice(0, 8).map((value: unknown) => Number(value).toFixed(4)).join(', ')}{originalAecsVector.length > 8 ? ', ...' : ''}]
+                      </p>
+                    </div>
+                    <div className="rounded bg-slate-50 p-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Adversarial Explanation Vector Preview</p>
+                      <p className="mt-1 break-words font-mono text-xs text-slate-700">
+                        [{adversarialAecsVector.slice(0, 8).map((value: unknown) => Number(value).toFixed(4)).join(', ')}{adversarialAecsVector.length > 8 ? ', ...' : ''}]
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {!aecsAvailable && (
                   <Alert className="mt-4" severity="info">
                     {cleanText(aecsDetails.reason, 'AECS is not available because original and adversarial explanation vectors were not generated.')}

@@ -463,5 +463,20 @@
     "timestamp": "2026-07-22T11:21:13.103357+00:00",
     "trust_hash": "76ae8c967b22a8d142597663bc83a2cf6e31c7d5a04e095503d5e961cf66d36f",
     "tx_id": "TX-20260722-000031"
+  },
+  {
+    "audit_hash": "3ea44f8de425e7fec98942d26b1319ac7e09fc66f956a6f44ff6229ff42383ea",
+    "block_hash": "4c2033a446d22654520ec48df4a326d4c7326b5d8d851016e3ef6cdcabddac8a",
+    "block_number": 32,
+    "consensus": "Local Hash Consensus",
+    "diagnosis_id": "5380d27b-845c-42ca-888e-84eec61fdb6a",
+    "hospital_id": null,
+    "ledger_status": "immutable",
+    "network": "TrustMedAI-Chain Local Ledger",
+    "previous_hash": "3358e384deffdc35c01f8fb2a612e5ad022b3fbcd707773249b98cd9c112a792",
+    "record_hash": "3b5dde3875481ae6fcbf664e418fea5ba3d59fc0b3b9c9f816e410c9bf0fcd75",
+    "timestamp": "2026-07-22T11:48:43.634898+00:00",
+    "trust_hash": "edf864e8a5b05dfd74edd8a7980d951253fb2238ecdd0a357792706dc6282912",
+    "tx_id": "TX-20260722-000032"
   }
 ]

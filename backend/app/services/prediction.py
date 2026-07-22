@@ -709,13 +709,36 @@ def _robustness_conclusion(defense: dict[str, Any], robustness_status: str) -> s
 def _aecs_status(score: float | None) -> str:
     if score is None:
         return "Not Available"
-    if score >= 0.85:
+    if score >= 0.90:
         return "Highly Stable"
-    if score >= 0.65:
+    if score >= 0.75:
+        return "Stable"
+    if score >= 0.50:
         return "Moderately Stable"
-    if score >= 0.40:
-        return "Low Stability"
-    return "Unstable"
+    return "Low Stability"
+
+
+def _aecs_not_evaluated(reason: str, *, modality: str, method: str | None = None) -> dict[str, Any]:
+    return {
+        "available": False,
+        "aecs": None,
+        "score": None,
+        "percentage": None,
+        "score_percent": None,
+        "similarity": None,
+        "similarity_percent": None,
+        "method": method,
+        "original_explanation_vector": None,
+        "adversarial_explanation_vector": None,
+        "explanation_distance": None,
+        "distance": None,
+        "original_explanation": "Not Available",
+        "adversarial_explanation": "Not Available",
+        "status": "Not Evaluated",
+        "reason": reason,
+        "attack_evaluated": False,
+        "modality": modality,
+    }
 
 
 def _aecs_from_vectors(
@@ -727,46 +750,51 @@ def _aecs_from_vectors(
     feature_names: list[str] | None = None,
 ) -> dict[str, Any]:
     if not before or not after:
-        return {
-            "available": False,
-            "score": None,
-            "reason": "Original and adversarial explanation vectors are required for AECS.",
-            "original_explanation": "Not Available",
-            "adversarial_explanation": "Not Available",
-            "status": "Not Available",
-            "method": method,
-            "modality": modality,
-        }
+        return _aecs_not_evaluated(
+            "Original and adversarial explanation vectors are required for AECS.",
+            modality=modality,
+            method=method,
+        )
     if len(before) != len(after):
-        return {
-            "available": False,
-            "score": None,
-            "reason": "Original and adversarial explanation vectors have different dimensions.",
-            "original_explanation": "Generated",
-            "adversarial_explanation": "Generated",
-            "status": "Not Available",
-            "method": method,
-            "modality": modality,
-        }
+        result = _aecs_not_evaluated(
+            "Original and adversarial explanation vectors have different dimensions.",
+            modality=modality,
+            method=method,
+        )
+        result["original_explanation"] = "Generated"
+        result["adversarial_explanation"] = "Generated"
+        result["attack_evaluated"] = True
+        result["original_explanation_vector"] = before
+        result["adversarial_explanation_vector"] = after
+        return result
     before_vector = np.asarray(before, dtype=np.float64)
     after_vector = np.asarray(after, dtype=np.float64)
     distance = float(np.linalg.norm(before_vector - after_vector))
-    denominator = float(np.linalg.norm(before_vector)) + 1e-9
-    similarity = float(np.clip(1.0 - (distance / denominator), 0.0, 1.0))
+    normalization = float(np.linalg.norm(before_vector) + np.linalg.norm(after_vector)) + 1e-8
+    similarity = float(np.clip(1.0 - (distance / normalization), 0.0, 1.0))
+    rounded_similarity = round(similarity, 4)
+    rounded_percentage = round(similarity * 100, 2)
+    rounded_distance = round(distance, 6)
     return {
         "available": True,
-        "score": round(similarity, 4),
-        "score_percent": round(similarity * 100, 2),
-        "similarity": round(similarity, 4),
-        "similarity_percent": round(similarity * 100, 2),
-        "distance": round(distance, 6),
+        "aecs": rounded_similarity,
+        "score": rounded_similarity,
+        "percentage": rounded_percentage,
+        "score_percent": rounded_percentage,
+        "similarity": rounded_similarity,
+        "similarity_percent": rounded_percentage,
+        "explanation_distance": rounded_distance,
+        "distance": rounded_distance,
         "original_explanation": "Generated",
         "adversarial_explanation": "Generated",
         "status": _aecs_status(similarity),
         "method": method,
-        "formula": "AECS = max(0, min(100, (1 - ||E_before - E_after||2 / (||E_before||2 + epsilon)) * 100))",
-        "epsilon": 1e-9,
+        "formula": "AECS = max(0, min(1, 1 - (||E_original - E_adversarial||2 / (||E_original||2 + ||E_adversarial||2 + epsilon))))",
+        "epsilon": 1e-8,
         "modality": modality,
+        "attack_evaluated": True,
+        "original_explanation_vector": [round(float(value), 8) for value in before_vector.tolist()],
+        "adversarial_explanation_vector": [round(float(value), 8) for value in after_vector.tolist()],
         "feature_names": feature_names or [],
     }
 
@@ -823,26 +851,18 @@ def _calculate_tabular_aecs(
     patient_attack: dict[str, Any] | None,
 ) -> dict[str, Any]:
     if not patient_attack or patient_attack.get("status") != "Evaluated":
-        return {
-            "available": False,
-            "score": None,
-            "reason": "Tabular adversarial values were not evaluated for this diagnosis.",
-            "original_explanation": "Not Available",
-            "adversarial_explanation": "Not Available",
-            "status": "Not Available",
-            "modality": "tabular",
-        }
+        return _aecs_not_evaluated(
+            "No adversarial explanation was generated because no attack was evaluated.",
+            modality="tabular",
+        )
     adversarial_values = patient_attack.get("adversarial_values")
     if not isinstance(adversarial_values, dict):
-        return {
-            "available": False,
-            "score": None,
-            "reason": "Adversarial tabular feature values are missing.",
-            "original_explanation": "Not Available",
-            "adversarial_explanation": "Not Available",
-            "status": "Not Available",
-            "modality": "tabular",
-        }
+        result = _aecs_not_evaluated(
+            "Adversarial explanation generation failed.",
+            modality="tabular",
+        )
+        result["attack_evaluated"] = True
+        return result
     before_vector, feature_names = _tabular_explanation_vector(
         disease_key,
         features,
@@ -863,7 +883,7 @@ def _calculate_tabular_aecs(
         before_vector,
         after_vector,
         modality="tabular",
-        method="local_feature_sensitivity_l2",
+        method="Local Feature Sensitivity",
         feature_names=feature_names,
     )
 
@@ -918,15 +938,11 @@ def _calculate_image_aecs(
     confidence: float,
 ) -> dict[str, Any]:
     if not adversarial_image_bytes:
-        return {
-            "available": False,
-            "score": None,
-            "reason": "Adversarial image artifact was not generated for this diagnosis.",
-            "original_explanation": "Not Available",
-            "adversarial_explanation": "Not Available",
-            "status": "Not Available",
-            "modality": "image",
-        }
+        return _aecs_not_evaluated(
+            "No adversarial explanation was generated because no attack was evaluated.",
+            modality="image",
+            method="Occlusion Sensitivity",
+        )
     try:
         before_vector = _image_occlusion_vector(
             disease_key,
@@ -949,19 +965,18 @@ def _calculate_image_aecs(
             before_vector,
             after_vector,
             modality="image",
-            method="occlusion_saliency_l2",
+            method="Occlusion Sensitivity",
             feature_names=[f"grid_cell_{index + 1}" for index in range(len(before_vector))],
-        )
+        ) | {"grid_size": "4x4"}
     except Exception as exc:
-        return {
-            "available": False,
-            "score": None,
-            "reason": str(exc),
-            "original_explanation": "Not Available",
-            "adversarial_explanation": "Not Available",
-            "status": "Not Available",
-            "modality": "image",
-        }
+        result = _aecs_not_evaluated(
+            "Adversarial explanation generation failed.",
+            modality="image",
+            method="Occlusion Sensitivity",
+        )
+        result["reason_detail"] = str(exc)
+        result["attack_evaluated"] = True
+        return result
 
 def _build_adversarial_report(
     *,
@@ -1230,8 +1245,25 @@ def _save_diagnosis(
             "modality": input_modality,
         }
     aecs = _as_float(aecs_analysis.get("score"), 0.0) if aecs_analysis.get("available") else 0.0
+    aecs_analysis["attack_type"] = (
+        (patient_attack_analysis or {}).get("attack_type")
+        or adversarial.get("attack_type")
+        or "Not Evaluated"
+    )
+    aecs_analysis["attack_evaluated"] = bool(
+        aecs_analysis.get("attack_evaluated")
+        or (patient_attack_analysis or {}).get("status") == "Evaluated"
+    )
     explanation["aecs"] = aecs_analysis
     adversarial["aecs"] = aecs_analysis
+    adversarial["aecs_score"] = aecs_analysis.get("score")
+    adversarial["aecs_percentage"] = aecs_analysis.get("percentage")
+    adversarial["aecs_method"] = aecs_analysis.get("method")
+    adversarial["original_explanation_vector"] = aecs_analysis.get("original_explanation_vector")
+    adversarial["adversarial_explanation_vector"] = aecs_analysis.get("adversarial_explanation_vector")
+    adversarial["explanation_distance"] = aecs_analysis.get("explanation_distance")
+    adversarial["explanation_status"] = aecs_analysis.get("status")
+    adversarial["attack_evaluated"] = aecs_analysis.get("attack_evaluated")
     metadata = load_model_metadata(disease.key)
     compliance = 1.0 if metadata.get("deployment_status") == "ready_for_research" else 0.5
     trust_score, components = calculate_dtei(
