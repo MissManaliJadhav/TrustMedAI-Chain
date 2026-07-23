@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.rbac import Role
 from app.db.models import AuditEvent, DiagnosisArtifact, DiagnosisRecord, TrustHistory, User
 from app.schemas import ExplanationBundle, PredictionRequest, PredictionResponse
@@ -1055,6 +1056,91 @@ def _build_attack_trust_evolution(components: Any, trust_score: float) -> dict[s
     }
 
 
+def _build_trust_recovery_plan(
+    adversarial: dict[str, Any],
+    trust_score: float,
+    *,
+    trust_change: float | None = None,
+    findings: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    findings = findings or []
+    patient_attack = adversarial.get("patient_attack") if isinstance(adversarial.get("patient_attack"), dict) else {}
+    robustness = _as_float(adversarial.get("robustness_score"))
+    explanation_stability = _as_float(adversarial.get("explanation_stability"))
+    trigger_recovery = bool(
+        findings
+        or (trust_change is not None and trust_change <= -settings.adversarial_trust_drop_threshold)
+        or (robustness is not None and robustness < settings.adversarial_robustness_threshold)
+        or (explanation_stability is not None and explanation_stability < settings.adversarial_explanation_stability_threshold)
+    )
+    actions: list[dict[str, Any]] = []
+    if isinstance(patient_attack, dict) and patient_attack.get("status") == "Evaluated":
+        if patient_attack.get("prediction_changed") is True:
+            actions.append(
+                {
+                    "code": "escalate_clinical_review",
+                    "description": "Require manual clinician review because the adversarial attack changed the diagnosis.",
+                }
+            )
+        if patient_attack.get("percentage_pixels_affected") is not None or patient_attack.get("perturbation_rate") is not None:
+            actions.append(
+                {
+                    "code": "log_input_perturbation",
+                    "description": "Record the input perturbation details and verify input integrity before clinical use.",
+                }
+            )
+    if robustness is not None and robustness < settings.adversarial_robustness_threshold:
+        actions.append(
+            {
+                "code": "schedule_adversarial_retraining",
+                "description": "Schedule targeted adversarial retraining for the diagnosed model version.",
+            }
+        )
+    if explanation_stability is not None and explanation_stability < settings.adversarial_explanation_stability_threshold:
+        actions.append(
+            {
+                "code": "refresh_explainability",
+                "description": "Regenerate explanation artifacts and validate explanation stability for this diagnosis.",
+            }
+        )
+    if trust_change is not None and trust_change <= -settings.adversarial_trust_drop_threshold:
+        actions.append(
+            {
+                "code": "review_trust_evolution",
+                "description": "Review the trust score deterioration and compare it against the clean baseline to identify mitigation steps.",
+            }
+        )
+    if not actions:
+        actions.append(
+            {
+                "code": "monitor_and_log",
+                "description": "Continue monitoring adversarial conditions and blockchain auditability for this diagnosis.",
+            }
+        )
+
+    priority = "critical" if any(item.get("severity") == "critical" for item in findings) else (
+        "high" if trust_change is not None and trust_change <= -settings.adversarial_trust_drop_threshold else "warning"
+    )
+    expected_recovery = {
+        "post_retraining_trust_score": min(0.99, round(trust_score + 0.12, 3)) if trigger_recovery else trust_score,
+        "post_clinical_review_trust_score": min(0.99, round(trust_score + 0.08, 3)) if trigger_recovery else trust_score,
+    }
+    return {
+        "recommended": trigger_recovery,
+        "priority": priority,
+        "actions": actions,
+        "current_trust_score": round(float(trust_score), 3),
+        "trust_change": trust_change,
+        "findings_count": len(findings),
+        "expected_recovery": expected_recovery,
+        "reason": (
+            "Adversarial evaluation or trust deterioration triggered recommended recovery actions."
+            if trigger_recovery
+            else "No adaptive trust recovery actions are recommended at this time."
+        ),
+    }
+
+
 def _merge_metadata_explanations(
     disease_key: str,
     features: dict[str, Any],
@@ -1276,6 +1362,13 @@ def _save_diagnosis(
     trust_evolution = _build_attack_trust_evolution(components, trust_score)
     adversarial["trust_evolution"] = trust_evolution
     security_findings = evaluate_adversarial_security_findings(adversarial)
+    trust_recovery = _build_trust_recovery_plan(
+        adversarial,
+        trust_score,
+        trust_change=trust_evolution.get("trust_change"),
+        findings=security_findings,
+    )
+    adversarial["trust_recovery"] = trust_recovery
     adversarial["security_event"] = {
         "generated": bool(security_findings),
         "findings": security_findings,
@@ -1348,6 +1441,21 @@ def _save_diagnosis(
         },
     )
     db.add(audit_event)
+    if trust_recovery.get("recommended"):
+        db.add(
+            AuditEvent(
+                actor_id=actor.id,
+                action="security.trust_recovery_recommended",
+                resource_type="diagnosis",
+                resource_id=record.id,
+                payload_hash=hash_payload({"record_id": record.id, "trust_recovery": trust_recovery}),
+                metadata_json={
+                    "disease_key": disease.key,
+                    "trust_score": trust_score,
+                    "trust_recovery": trust_recovery,
+                },
+            )
+        )
     # Persist the clinical record before making external blockchain calls.
     db.commit()
     db.refresh(record)

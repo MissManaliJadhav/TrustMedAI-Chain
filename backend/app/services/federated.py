@@ -4,15 +4,38 @@ from datetime import datetime, timezone
 from hashlib import sha256
 import json
 import math
+import pickle
 import random
+from pathlib import Path
 from typing import Any
 
+import numpy as np
+import pandas as pd
 from fastapi import HTTPException
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.db.models import AuditEvent, FederatedClientUpdate, FederatedRound, Hospital, User
+from ai.training.production_disease_pipeline import (
+    build_tabular_preprocessor,
+    classification_metrics_from_predictions,
+    load_tabular_dataset,
+    split_70_15_15,
+)
+from app.db.models import (
+    AuditEvent,
+    FederatedClientUpdate,
+    FederatedRound,
+    FederatedTrustSnapshot,
+    GlobalModelVersion,
+    Hospital,
+    LocalTrainingRun,
+    User,
+)
 from app.schemas import FederatedClientUpdateRequest, FederatedRoundCreateRequest, FederatedSimulationRequest
+from app.services.catalog import get_disease
+from app.services.trust import calculate_dtei
 
 DEFAULT_GLOBAL_WEIGHTS = [0.42, -0.18, 0.31, 0.08, -0.27, 0.16, 0.23, -0.11]
 DEFAULT_HOSPITALS = [
@@ -24,12 +47,131 @@ DEFAULT_HOSPITALS = [
 ]
 FORBIDDEN_UPDATE_KEYS = {"raw", "raw_data", "features", "patients", "patient_rows", "records", "dataset", "images"}
 
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+TRAIN_SPLIT_ROOT = PROJECT_ROOT / "data" / "train"
+ARTIFACT_DIR = PROJECT_ROOT / "backend" / "app" / "ai" / "artifacts"
+
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+def _resolve_training_data_directory(disease_key: str) -> Path:
+    raw_dir = PROJECT_ROOT / "data" / "raw" / disease_key
+    if raw_dir.exists() and any(raw_dir.rglob("*")):
+        return raw_dir
+    train_dir = TRAIN_SPLIT_ROOT / disease_key
+    if train_dir.exists() and any(train_dir.rglob("*")):
+        return train_dir
+    raise FileNotFoundError(
+        f"No training dataset folder found for {disease_key}. Expected either {raw_dir} or {train_dir}."
+    )
+
+
+def _load_tabular_dataset(disease_key: str) -> tuple[pd.DataFrame, pd.Series, dict[str, Any]]:
+    data_dir = _resolve_training_data_directory(disease_key)
+    return load_tabular_dataset(disease_key, data_dir)
+
+
+def _build_feature_names(preprocessor: Pipeline, X: pd.DataFrame) -> list[str]:
+    try:
+        return list(preprocessor.get_feature_names_out())
+    except Exception:
+        return list(X.columns)
+
+
+def _baseline_weight_vector(round_row: FederatedRound, n_features: int) -> list[float]:
+    weights = round_row.global_weights.get("layers") if isinstance(round_row.global_weights, dict) else None
+    if isinstance(weights, list) and len(weights) == n_features + 1:
+        return weights
+    return [0.0] * (n_features + 1)
+
+
 def _hash_payload(payload: dict[str, Any]) -> str:
+    canonical = json.dumps(payload, sort_keys=True, default=str, separators=(",", ":")).encode("utf-8")
+    return sha256(canonical).hexdigest()
+
+
+def _pipeline_from_weights(weights: list[float], preprocessor: Pipeline) -> Pipeline:
+    n_features = len(weights) - 1
+    classifier = LogisticRegression(max_iter=1000, class_weight="balanced", solver="liblinear")
+    classifier.classes_ = np.array([0, 1], dtype=int)
+    classifier.coef_ = np.asarray(weights[:-1], dtype=float).reshape(1, n_features)
+    classifier.intercept_ = np.asarray([float(weights[-1])], dtype=float)
+    classifier.n_features_in_ = n_features
+    pipeline = Pipeline([("preprocess", preprocessor), ("classifier", classifier)])
+    return pipeline
+
+
+def _extract_weight_vector(model: Pipeline) -> list[float]:
+    classifier = model.named_steps["classifier"]
+    coefficients = np.asarray(classifier.coef_).ravel().tolist()
+    intercept = float(classifier.intercept_[0]) if hasattr(classifier.intercept_, "__getitem__") else float(classifier.intercept_)
+    return coefficients + [intercept]
+
+
+def _partition_rows_by_hospital(X: pd.DataFrame, y: pd.Series, hospital_ids: list[str]) -> pd.Series:
+    assignment = pd.Series(index=y.index, dtype=object)
+    for label in sorted(y.unique()):
+        class_indices = y[y == label].index.to_numpy()
+        for index, row_id in enumerate(class_indices):
+            assignment.loc[row_id] = hospital_ids[index % len(hospital_ids)]
+    return assignment
+
+
+def _save_local_model_artifact(round_id: str, hospital_id: str, model: Pipeline) -> tuple[str, str]:
+    artifact_folder = ARTIFACT_DIR / "federated" / round_id
+    artifact_folder.mkdir(parents=True, exist_ok=True)
+    model_path = artifact_folder / f"{hospital_id}_update.pkl"
+    with model_path.open("wb") as handle:
+        pickle.dump(model, handle)
+    fingerprint = sha256(model_path.read_bytes()).hexdigest()
+    return str(model_path.relative_to(PROJECT_ROOT)), fingerprint
+
+
+def _save_aggregated_model_artifact(round_row: FederatedRound, weights: list[float], preprocessor: Pipeline) -> tuple[str, str]:
+    artifact_folder = ARTIFACT_DIR / "federated" / round_row.id
+    artifact_folder.mkdir(parents=True, exist_ok=True)
+    model = _pipeline_from_weights(weights, preprocessor)
+    model_path = artifact_folder / f"{round_row.disease_key}_global_model.pkl"
+    with model_path.open("wb") as handle:
+        pickle.dump(model, handle)
+    fingerprint = sha256(model_path.read_bytes()).hexdigest()
+    return str(model_path.relative_to(PROJECT_ROOT)), fingerprint
+
+
+def _train_local_update(db: Session, round_row: FederatedRound, hospital: Hospital) -> tuple[list[float], dict[str, Any], str, str, int]:
+    X, y, _ = _load_tabular_dataset(round_row.disease_key)
+    hospital_ids = [hospital.id for hospital in db.query(Hospital).filter(Hospital.verified == True).order_by(Hospital.name).all()]
+    if hospital.id not in hospital_ids:
+        hospital_ids.append(hospital.id)
+    assignment = _partition_rows_by_hospital(X, y, hospital_ids)
+    hospital_mask = assignment == hospital.id
+    X_local = X.loc[hospital_mask]
+    y_local = y.loc[hospital_mask]
+    if len(X_local) < 10 or y_local.nunique() < 2:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Hospital {hospital.name} does not have enough local training samples for {round_row.disease_key}.",
+        )
+    preprocessor, _, _ = build_tabular_preprocessor(X)
+    preprocessor.fit(X)
+    X_train, X_val, X_test, y_train, y_val, y_test = split_70_15_15(X_local, y_local)
+    classifier = LogisticRegression(max_iter=1000, class_weight="balanced", solver="liblinear")
+    model = Pipeline([("preprocess", preprocessor), ("classifier", classifier)])
+    with np.errstate(all="ignore"):
+        model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    probabilities = model.predict_proba(X_test)
+    metrics = classification_metrics_from_predictions(y_test.to_numpy(), y_pred, probabilities)
+    metrics.update({"train_rows": float(len(X_train)), "validation_rows": float(len(X_val)), "test_rows": float(len(X_test))})
+    baseline_weights = _baseline_weight_vector(round_row, X_train.shape[1] if hasattr(X_train, "shape") else len(X_train.columns))
+    local_weights = _extract_weight_vector(model)
+    if len(local_weights) != len(baseline_weights):
+        baseline_weights = [0.0] * len(local_weights)
+    delta = [local - base for local, base in zip(local_weights, baseline_weights)]
+    model_path, fingerprint = _save_local_model_artifact(round_row.id, hospital.id, model)
+    return delta, metrics, model_path, fingerprint, len(X_local)
     encoded = json.dumps(payload, sort_keys=True, default=str, separators=(",", ":")).encode("utf-8")
     return sha256(encoded).hexdigest()
 
@@ -84,15 +226,46 @@ def _privacy_config(payload: FederatedRoundCreateRequest) -> dict[str, Any]:
 
 def create_round(db: Session, payload: FederatedRoundCreateRequest, actor: User) -> FederatedRound:
     ensure_federated_hospitals(db)
+    initial_weights = DEFAULT_GLOBAL_WEIGHTS
+    previous_global_model_version = None
+    try:
+        X, y, _ = _load_tabular_dataset(payload.disease_key)
+        preprocessor, _, _ = build_tabular_preprocessor(X)
+        preprocessor.fit(X)
+        feature_count = len(_build_feature_names(preprocessor, X))
+        latest_completed = (
+            db.query(FederatedRound)
+            .filter(FederatedRound.disease_key == payload.disease_key, FederatedRound.status == "aggregated")
+            .order_by(FederatedRound.round_number.desc())
+            .first()
+        )
+        if latest_completed and isinstance(latest_completed.aggregated_weights, dict):
+            weights = latest_completed.aggregated_weights.get("layers")
+            if isinstance(weights, list) and len(weights) == feature_count + 1:
+                initial_weights = weights
+                previous_global_model_version = latest_completed.global_model_version
+            else:
+                initial_weights = [0.0] * (feature_count + 1)
+        else:
+            initial_weights = [0.0] * (feature_count + 1)
+    except FileNotFoundError:
+        initial_weights = DEFAULT_GLOBAL_WEIGHTS
     round_row = FederatedRound(
         round_number=_next_round_number(db, payload.model_name),
         model_name=payload.model_name,
         disease_key=payload.disease_key,
         min_clients=payload.min_clients,
         global_model_version=payload.global_model_version,
-        global_weights={"layers": DEFAULT_GLOBAL_WEIGHTS},
+        previous_global_model_version=previous_global_model_version,
+        participating_clients=0,
+        total_samples=0,
+        global_model_path=None,
+        global_weights={"layers": initial_weights},
         privacy_config=_privacy_config(payload),
         metrics={"accuracy": 0.0, "loss": 0.0, "participation_rate": 0.0},
+        global_trust=0.0,
+        previous_global_trust=None,
+        trust_change=None,
         created_by=actor.id,
     )
     db.add(round_row)
@@ -149,16 +322,27 @@ def submit_update(
     if not hospital.verified:
         raise HTTPException(status_code=403, detail="Only verified hospitals can submit federated updates")
 
-    delta = payload.weights_delta or _generated_delta(round_row, hospital, payload.sample_count)
-    if len(delta) != len(DEFAULT_GLOBAL_WEIGHTS):
-        raise HTTPException(status_code=422, detail=f"weights_delta must contain {len(DEFAULT_GLOBAL_WEIGHTS)} values")
+    model_path = None
+    model_fingerprint = None
+    if payload.weights_delta is None:
+        delta, computed_metrics, model_path, model_fingerprint, local_sample_count = _train_local_update(db, round_row, hospital)
+        sample_count = local_sample_count
+        metrics = computed_metrics
+    else:
+        delta = payload.weights_delta
+        sample_count = payload.sample_count
+        metrics = payload.metrics
+
+    base_weights = round_row.global_weights.get("layers") if isinstance(round_row.global_weights, dict) else DEFAULT_GLOBAL_WEIGHTS
+    if len(delta) != len(base_weights):
+        raise HTTPException(status_code=422, detail=f"weights_delta must contain {len(base_weights)} values")
 
     update_payload = {
         "round_id": round_row.id,
         "hospital_id": hospital.id,
-        "sample_count": payload.sample_count,
+        "sample_count": sample_count,
         "weights_delta": delta,
-        "metrics": payload.metrics,
+        "metrics": metrics,
         "privacy_epsilon_spent": payload.privacy_epsilon_spent,
     }
     payload_hash = _hash_payload(update_payload)
@@ -179,26 +363,70 @@ def submit_update(
         .first()
     )
     if existing:
-        existing.sample_count = payload.sample_count
+        existing.sample_count = sample_count
         existing.weights_delta = {"layers": delta}
-        existing.metrics = payload.metrics
+        existing.metrics = metrics
         existing.privacy_report = privacy_report
         existing.payload_hash = payload_hash
+        if payload.weights_delta is None:
+            existing.model_update_path = model_path
+            existing.model_fingerprint = model_fingerprint
         existing.accepted = True
         update_row = existing
     else:
         update_row = FederatedClientUpdate(
             round_id=round_row.id,
             hospital_id=hospital.id,
-            sample_count=payload.sample_count,
+            sample_count=sample_count,
             weights_delta={"layers": delta},
-            metrics=payload.metrics,
+            model_update_path=model_path,
+            model_fingerprint=model_fingerprint,
+            metrics=metrics,
             privacy_report=privacy_report,
             payload_hash=payload_hash,
         )
         db.add(update_row)
 
+    run = db.query(LocalTrainingRun).filter_by(round_id=round_row.id, hospital_id=hospital.id).first()
+    local_trust = round(
+        (
+            float(metrics.get("accuracy", 0.0))
+            + float(metrics.get("f1_score", 0.0))
+            + float(metrics.get("balanced_accuracy", metrics.get("accuracy", 0.0)))
+        )
+        / 3.0,
+        4,
+    )
+    trust_components = {
+        "accuracy": float(metrics.get("accuracy", 0.0)),
+        "f1_score": float(metrics.get("f1_score", 0.0)),
+        "balanced_accuracy": float(metrics.get("balanced_accuracy", metrics.get("accuracy", 0.0))),
+        "hospital_reputation": float(hospital.reputation_score),
+    }
+    if run:
+        run.sample_count = sample_count
+        run.model_update_path = model_path or run.model_update_path
+        run.metrics = metrics
+        run.local_trust = local_trust
+        run.trust_components = trust_components
+        run.training_time_seconds = float(run.training_time_seconds or 0.0)
+    else:
+        run = LocalTrainingRun(
+            round_id=round_row.id,
+            hospital_id=hospital.id,
+            model_update_path=model_path,
+            sample_count=sample_count,
+            metrics=metrics,
+            local_trust=local_trust,
+            trust_components=trust_components,
+            training_time_seconds=0.0,
+        )
+        db.add(run)
+
     db.flush()
+    round_row.participating_clients = len([update for update in round_row.updates if update.accepted])
+    round_row.total_samples = sum(update.sample_count for update in round_row.updates if update.accepted)
+
     _audit(
         db,
         actor,
@@ -238,6 +466,32 @@ def aggregate_round(db: Session, round_id: str, actor: User) -> FederatedRound:
         epsilon_spent += float(update.privacy_report.get("epsilon_spent", 0.0))
 
     aggregated_weights = [round(weight + delta, 6) for weight, delta in zip(base_weights, aggregate_delta)]
+    try:
+        X, y, _ = _load_tabular_dataset(round_row.disease_key)
+        preprocessor, _, _ = build_tabular_preprocessor(X)
+        preprocessor.fit(X)
+        global_model_path, model_fingerprint = _save_aggregated_model_artifact(round_row, aggregated_weights, preprocessor)
+        round_row.global_model_path = global_model_path
+    except FileNotFoundError:
+        model_fingerprint = None
+
+    previous_global_trust = round_row.global_trust
+    trust_confidence = round(weighted_accuracy, 4)
+    trust_components = {
+        "fidelity": trust_confidence,
+        "interpretability": round(float(weighted_accuracy or 0.0) * 0.9, 4),
+        "robustness": round(float(weighted_accuracy or 0.0) * 0.85, 4),
+        "blockchain_integrity": 0.85,
+        "compliance": 0.9,
+    }
+    global_trust, _ = calculate_dtei(
+        trust_confidence,
+        trust_components["interpretability"],
+        trust_components["robustness"],
+        trust_components["blockchain_integrity"],
+        trust_components["compliance"],
+    )
+
     aggregate_payload = {
         "round_id": round_row.id,
         "updates": [update.payload_hash for update in updates],
@@ -255,7 +509,36 @@ def aggregate_round(db: Session, round_id: str, actor: User) -> FederatedRound:
     round_row.status = "aggregated"
     round_row.completed_at = _utc_now()
     round_row.update_hash = _hash_payload(aggregate_payload)
+    round_row.previous_global_trust = previous_global_trust
+    round_row.global_trust = global_trust
+    round_row.trust_change = round(global_trust - previous_global_trust, 4) if previous_global_trust is not None else None
     round_row.global_model_version = f"{round_row.global_model_version}-r{round_row.round_number}"
+
+    db.add(
+        GlobalModelVersion(
+            disease_key=round_row.disease_key,
+            round_number=round_row.round_number,
+            version=round_row.global_model_version,
+            model_path=round_row.global_model_path or "",
+            model_fingerprint=model_fingerprint or "",
+            metrics=round_row.metrics,
+        )
+    )
+    db.add(
+        FederatedTrustSnapshot(
+            round_id=round_row.id,
+            local_trust_values={
+                update.hospital_id: float(
+                    update.metrics.get("accuracy", 0.0)
+                    if update.metrics.get("accuracy") is not None
+                    else 0.0
+                )
+                for update in updates
+            },
+            global_trust=global_trust,
+            trust_change=round(global_trust - previous_global_trust, 4) if previous_global_trust is not None else None,
+        )
+    )
 
     _audit(
         db,
@@ -268,6 +551,7 @@ def aggregate_round(db: Session, round_id: str, actor: User) -> FederatedRound:
             "total_samples": total_samples,
             "aggregate_hash": round_row.update_hash,
             "raw_data_shared": False,
+            "global_trust": global_trust,
         },
     )
     db.commit()

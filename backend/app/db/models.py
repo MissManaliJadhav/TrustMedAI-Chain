@@ -176,10 +176,17 @@ class FederatedRound(Base):
     status: Mapped[str] = mapped_column(String(40), default="collecting", index=True)
     strategy: Mapped[str] = mapped_column(String(80), default="FedAvg")
     min_clients: Mapped[int] = mapped_column(Integer, default=2)
+    participating_clients: Mapped[int] = mapped_column(Integer, default=0)
+    total_samples: Mapped[int] = mapped_column(Integer, default=0)
+    previous_global_model_version: Mapped[str | None] = mapped_column(String(80), nullable=True)
     global_model_version: Mapped[str] = mapped_column(String(80), default="v1")
+    global_model_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
     global_weights: Mapped[dict] = mapped_column(JSON, default=dict)
     aggregated_weights: Mapped[dict] = mapped_column(JSON, default=dict)
     metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+    global_trust: Mapped[float] = mapped_column(Float, default=0.0)
+    previous_global_trust: Mapped[float | None] = mapped_column(Float, nullable=True)
+    trust_change: Mapped[float | None] = mapped_column(Float, nullable=True)
     privacy_config: Mapped[dict] = mapped_column(JSON, default=dict)
     update_hash: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"), nullable=True)
@@ -187,6 +194,65 @@ class FederatedRound(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     updates = relationship("FederatedClientUpdate", back_populates="round", cascade="all, delete-orphan")
+
+
+class FederatedClient(Base):
+    __tablename__ = "federated_clients"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    hospital_id: Mapped[str] = mapped_column(String(36), ForeignKey("hospitals.id"), index=True)
+    disease_key: Mapped[str] = mapped_column(String(80), index=True)
+    local_sample_count: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[str] = mapped_column(String(40), default="idle")
+    last_round: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    partition_strategy: Mapped[str] = mapped_column(String(40), default="iid")
+    partition_metadata: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    hospital = relationship("Hospital")
+
+
+class LocalTrainingRun(Base):
+    __tablename__ = "local_training_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    round_id: Mapped[str] = mapped_column(String(36), ForeignKey("federated_rounds.id"), index=True)
+    hospital_id: Mapped[str] = mapped_column(String(36), ForeignKey("hospitals.id"), index=True)
+    model_update_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    sample_count: Mapped[int] = mapped_column(Integer)
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+    local_trust: Mapped[float] = mapped_column(Float, default=0.0)
+    trust_components: Mapped[dict] = mapped_column(JSON, default=dict)
+    training_time_seconds: Mapped[float] = mapped_column(Float, default=0.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+    hospital = relationship("Hospital")
+    round = relationship("FederatedRound")
+
+
+class GlobalModelVersion(Base):
+    __tablename__ = "global_model_versions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    disease_key: Mapped[str] = mapped_column(String(80), index=True)
+    round_number: Mapped[int] = mapped_column(Integer)
+    version: Mapped[str] = mapped_column(String(80))
+    model_path: Mapped[str] = mapped_column(String(512))
+    model_fingerprint: Mapped[str] = mapped_column(String(128), index=True)
+    metrics: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class FederatedTrustSnapshot(Base):
+    __tablename__ = "federated_trust_snapshots"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    round_id: Mapped[str] = mapped_column(String(36), ForeignKey("federated_rounds.id"), index=True)
+    local_trust_values: Mapped[dict] = mapped_column(JSON, default=dict)
+    global_trust: Mapped[float] = mapped_column(Float, default=0.0)
+    trust_change: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
 
 class FederatedClientUpdate(Base):
@@ -198,6 +264,8 @@ class FederatedClientUpdate(Base):
     hospital_id: Mapped[str] = mapped_column(String(36), ForeignKey("hospitals.id"), index=True)
     sample_count: Mapped[int] = mapped_column(Integer)
     weights_delta: Mapped[dict] = mapped_column(JSON, default=dict)
+    model_update_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    model_fingerprint: Mapped[str | None] = mapped_column(String(128), nullable=True)
     metrics: Mapped[dict] = mapped_column(JSON, default=dict)
     privacy_report: Mapped[dict] = mapped_column(JSON, default=dict)
     payload_hash: Mapped[str] = mapped_column(String(128), index=True)

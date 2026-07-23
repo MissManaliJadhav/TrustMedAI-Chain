@@ -103,28 +103,6 @@ export const AdminFederated: React.FC = () => {
     [dashboard],
   );
 
-  const runDemoRound = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_BASE_URL}/federated/demo-round`, {
-        method: 'POST',
-        headers: tokenHeaders(),
-        body: JSON.stringify({
-          model_name: 'trustmedai-risk-model',
-          disease_key: 'heart',
-          participating_hospitals: 4,
-        }),
-      });
-      if (!response.ok) throw new Error('Demo federated round failed');
-      const data = await response.json();
-      setDashboard(data.dashboard);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const startRound = async () => {
     setBusy(true);
@@ -152,6 +130,29 @@ export const AdminFederated: React.FC = () => {
     }
   };
 
+  const runDemoRound = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/federated/demo-round`, {
+        method: 'POST',
+        headers: tokenHeaders(),
+        body: JSON.stringify({
+          model_name: 'trustmedai-risk-model',
+          disease_key: 'heart',
+          participating_hospitals: 4,
+        }),
+      });
+      if (!response.ok) throw new Error('Demo federated round failed');
+      const data = await response.json();
+      setDashboard(data.dashboard);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const submitHospitalUpdate = async (hospital: FederatedNode) => {
     if (!activeCollectingRound) return;
     setBusy(true);
@@ -162,12 +163,8 @@ export const AdminFederated: React.FC = () => {
         headers: tokenHeaders(),
         body: JSON.stringify({
           hospital_id: hospital.id,
-          sample_count: 900 + Math.round(hospital.reputation * 350),
-          metrics: {
-            accuracy: Math.min(0.96, hospital.trust),
-            loss: Math.max(0.12, 0.42 - hospital.reputation / 5),
-            f1_score: Math.min(0.95, hospital.reputation + 0.04),
-          },
+          sample_count: 1,
+          metrics: {},
           privacy_epsilon_spent: 0.2,
         }),
       });

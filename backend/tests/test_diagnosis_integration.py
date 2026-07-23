@@ -120,6 +120,9 @@ def test_tabular_and_image_artifacts_persist_end_to_end(tmp_path) -> None:
         assert image_body["input_modality"] == "image"
         assert image_body["adversarial"]["security_event"]["generated"] is True
         assert image_body["adversarial"]["trust_evolution"]["trust_change"] <= 0
+        assert "trust_recovery" in image_body["adversarial"]
+        assert isinstance(image_body["adversarial"]["trust_recovery"], dict)
+        assert image_body["adversarial"]["trust_recovery"]["current_trust_score"] == image_body["trust_score"]
         assert {item["kind"] for item in image_body["artifacts"]} == {
             "input_image",
             "gradcam_heatmap",

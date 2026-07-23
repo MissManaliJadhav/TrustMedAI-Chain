@@ -1,4 +1,6 @@
 import logging
+import sys
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -15,6 +17,12 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+# Ensure top-level packages (like `ai/`) are importable when running from backend/
+# This mirrors typical development behaviour where the workspace root is on sys.path.
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 
 @asynccontextmanager

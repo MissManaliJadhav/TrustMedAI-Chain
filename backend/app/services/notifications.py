@@ -228,6 +228,7 @@ def notify_adversarial_security_event(
         "trust_score": record.trust_score,
         "attack_type": adversarial.get("patient_attack", {}).get("attack_type") if isinstance(adversarial.get("patient_attack"), dict) else adversarial.get("attack_type"),
         "thresholds": adversarial_security_thresholds(),
+        "trust_recovery": adversarial.get("trust_recovery"),
         "findings": findings,
     }
     for user in _security_recipients(db, record):
